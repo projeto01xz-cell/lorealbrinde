@@ -49,6 +49,7 @@ const ProductPage = ({
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const handleResgate = () => {
+    window.scrollTo(0, 0);
     onCheckout();
   };
   return <div className="min-h-[100svh] bg-white">
