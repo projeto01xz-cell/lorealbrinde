@@ -20,63 +20,59 @@ const Upsell = () => {
 
   useEffect(() => {
     // Se não tem orderId, mostrar estado de loading como demo
-    if (!orderId) {
+    if (!orderId || orderId === "null") {
       setStep("loading");
       return;
     }
 
-    // Buscar status inicial do pedido
+    // Buscar status inicial do pedido via edge function segura
     const fetchOrder = async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("status, customer_name")
-        .eq("external_id", orderId)
-        .single();
+      try {
+        const { data, error } = await supabase.functions.invoke("get-order-status", {
+          body: { externalId: orderId }
+        });
 
-      if (error || !data) {
-        console.error("Order not found:", error);
-        return;
-      }
+        if (error || !data) {
+          console.error("Order not found:", error);
+          return;
+        }
 
-      setOrderStatus(data.status);
-      setCustomerName(data.customer_name?.split(" ")[0] || "");
-      
-      // Se já está pago, iniciar animação de loading
-      if (data.status === "paid") {
-        setStep("loading");
+        setOrderStatus(data.status);
+        setCustomerName(data.customerName || "");
+        
+        // Se já está pago, iniciar animação de loading
+        if (data.status === "paid") {
+          setStep("loading");
+        }
+      } catch (err) {
+        console.error("Error fetching order:", err);
       }
     };
 
     fetchOrder();
 
-    // Escutar atualizações em tempo real
-    const channel = supabase
-      .channel("order-updates")
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "orders",
-          filter: `external_id=eq.${orderId}`,
-        },
-        (payload) => {
-          console.log("Order updated:", payload);
-          const newStatus = (payload.new as { status: string }).status;
-          setOrderStatus(newStatus);
-          
-          // Se pagou, iniciar animação
-          if (newStatus === "paid") {
+    // Polling para verificar status (já que realtime não funciona sem SELECT policy)
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data } = await supabase.functions.invoke("get-order-status", {
+          body: { externalId: orderId }
+        });
+
+        if (data && data.status !== orderStatus) {
+          setOrderStatus(data.status);
+          if (data.status === "paid") {
             setStep("loading");
           }
         }
-      )
-      .subscribe();
+      } catch (err) {
+        console.error("Polling error:", err);
+      }
+    }, 5000); // Verificar a cada 5 segundos
 
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(pollInterval);
     };
-  }, [orderId, navigate]);
+  }, [orderId]);
 
   // Animação de progresso (6 segundos)
   useEffect(() => {

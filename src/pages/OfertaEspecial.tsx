@@ -19,9 +19,6 @@ const OfertaEspecial = () => {
   const orderId = searchParams.get("order");
   const [menuOpen, setMenuOpen] = useState(false);
   const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [customerDocument, setCustomerDocument] = useState("");
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [copied, setCopied] = useState(false);
@@ -32,17 +29,16 @@ const OfertaEspecial = () => {
     if (!orderId || orderId === "null") return;
 
     const fetchOrder = async () => {
-      const { data } = await supabase
-        .from("orders")
-        .select("customer_name, customer_email, customer_phone, customer_document")
-        .eq("external_id", orderId)
-        .single();
+      try {
+        const { data } = await supabase.functions.invoke("get-order-status", {
+          body: { externalId: orderId }
+        });
 
-      if (data) {
-        setCustomerName(data.customer_name?.split(" ")[0] || "");
-        setCustomerEmail(data.customer_email || "");
-        setCustomerPhone(data.customer_phone || "");
-        setCustomerDocument(data.customer_document || "");
+        if (data) {
+          setCustomerName(data.customerName || "");
+        }
+      } catch (err) {
+        console.error("Error fetching order:", err);
       }
     };
 
@@ -96,9 +92,9 @@ const OfertaEspecial = () => {
           amount: totalCents,
           customer: {
             name: customerName || "Cliente Upsell",
-            email: customerEmail || "cliente@email.com",
-            document: customerDocument || "00000000000",
-            phone: customerPhone || "00000000000"
+            email: "cliente@upsell.com",
+            document: "00000000000",
+            phone: "00000000000"
           },
           items,
           expiresInMinutes: 30

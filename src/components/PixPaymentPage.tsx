@@ -29,41 +29,39 @@ const PixPaymentPage = ({ pixData, total, customerName }: PixPaymentPageProps) =
     }
   };
 
-  // Escutar atualizações em tempo real do pagamento
+  // Polling para verificar status do pagamento
   useEffect(() => {
     if (!pixData.orderId) return;
 
-    console.log("Listening for payment updates on order:", pixData.orderId);
+    console.log("Starting payment status polling for order:", pixData.orderId);
 
-    const channel = supabase
-      .channel("pix-payment-updates")
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "orders",
-          filter: `external_id=eq.${pixData.orderId}`,
-        },
-        (payload) => {
-          console.log("Payment status updated:", payload);
-          const newStatus = (payload.new as { status: string }).status;
-          setPaymentStatus(newStatus);
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data } = await supabase.functions.invoke("get-order-status", {
+          body: { externalId: pixData.orderId }
+        });
+
+        if (data && data.status !== paymentStatus) {
+          console.log("Payment status updated:", data.status);
+          setPaymentStatus(data.status);
           
           // Se pagou, redirecionar para upsell
-          if (newStatus === "paid") {
+          if (data.status === "paid") {
+            clearInterval(pollInterval);
             setTimeout(() => {
               navigate(`/upsell?order=${pixData.orderId}`);
             }, 1500);
           }
         }
-      )
-      .subscribe();
+      } catch (err) {
+        console.error("Polling error:", err);
+      }
+    }, 5000); // Verificar a cada 5 segundos
 
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(pollInterval);
     };
-  }, [pixData.orderId, navigate]);
+  }, [pixData.orderId, navigate, paymentStatus]);
 
   return (
     <div className="min-h-[100svh] bg-gray-50 pb-8">
