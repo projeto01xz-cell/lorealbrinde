@@ -66,7 +66,7 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
         <SparkleParticles />
         
         {/* Content container */}
-        <div className="h-full flex flex-col items-center justify-center px-5 overflow-hidden">
+        <div className="h-full flex flex-col items-center justify-center px-5 pt-16 overflow-hidden">
           <div className="w-full max-w-sm mx-auto text-center space-y-3 relative z-10">
             
             {/* Initial headline - always visible */}
