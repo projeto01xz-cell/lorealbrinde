@@ -53,7 +53,7 @@ const ProductPage = ({
       {/* Promo Banner */}
       <div className="fixed top-0 left-0 right-0 z-[60] bg-black py-2 px-4">
         <div className="flex items-center justify-center gap-3">
-          <span className="text-[11px] sm:text-xs font-bold text-yellow-400 uppercase tracking-wider">
+          <span className="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider">
             Oferta Exclusiva Válida
           </span>
           <span className="bg-white text-black text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded uppercase">
@@ -123,11 +123,6 @@ const ProductPage = ({
               {/* Trust Icons */}
               
 
-              {/* CTA Button */}
-              <Button onClick={handleResgate} className="w-full h-14 bg-green-500 hover:bg-green-600 text-white font-bold text-base rounded-xl shadow-lg shadow-green-500/30">
-                <ShoppingCart className="w-5 h-5 mr-2" />
-                RESGATAR AGORA
-              </Button>
 
               {/* Urgency */}
               <div className="text-center space-y-1">
