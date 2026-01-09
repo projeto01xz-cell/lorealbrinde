@@ -7,14 +7,14 @@ const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-background border-b border-border/30">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border/30">
+        <div className="px-4 h-12 flex items-center justify-between max-w-screen-sm mx-auto">
           {/* Ícone de busca à esquerda */}
           <button 
             aria-label="Buscar"
-            className="w-10 h-10 flex items-center justify-center text-foreground hover:text-primary transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-foreground hover:text-primary transition-colors -ml-1"
           >
-            <Search className="w-5 h-5" />
+            <Search className="w-[18px] h-[18px]" />
           </button>
 
           {/* Logo centralizada */}
@@ -22,7 +22,7 @@ const Header = () => {
             <img 
               src={lorealLogo}
               alt="L'Oréal Paris"
-              className="h-5 w-auto"
+              className="h-4 w-auto"
             />
           </div>
 
@@ -30,23 +30,26 @@ const Header = () => {
           <button 
             aria-label="Menu"
             onClick={() => setMenuOpen(!menuOpen)}
-            className="w-10 h-10 flex items-center justify-center text-foreground hover:text-primary transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-foreground hover:text-primary transition-colors -mr-1"
           >
-            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {menuOpen ? <X className="w-[18px] h-[18px]" /> : <Menu className="w-[18px] h-[18px]" />}
           </button>
         </div>
       </header>
 
+      {/* Spacer for fixed header */}
+      <div className="h-12" />
+
       {/* Menu mobile dropdown */}
       {menuOpen && (
-        <div className="fixed inset-0 top-14 z-40 bg-background animate-fade-in">
-          <nav className="container mx-auto px-4 py-6">
-            <ul className="space-y-4">
+        <div className="fixed inset-0 top-12 z-40 bg-background animate-fade-in">
+          <nav className="px-5 py-6">
+            <ul className="space-y-1">
               <li>
                 <a 
                   href="#como-funciona"
                   onClick={() => setMenuOpen(false)}
-                  className="block py-3 text-lg font-medium text-foreground hover:text-primary transition-colors border-b border-border/30"
+                  className="block py-4 text-base font-medium text-foreground hover:text-primary transition-colors border-b border-border/30"
                 >
                   Como funciona
                 </a>
@@ -55,7 +58,7 @@ const Header = () => {
                 <a 
                   href="#duvidas"
                   onClick={() => setMenuOpen(false)}
-                  className="block py-3 text-lg font-medium text-foreground hover:text-primary transition-colors border-b border-border/30"
+                  className="block py-4 text-base font-medium text-foreground hover:text-primary transition-colors border-b border-border/30"
                 >
                   Dúvidas
                 </a>
