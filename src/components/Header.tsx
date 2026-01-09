@@ -1,32 +1,70 @@
-import { Gift } from "lucide-react";
+import { useState } from "react";
+import { Search, Menu, X } from "lucide-react";
+import lorealLogo from "@/assets/loreal-paris-logo.svg";
 
 const Header = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border/50">
-      <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-[hsl(25_90%_52%)] flex items-center justify-center">
-            <Gift className="w-4 h-4 text-white" />
+    <>
+      <header className="sticky top-0 z-50 w-full bg-background border-b border-border/30">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
+          {/* Ícone de busca à esquerda */}
+          <button 
+            aria-label="Buscar"
+            className="w-10 h-10 flex items-center justify-center text-foreground hover:text-primary transition-colors"
+          >
+            <Search className="w-5 h-5" />
+          </button>
+
+          {/* Logo centralizada */}
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <img 
+              src={lorealLogo}
+              alt="L'Oréal Paris"
+              className="h-5 w-auto"
+            />
           </div>
-          <span className="font-semibold text-foreground">NovoProduto</span>
+
+          {/* Menu hambúrguer à direita */}
+          <button 
+            aria-label="Menu"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="w-10 h-10 flex items-center justify-center text-foreground hover:text-primary transition-colors"
+          >
+            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
-        
-        <nav className="flex items-center gap-4 text-sm text-muted-foreground">
-          <a 
-            href="#como-funciona" 
-            className="hover:text-foreground transition-colors"
-          >
-            Como funciona
-          </a>
-          <a 
-            href="#duvidas" 
-            className="hover:text-foreground transition-colors"
-          >
-            Dúvidas
-          </a>
-        </nav>
-      </div>
-    </header>
+      </header>
+
+      {/* Menu mobile dropdown */}
+      {menuOpen && (
+        <div className="fixed inset-0 top-14 z-40 bg-background animate-fade-in">
+          <nav className="container mx-auto px-4 py-6">
+            <ul className="space-y-4">
+              <li>
+                <a 
+                  href="#como-funciona"
+                  onClick={() => setMenuOpen(false)}
+                  className="block py-3 text-lg font-medium text-foreground hover:text-primary transition-colors border-b border-border/30"
+                >
+                  Como funciona
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#duvidas"
+                  onClick={() => setMenuOpen(false)}
+                  className="block py-3 text-lg font-medium text-foreground hover:text-primary transition-colors border-b border-border/30"
+                >
+                  Dúvidas
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      )}
+    </>
   );
 };
 
