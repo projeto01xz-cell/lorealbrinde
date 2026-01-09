@@ -16,7 +16,7 @@ import {
   X
 } from "lucide-react";
 import { motion } from "framer-motion";
-import elseveProducts from "@/assets/elseve-products.png";
+import productKitFull from "@/assets/product-kit-full.png";
 import lorealLogo from "@/assets/loreal-paris-logo.svg";
 
 interface ProductPageProps {
@@ -136,9 +136,9 @@ const ProductPage = ({ userData }: ProductPageProps) => {
             </div>
             
             <motion.img 
-              src={elseveProducts} 
+              src={productKitFull} 
               alt="Kit Elseve Collagen Lifter" 
-              className="w-full max-w-[260px] mx-auto"
+              className="w-full mx-auto"
               animate={{ y: [0, -5, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
