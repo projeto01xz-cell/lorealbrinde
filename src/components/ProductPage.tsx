@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Shield, Truck, Gift, Star, Check, ChevronDown, ChevronUp, ShoppingCart, Users, Search, Menu, X } from "lucide-react";
+import { Shield, Truck, Gift, Star, Check, ChevronDown, ChevronUp, ShoppingCart, Users, Search, Menu, X, CreditCard, Smartphone, Landmark, Banknote } from "lucide-react";
 import { motion } from "framer-motion";
 import productKitFull from "@/assets/product-kit-full.png";
 import lorealLogo from "@/assets/loreal-paris-logo.svg";
@@ -113,7 +113,7 @@ const ProductPage = ({
 
               {/* Rating */}
               <div className="flex items-center justify-center gap-1">
-                {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
+                {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-gray-900 text-gray-900" />)}
                 <span className="text-xs text-gray-500 ml-1.5">(312 avaliações)</span>
               </div>
 
@@ -147,7 +147,18 @@ const ProductPage = ({
         <div className="max-w-sm mx-auto text-center">
           <p className="text-xs text-gray-500 mb-2">Formas de pagamento:</p>
           <div className="flex justify-center gap-3">
-            {["💳", "📱", "🏦", "💰"].map((icon, i) => <span key={i} className="text-lg bg-gray-50 w-10 h-10 rounded-lg flex items-center justify-center">{icon}</span>)}
+            <span className="bg-gray-100 w-10 h-10 rounded-lg flex items-center justify-center border border-gray-200">
+              <CreditCard className="w-5 h-5 text-gray-700" />
+            </span>
+            <span className="bg-gray-100 w-10 h-10 rounded-lg flex items-center justify-center border border-gray-200">
+              <Smartphone className="w-5 h-5 text-gray-700" />
+            </span>
+            <span className="bg-gray-100 w-10 h-10 rounded-lg flex items-center justify-center border border-gray-200">
+              <Landmark className="w-5 h-5 text-gray-700" />
+            </span>
+            <span className="bg-gray-100 w-10 h-10 rounded-lg flex items-center justify-center border border-gray-200">
+              <Banknote className="w-5 h-5 text-gray-700" />
+            </span>
           </div>
           <p className="text-xs text-green-600 mt-3 flex items-center justify-center gap-1 font-medium">
             <Truck className="w-3.5 h-3.5" />
@@ -202,7 +213,7 @@ const ProductPage = ({
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{review.name}</p>
                     <div className="flex">
-                      {[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />)}
+                      {[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-gray-900 text-gray-900' : 'text-gray-300'}`} />)}
                     </div>
                   </div>
                 </div>
@@ -235,7 +246,7 @@ const ProductPage = ({
       {/* Sticky CTA */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
         <div className="max-w-sm mx-auto">
-          <Button onClick={handleResgate} className="w-full h-12 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full">
+          <Button onClick={handleResgate} className="w-full h-12 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg">
             <ShoppingCart className="w-4 h-4 mr-2" />
             RESGATAR AGORA
           </Button>
