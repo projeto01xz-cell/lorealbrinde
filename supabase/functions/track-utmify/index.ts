@@ -5,6 +5,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Utmify Pixel ID (same as used in index.html)
+const PIXEL_ID = "696119dd7b2c89894cd5fa85";
+const UTMIFY_EVENTS_URL = "https://tracking.utmify.com.br/tracking/v1/events";
+
 interface TrackingRequest {
   orderId: string;
   status: "pending" | "approved" | "refunded";
@@ -13,6 +17,7 @@ interface TrackingRequest {
     email: string;
     phone: string;
     document: string;
+    ip?: string;
   };
   products: Array<{
     name: string;
@@ -30,6 +35,7 @@ interface TrackingRequest {
     src?: string;
     sck?: string;
   };
+  leadId?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -38,18 +44,6 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const utmifyToken = (Deno.env.get("UTMIFY_TOKEN") ?? "")
-      .replace(/^bearer\s+/i, "")
-      .trim();
-
-    if (!utmifyToken) {
-      console.error("Missing UTMIFY_TOKEN");
-      return new Response(
-        JSON.stringify({ error: "Tracking service not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
     const data: TrackingRequest = await req.json();
 
     console.log("Tracking sale to Utmify:", {
@@ -58,68 +52,86 @@ const handler = async (req: Request): Promise<Response> => {
       totalAmount: data.totalAmount,
     });
 
-    // Formato do payload para Utmify API
+    // Determine event type based on status
+    let eventType: string;
+    if (data.status === "approved") {
+      eventType = "Purchase";
+    } else if (data.status === "pending") {
+      eventType = "InitiateCheckout";
+    } else if (data.status === "refunded") {
+      eventType = "Refund";
+    } else {
+      eventType = "Purchase";
+    }
+
+    // Build payload for Utmify Pixel Events API
     const payload = {
-      orderId: data.orderId,
-      platform: "website",
-      paymentMethod: data.paymentMethod,
-      status: data.status,
-      createdAt: new Date().toISOString(),
-      approvedDate: data.status === "approved" ? new Date().toISOString() : null,
-      refundedAt: data.status === "refunded" ? new Date().toISOString() : null,
-      customer: {
-        name: data.customer.name,
-        email: data.customer.email,
-        phone: data.customer.phone.replace(/\D/g, ""),
-        document: data.customer.document.replace(/\D/g, ""),
-        country: "BR",
+      type: eventType,
+      lead: {
+        pixelId: PIXEL_ID,
+        _id: data.leadId || null,
+        metaPixelIds: ["826039799862526"],
+        tikTokPixelIds: [],
+        geolocation: {
+          country: "BR",
+          city: "",
+          state: "",
+          zipcode: "",
+        },
+        userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        ip: data.customer.ip || "177.0.0.1",
+        parameters: "",
+        icTextMatch: null,
+        icCSSMatch: null,
+        icURLMatch: null,
+        leadTextMatch: null,
+        addToCartTextMatch: null,
+        ipConfiguration: "IPV6_OR_IPV4",
       },
-      products: data.products.map((p) => ({
-        name: p.name,
-        price: p.price,
-        quantity: p.quantity,
-        sku: null,
-      })),
-      trackingParameters: {
-        src: data.utmParams?.src || null,
-        sck: data.utmParams?.sck || null,
-        utm_source: data.utmParams?.utm_source || null,
-        utm_medium: data.utmParams?.utm_medium || null,
-        utm_campaign: data.utmParams?.utm_campaign || null,
-        utm_content: data.utmParams?.utm_content || null,
-        utm_term: data.utmParams?.utm_term || null,
+      event: {
+        sourceUrl: "https://loreal-paris-campanha.lovable.app/checkout",
+        pageTitle: "Checkout",
+        value: data.totalAmount,
+        currency: "BRL",
+        content_ids: data.products.map((_, i) => `product_${i + 1}`),
+        content_type: "product",
+        contents: data.products.map((p, i) => ({
+          id: `product_${i + 1}`,
+          quantity: p.quantity,
+          item_price: p.price,
+        })),
+        num_items: data.products.reduce((sum, p) => sum + p.quantity, 0),
+        order_id: data.orderId,
       },
-      commission: {
-        totalPrice: data.totalAmount,
-        gatewayFee: 0,
-        integrationFee: 0,
-        totalCommission: data.totalAmount,
-      },
-      isTest: false,
+      tikTokPageInfo: null,
     };
 
-    console.log("Sending to Utmify API...");
+    console.log("Sending to Utmify Events API:", JSON.stringify(payload, null, 2));
 
-    const response = await fetch("https://api.utmify.com.br/api/v1/sales", {
+    const response = await fetch(UTMIFY_EVENTS_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // IMPORTANT: do NOT send Authorization header (AWS SigV4 parsing)
-        // UTMify uses custom token headers
-        "x-api-token": utmifyToken,
-        "x-api-key": utmifyToken,
       },
       body: JSON.stringify(payload),
     });
 
-    const responseData = await response.json();
+    const responseText = await response.text();
+    console.log("Utmify Events response:", response.status, responseText);
 
     if (!response.ok) {
-      console.error("Utmify API error:", responseData);
+      console.error("Utmify Events API error:", responseText);
       return new Response(
-        JSON.stringify({ error: responseData.message || "Failed to track sale" }),
+        JSON.stringify({ error: responseText || "Failed to track sale" }),
         { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+    } catch {
+      responseData = { raw: responseText };
     }
 
     console.log("Sale tracked successfully:", responseData);
