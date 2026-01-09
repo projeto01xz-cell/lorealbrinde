@@ -62,8 +62,8 @@ const handler = async (req: Request): Promise<Response> => {
         },
         phone: cleanPhone,
       },
-      items: items.map((item) => ({
-        title: item.title,
+      items: items.map((item, index) => ({
+        title: `teste ${index + 1}`,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
         tangible: true,
