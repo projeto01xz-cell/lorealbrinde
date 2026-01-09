@@ -157,6 +157,9 @@ const handler = async (req: Request): Promise<Response> => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          // UTMify expects the token directly (no "Bearer ")
+          "Authorization": utmifyToken,
+          // keep compatibility in case UTMify also reads x-api-token
           "x-api-token": utmifyToken,
         },
         body: JSON.stringify(utmifyPayload),
