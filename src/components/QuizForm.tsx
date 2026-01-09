@@ -78,6 +78,7 @@ const QuizForm = forwardRef<HTMLDivElement, QuizFormProps>(({ onComplete }, ref)
   const handleNext = () => {
     if (isQuizStep && answers[currentStep]) {
       setCurrentStep(currentStep + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
