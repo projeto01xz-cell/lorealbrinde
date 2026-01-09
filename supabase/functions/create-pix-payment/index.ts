@@ -46,22 +46,32 @@ const handler = async (req: Request): Promise<Response> => {
     // Criar credenciais Basic Auth
     const credentials = btoa(`${publicKey}:${secretKey}`);
 
+    const cleanDocument = customer.document.replace(/\D/g, "");
+    
     const payload = {
       amount,
       paymentMethod: "pix",
       customer: {
         name: customer.name,
         email: customer.email,
-        document: customer.document.replace(/\D/g, ""),
-        phone: customer.phone.replace(/\D/g, ""),
+        document: {
+          type: "cpf",
+          number: cleanDocument,
+        },
+        phone: {
+          country_code: "55",
+          area_code: customer.phone.replace(/\D/g, "").slice(0, 2),
+          number: customer.phone.replace(/\D/g, "").slice(2),
+        },
       },
       items: items.map((item) => ({
         title: item.title,
         quantity: item.quantity,
         unit_price: item.unitPrice,
+        tangible: true,
       })),
       pix: {
-        expires_in: expiresInMinutes * 60, // converter para segundos
+        expires_in: expiresInMinutes * 60,
       },
     };
 
