@@ -108,17 +108,17 @@ const CpfVerification = ({ userData }: CpfVerificationProps) => {
   };
 
   return (
-    <section className="py-12 px-4 bg-background">
-      <div className="max-w-md mx-auto">
-        <div className="card-elevated p-6 animate-scale-in">
+    <section className="min-h-[100svh] py-6 px-4 bg-background flex flex-col">
+      <div className="w-full max-w-sm mx-auto flex-1 flex flex-col justify-center">
+        <div className="card-elevated p-5 animate-scale-in">
           {status === "idle" && (
-            <div className="space-y-6">
+            <div className="space-y-5">
               <div className="text-center">
-                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-7 h-7 text-primary" />
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                  <Shield className="w-6 h-6 text-primary" />
                 </div>
-                <h2 className="section-title">Verificação de Elegibilidade</h2>
-                <p className="text-muted-foreground text-sm mt-2">
+                <h2 className="text-lg font-semibold text-foreground">Verificação de Elegibilidade</h2>
+                <p className="text-muted-foreground text-sm mt-1">
                   Informe seu CPF para verificar sua participação
                 </p>
               </div>

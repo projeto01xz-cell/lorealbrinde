@@ -79,15 +79,15 @@ const QuizForm = forwardRef<HTMLDivElement, QuizFormProps>(({ onComplete }, ref)
   const progress = ((currentStep + 1) / (questions.length + 1)) * 100;
 
   return (
-    <section ref={ref} id="questionario" className="py-12 px-4 bg-secondary/30">
-      <div className="max-w-md mx-auto">
+    <section ref={ref} id="questionario" className="min-h-[100svh] py-6 px-4 bg-secondary/30 flex flex-col">
+      <div className="w-full max-w-sm mx-auto flex-1 flex flex-col">
         {/* Progress bar */}
-        <div className="mb-8">
-          <div className="flex justify-between text-sm text-muted-foreground mb-2">
+        <div className="mb-6">
+          <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
             <span>Etapa {currentStep + 1} de {questions.length + 1}</span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <div className="h-2 bg-border rounded-full overflow-hidden">
+          <div className="h-1.5 bg-border rounded-full overflow-hidden">
             <div 
               className="h-full bg-primary transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
@@ -95,14 +95,14 @@ const QuizForm = forwardRef<HTMLDivElement, QuizFormProps>(({ onComplete }, ref)
           </div>
         </div>
 
-        <div className="card-elevated p-6 animate-fade-up">
+        <div className="card-elevated p-5 animate-fade-up flex-1 flex flex-col justify-center">
           {isQuizStep && (
-            <div key={currentStep} className="space-y-6 animate-fade-in">
-              <h2 className="section-title text-center">
+            <div key={currentStep} className="space-y-5 animate-fade-in">
+              <h2 className="text-lg font-semibold text-foreground text-center leading-snug">
                 {questions[currentStep].question}
               </h2>
               
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {questions[currentStep].options.map((option) => {
                   const Icon = option.icon;
                   const isSelected = answers[currentStep] === option.value;
@@ -112,18 +112,18 @@ const QuizForm = forwardRef<HTMLDivElement, QuizFormProps>(({ onComplete }, ref)
                       key={option.value}
                       onClick={() => handleOptionSelect(option.value)}
                       className={cn(
-                        "option-card w-full flex items-center gap-3 text-left",
+                        "option-card w-full flex items-center gap-3 text-left py-3.5 px-4",
                         isSelected && "option-card-selected"
                       )}
                     >
                       <div className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+                        "w-9 h-9 rounded-full flex items-center justify-center transition-colors flex-shrink-0",
                         isSelected ? "bg-primary text-white" : "bg-secondary text-muted-foreground"
                       )}>
-                        {isSelected ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+                        {isSelected ? <Check className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
                       </div>
                       <span className={cn(
-                        "font-medium transition-colors",
+                        "text-sm font-medium transition-colors",
                         isSelected ? "text-primary" : "text-foreground"
                       )}>
                         {option.label}
@@ -136,7 +136,7 @@ const QuizForm = forwardRef<HTMLDivElement, QuizFormProps>(({ onComplete }, ref)
               <Button
                 variant="hero"
                 size="lg"
-                className="w-full"
+                className="w-full h-12"
                 onClick={handleNext}
                 disabled={!answers[currentStep]}
               >
@@ -147,13 +147,13 @@ const QuizForm = forwardRef<HTMLDivElement, QuizFormProps>(({ onComplete }, ref)
           )}
 
           {isContactStep && (
-            <div className="space-y-6 animate-fade-in">
+            <div className="space-y-5 animate-fade-in">
               <div className="text-center">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <Check className="w-6 h-6 text-primary" />
+                <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                  <Check className="w-5 h-5 text-primary" />
                 </div>
-                <h2 className="section-title">Quase lá!</h2>
-                <p className="text-muted-foreground text-sm mt-2">
+                <h2 className="text-lg font-semibold text-foreground">Quase lá!</h2>
+                <p className="text-muted-foreground text-sm mt-1">
                   Preencha seus dados para participar
                 </p>
               </div>

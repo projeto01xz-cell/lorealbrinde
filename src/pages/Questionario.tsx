@@ -22,25 +22,26 @@ const Questionario = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[100svh] bg-background overflow-x-hidden flex flex-col">
       <Header />
       
-      {currentStep === "quiz" && (
-        <QuizForm ref={quizRef} onComplete={handleQuizComplete} />
-      )}
-      
-      {currentStep === "cpf" && userData && (
-        <CpfVerification userData={userData} />
-      )}
+      <main className="flex-1">
+        {currentStep === "quiz" && (
+          <QuizForm ref={quizRef} onComplete={handleQuizComplete} />
+        )}
+        
+        {currentStep === "cpf" && userData && (
+          <CpfVerification userData={userData} />
+        )}
+      </main>
       
       {/* Footer */}
-      <footer className="py-6 px-4 border-t border-border/50 bg-secondary/20">
-        <div className="max-w-md mx-auto text-center">
-          <p className="text-xs text-muted-foreground">
+      <footer className="py-4 px-4 border-t border-border/50 bg-secondary/20 mt-auto">
+        <div className="max-w-sm mx-auto text-center">
+          <p className="text-[10px] text-muted-foreground leading-relaxed">
             © 2025 L'Oréal Paris. Todos os direitos reservados.
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Esta é uma campanha promocional com vagas limitadas.
+            <br />
+            Campanha promocional com vagas limitadas.
           </p>
         </div>
       </footer>
