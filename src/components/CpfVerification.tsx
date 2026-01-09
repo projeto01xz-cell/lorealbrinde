@@ -5,13 +5,14 @@ import { cn } from "@/lib/utils";
 
 interface CpfVerificationProps {
   userData: { name: string; whatsapp: string; answers: string[] };
+  onVerified: (cpf: string) => void;
 }
 
 type VerificationStatus = "idle" | "loading" | "success" | "error";
 
 const loadingMessages = [
-  "Analisando dados...",
-  "Verificando elegibilidade...",
+  "Verificando se você já participou...",
+  "Conferindo elegibilidade...",
   "Consultando disponibilidade...",
   "Finalizando verificação...",
 ];
@@ -46,7 +47,7 @@ const validateCPF = (cpf: string): boolean => {
   return true;
 };
 
-const CpfVerification = ({ userData }: CpfVerificationProps) => {
+const CpfVerification = ({ userData, onVerified }: CpfVerificationProps) => {
   const [cpf, setCpf] = useState("");
   const [status, setStatus] = useState<VerificationStatus>("idle");
   const [progress, setProgress] = useState(0);
@@ -78,12 +79,12 @@ const CpfVerification = ({ userData }: CpfVerificationProps) => {
 
       const messageInterval = setInterval(() => {
         setMessageIndex((prev) => (prev + 1) % loadingMessages.length);
-      }, 1500);
+      }, 1250);
 
       const timeout = setTimeout(() => {
         const isValid = validateCPF(cpf);
         setStatus(isValid ? "success" : "error");
-      }, 5500);
+      }, 5000);
 
       return () => {
         clearInterval(progressInterval);
@@ -92,6 +93,17 @@ const CpfVerification = ({ userData }: CpfVerificationProps) => {
       };
     }
   }, [status, cpf]);
+
+  // Redirect to product page after success
+  useEffect(() => {
+    if (status === "success") {
+      const redirectTimeout = setTimeout(() => {
+        onVerified(cpf);
+      }, 2000);
+
+      return () => clearTimeout(redirectTimeout);
+    }
+  }, [status, cpf, onVerified]);
 
   const handleVerify = () => {
     if (cpf.replace(/\D/g, "").length === 11) {
@@ -108,7 +120,7 @@ const CpfVerification = ({ userData }: CpfVerificationProps) => {
   };
 
   return (
-    <section className="min-h-[100svh] py-6 px-4 bg-background flex flex-col">
+    <section className="min-h-[100svh] py-6 px-4 bg-secondary/30 flex flex-col">
       <div className="w-full max-w-sm mx-auto flex-1 flex flex-col justify-center">
         <div className="card-elevated p-5 animate-scale-in">
           {status === "idle" && (
@@ -192,22 +204,14 @@ const CpfVerification = ({ userData }: CpfVerificationProps) => {
                   Parabéns, {userData.name.split(" ")[0]}!
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Sua inscrição foi confirmada na seleção.
+                  Você pode participar da promoção!
                 </p>
               </div>
 
-              <div className="bg-secondary/50 rounded-xl p-4 text-left">
-                <p className="text-sm text-muted-foreground">
-                  <strong className="text-foreground">Próximos passos:</strong><br />
-                  Entraremos em contato pelo WhatsApp{" "}
-                  <span className="font-medium text-foreground">{userData.whatsapp}</span>{" "}
-                  caso você seja selecionado.
-                </p>
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Redirecionando...</span>
               </div>
-
-              <p className="text-xs text-muted-foreground">
-                A seleção depende de disponibilidade e critérios da campanha.
-              </p>
             </div>
           )}
 
