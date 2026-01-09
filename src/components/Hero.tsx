@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import heroBg from "@/assets/hero-bg.png";
 import elseveProducts from "@/assets/elseve-products.png";
+import SparkleParticles from "./SparkleParticles";
 
 interface HeroProps {
   onStartQuiz: () => void;
@@ -50,6 +51,9 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
       >
         {/* Light glow effect */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] h-[50%] bg-gradient-to-b from-white/25 via-white/5 to-transparent blur-3xl pointer-events-none" />
+        
+        {/* Sparkle particles */}
+        <SparkleParticles />
         
         {/* Sticky content container */}
         <div className="sticky top-0 min-h-screen flex flex-col items-center justify-center px-4 py-12">
