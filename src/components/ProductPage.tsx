@@ -112,93 +112,120 @@ const ProductPage = ({ userData }: ProductPageProps) => {
       {/* Spacer for fixed header */}
       <div className="h-12" />
 
-      {/* Hero Section - Similar to reference */}
-      <section className="bg-gradient-to-b from-purple-50 to-white py-6 px-4">
-        <div className="max-w-sm mx-auto text-center">
-          <h1 className="text-2xl font-black text-gray-900 mb-1 tracking-tight">LANÇAMENTO ELSEVE</h1>
-          <p className="text-base font-semibold text-gray-600">COLLAGEN LIFTER</p>
-          
-          {/* Badges */}
-          <div className="flex justify-center gap-2 mt-4">
-            <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1">
-              🏆 MAIS VENDIDO
-            </span>
-            <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded flex items-center gap-1 border border-blue-200">
-              📦 PAGUE APENAS O FRETE
-            </span>
-          </div>
-
-          {/* Product Image Card */}
-          <div className="relative mt-6 bg-white rounded-2xl shadow-lg p-4 border border-gray-100">
-            {/* -100% OFF Badge */}
-            <div className="absolute top-3 right-3 bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-md">
-              -100% OFF
+      {/* Product Card - Modern E-commerce Vertical */}
+      <section className="px-4 py-6">
+        <div className="max-w-sm mx-auto">
+          {/* Main Product Card */}
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+            {/* Header Badges */}
+            <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-4 py-3 flex items-center justify-between">
+              <span className="bg-orange-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
+                🏆 Mais Vendido
+              </span>
+              <span className="bg-white/20 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
+                📦 Pague só o frete
+              </span>
             </div>
-            
-            <motion.img 
-              src={productKitFull} 
-              alt="Kit Elseve Collagen Lifter" 
-              className="w-full mx-auto"
-              animate={{ y: [0, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </div>
 
-          {/* Trust Icons */}
-          <div className="flex justify-center gap-8 mt-5 text-xs text-gray-600">
-            <div className="flex flex-col items-center gap-1.5">
-              <Shield className="w-5 h-5 text-gray-500" />
-              <span>Compra Segura</span>
+            {/* Product Image */}
+            <div className="relative bg-gradient-to-b from-purple-50 to-white p-4">
+              {/* Discount Badge */}
+              <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10">
+                -100% OFF
+              </div>
+              
+              <img 
+                src={productKitFull} 
+                alt="Kit Elseve Collagen Lifter" 
+                className="w-full"
+              />
             </div>
-            <div className="flex flex-col items-center gap-1.5">
-              <Truck className="w-5 h-5 text-gray-500" />
-              <span>Entrega Rápida</span>
-            </div>
-            <div className="flex flex-col items-center gap-1.5">
-              <Gift className="w-5 h-5 text-gray-500" />
-              <span>Grátis</span>
+
+            {/* Product Info */}
+            <div className="p-5 space-y-4">
+              {/* Title */}
+              <div className="text-center">
+                <h1 className="text-xl font-black text-gray-900 uppercase tracking-tight">
+                  Lançamento Elseve
+                </h1>
+                <p className="text-sm font-semibold text-purple-600 mt-0.5">Collagen Lifter</p>
+              </div>
+
+              {/* Rating */}
+              <div className="flex items-center justify-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                ))}
+                <span className="text-xs text-gray-500 ml-1.5">(312 avaliações)</span>
+              </div>
+
+              {/* Price */}
+              <div className="text-center py-2">
+                <p className="text-xs text-gray-400 line-through">R$ 89,90</p>
+                <p className="text-2xl font-black text-green-600">GRÁTIS</p>
+                <p className="text-xs text-gray-500 mt-0.5">+ frete</p>
+              </div>
+
+              {/* Trust Icons */}
+              <div className="flex justify-between px-2 py-3 bg-gray-50 rounded-xl">
+                <div className="flex flex-col items-center gap-1 flex-1">
+                  <Shield className="w-5 h-5 text-purple-600" />
+                  <span className="text-[10px] text-gray-600 font-medium">Compra Segura</span>
+                </div>
+                <div className="w-px bg-gray-200" />
+                <div className="flex flex-col items-center gap-1 flex-1">
+                  <Truck className="w-5 h-5 text-purple-600" />
+                  <span className="text-[10px] text-gray-600 font-medium">Entrega Rápida</span>
+                </div>
+                <div className="w-px bg-gray-200" />
+                <div className="flex flex-col items-center gap-1 flex-1">
+                  <Gift className="w-5 h-5 text-purple-600" />
+                  <span className="text-[10px] text-gray-600 font-medium">100% Grátis</span>
+                </div>
+              </div>
+
+              {/* CTA Button */}
+              <Button 
+                onClick={handleResgate}
+                className="w-full h-14 bg-green-500 hover:bg-green-600 text-white font-bold text-base rounded-xl shadow-lg shadow-green-500/30"
+              >
+                <ShoppingCart className="w-5 h-5 mr-2" />
+                RESGATAR AGORA
+              </Button>
+
+              {/* Urgency */}
+              <div className="text-center space-y-1">
+                <p className="text-xs text-orange-600 font-semibold flex items-center justify-center gap-1">
+                  <Package className="w-3.5 h-3.5" />
+                  Apenas 7 unidades em estoque
+                </p>
+                <p className="text-[10px] text-gray-400">
+                  👥 32 pessoas compraram nas últimas 24h
+                </p>
+              </div>
+
+              {/* Period */}
+              <p className="text-[10px] text-gray-400 text-center leading-relaxed pt-2 border-t border-gray-100">
+                Período: 15/12/2025 até 08/01/2026 (horário de Brasília)
+              </p>
             </div>
           </div>
-
-          {/* Rating */}
-          <div className="flex items-center justify-center gap-1 mt-4">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            ))}
-            <span className="text-xs text-gray-500 ml-1">(312 avaliações)</span>
-          </div>
-
-          {/* Period */}
-          <p className="text-xs mt-4 text-gray-500 italic leading-relaxed">
-            Período de participação: De 15 de Dezembro de 2025 às 00h00 até 08 de Janeiro de 2026 às 23:59 (horário de Brasília).
-          </p>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-white py-6 px-4 -mt-2">
-        <div className="max-w-sm mx-auto">
-          <Button 
-            onClick={handleResgate}
-            className="w-full h-14 bg-green-500 hover:bg-green-600 text-white font-bold text-lg rounded-full shadow-lg"
-          >
-            <ShoppingCart className="w-5 h-5 mr-2" />
-            RESGATAR AGORA
-          </Button>
-
-          {/* Payment Methods */}
-          <div className="text-center mt-4">
-            <p className="text-xs text-gray-500 mb-2">Formas de pagamento:</p>
-            <div className="flex justify-center gap-2">
-              {["💳", "📱", "🏦", "💰"].map((icon, i) => (
-                <span key={i} className="text-lg">{icon}</span>
-              ))}
-            </div>
-            <p className="text-xs text-green-600 mt-2 flex items-center justify-center gap-1">
-              <Truck className="w-3 h-3" />
-              🚚 Entrega rápida para todo Brasil
-            </p>
+      {/* Payment Methods */}
+      <section className="bg-white py-4 px-4">
+        <div className="max-w-sm mx-auto text-center">
+          <p className="text-xs text-gray-500 mb-2">Formas de pagamento:</p>
+          <div className="flex justify-center gap-3">
+            {["💳", "📱", "🏦", "💰"].map((icon, i) => (
+              <span key={i} className="text-lg bg-gray-50 w-10 h-10 rounded-lg flex items-center justify-center">{icon}</span>
+            ))}
           </div>
+          <p className="text-xs text-green-600 mt-3 flex items-center justify-center gap-1 font-medium">
+            <Truck className="w-3.5 h-3.5" />
+            Entrega rápida para todo Brasil
+          </p>
         </div>
       </section>
 
@@ -212,23 +239,9 @@ const ProductPage = ({ userData }: ProductPageProps) => {
             <h3 className="font-bold text-sm text-gray-900">Garantia de 30 Dias</h3>
             <p className="text-xs text-gray-500 mt-0.5">Não ficou satisfeito? Devolvemos seu dinheiro!</p>
             <p className="text-xs text-gray-600 mt-1">
-              Oferecemos 30 dias de garantia para você testar o produto com total segurança. Se não estiver 100% satisfeito, basta entrar em contato e devolveremos seu dinheiro, sem burocracia.
+              Oferecemos 30 dias de garantia para você testar o produto com total segurança.
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* Urgency Section */}
-      <section className="bg-white py-4 px-4 border-b border-gray-200">
-        <div className="max-w-sm mx-auto text-center space-y-2">
-          <p className="text-sm flex items-center justify-center gap-2">
-            <Package className="w-4 h-4 text-orange-500" />
-            Apenas <span className="font-bold text-orange-500">7 unidades</span> em estoque
-          </p>
-          <p className="text-xs text-gray-500 flex items-center justify-center gap-1">
-            <Users className="w-3 h-3" />
-            👥 32 pessoas compraram nas últimas 24h
-          </p>
         </div>
       </section>
 
