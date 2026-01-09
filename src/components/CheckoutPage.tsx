@@ -375,7 +375,9 @@ const CheckoutPage = ({
         address_city: formData.city,
         address_state: formData.state,
         products: trackingProducts,
-        utm_params: utmParams
+        utm_params: utmParams,
+        utmify_lead_id: utmifyLeadId,
+        client_ip: clientIP
       };
 
       console.log("Saving order to database:", orderData);

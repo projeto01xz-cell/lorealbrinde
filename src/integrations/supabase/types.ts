@@ -23,6 +23,7 @@ export type Database = {
           address_number: string | null
           address_state: string | null
           address_street: string | null
+          client_ip: string | null
           created_at: string
           customer_document: string
           customer_email: string
@@ -39,6 +40,7 @@ export type Database = {
           total_amount: number
           updated_at: string
           utm_params: Json | null
+          utmify_lead_id: string | null
         }
         Insert: {
           address_cep?: string | null
@@ -48,6 +50,7 @@ export type Database = {
           address_number?: string | null
           address_state?: string | null
           address_street?: string | null
+          client_ip?: string | null
           created_at?: string
           customer_document: string
           customer_email: string
@@ -64,6 +67,7 @@ export type Database = {
           total_amount: number
           updated_at?: string
           utm_params?: Json | null
+          utmify_lead_id?: string | null
         }
         Update: {
           address_cep?: string | null
@@ -73,6 +77,7 @@ export type Database = {
           address_number?: string | null
           address_state?: string | null
           address_street?: string | null
+          client_ip?: string | null
           created_at?: string
           customer_document?: string
           customer_email?: string
@@ -89,6 +94,7 @@ export type Database = {
           total_amount?: number
           updated_at?: string
           utm_params?: Json | null
+          utmify_lead_id?: string | null
         }
         Relationships: []
       }
