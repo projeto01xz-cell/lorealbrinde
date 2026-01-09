@@ -21,14 +21,33 @@ const handler = async (req: Request): Promise<Response> => {
     const url = new URL(req.url);
     const action = url.searchParams.get("action");
 
-    // Check admin password
-    const authHeader = req.headers.get("x-admin-password");
-    if (authHeader !== ADMIN_PASSWORD) {
+    // Parse body for password (works with both GET and POST)
+    let body: Record<string, unknown> = {};
+    try {
+      const text = await req.text();
+      if (text) {
+        body = JSON.parse(text);
+      }
+    } catch {
+      // Ignore parse errors for GET requests
+    }
+
+    // Check admin password from body or header
+    const passwordFromBody = body.password as string | undefined;
+    const passwordFromHeader = req.headers.get("x-admin-password");
+    const providedPassword = passwordFromBody || passwordFromHeader;
+
+    console.log("Auth attempt - password provided:", !!providedPassword);
+
+    if (providedPassword !== ADMIN_PASSWORD) {
+      console.log("Auth failed - invalid password");
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    console.log("Auth successful");
 
     // List orders
     if (action === "list" || req.method === "GET") {
@@ -57,7 +76,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Resend to UTMify
     if (action === "resend-utmify" && req.method === "POST") {
-      const { orderId } = await req.json();
+      const orderId = body.orderId as string;
+      
+      if (!orderId) {
+        return new Response(
+          JSON.stringify({ error: "Missing orderId" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
       
       console.log(`Resending order ${orderId} to UTMify...`);
 

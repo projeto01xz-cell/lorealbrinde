@@ -35,10 +35,7 @@ const Admin = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("admin-orders", {
-        body: {},
-        headers: {
-          "x-admin-password": password,
-        },
+        body: { password },
       });
 
       if (error) {
@@ -70,10 +67,7 @@ const Admin = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("admin-orders", {
-        body: {},
-        headers: {
-          "x-admin-password": password,
-        },
+        body: { password },
       });
 
       if (error) throw new Error(error.message);
@@ -99,10 +93,7 @@ const Admin = () => {
     setSendingOrderId(orderId);
     try {
       const { data, error } = await supabase.functions.invoke("admin-orders?action=resend-utmify", {
-        body: { orderId },
-        headers: {
-          "x-admin-password": password,
-        },
+        body: { orderId, password },
       });
 
       if (error) throw new Error(error.message);
