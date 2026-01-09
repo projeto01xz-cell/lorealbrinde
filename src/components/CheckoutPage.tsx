@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Search, Menu, X, Truck, Package, Zap, Loader2, Gift, CheckSquare, Square } from "lucide-react";
+import { Search, Menu, X, Truck, Package, Zap, Loader2, Gift, CheckSquare, Square, Copy, Check, QrCode } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import lorealLogo from "@/assets/loreal-paris-logo.svg";
 import productKitFull from "@/assets/product-kit-full.png";
 
@@ -141,6 +143,13 @@ const CheckoutPage = ({ userData }: CheckoutPageProps) => {
   const [loadingCep, setLoadingCep] = useState(false);
   const [errors, setErrors] = useState<{ cpf?: string; cep?: string }>({});
   const [selectedBumps, setSelectedBumps] = useState<string[]>([]);
+  const [loadingPayment, setLoadingPayment] = useState(false);
+  const [pixData, setPixData] = useState<{
+    payload: string;
+    qrCodeUrl?: string;
+    expiresAt?: string;
+  } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const toggleBump = (bumpId: string) => {
     setSelectedBumps((prev) =>
@@ -227,7 +236,16 @@ const CheckoutPage = ({ userData }: CheckoutPageProps) => {
     setAddressFilled(checkAddressFilled(updatedForm));
   };
 
-  const handleSubmit = () => {
+  const handleCopyPix = async () => {
+    if (pixData?.payload) {
+      await navigator.clipboard.writeText(pixData.payload);
+      setCopied(true);
+      toast.success("Código Pix copiado!");
+      setTimeout(() => setCopied(false), 3000);
+    }
+  };
+
+  const handleSubmit = async () => {
     if (!selectedShipping) return;
     if (!validateCPF(formData.cpf)) {
       setErrors((prev) => ({ ...prev, cpf: "CPF inválido" }));
@@ -237,10 +255,80 @@ const CheckoutPage = ({ userData }: CheckoutPageProps) => {
       setErrors((prev) => ({ ...prev, cep: "CEP inválido" }));
       return;
     }
+    if (!formData.email) {
+      toast.error("Por favor, preencha o e-mail");
+      return;
+    }
 
-    const shipping = shippingOptions.find((s) => s.id === selectedShipping);
-    const message = `Olá! Quero finalizar meu pedido do Kit Elseve Collagen Lifter!\n\nDados:\nNome: ${formData.fullName}\nEmail: ${formData.email}\nCPF: ${formData.cpf}\nTelefone: ${formData.phone}\n\nEndereço:\n${formData.street}, ${formData.number}${formData.complement ? ` - ${formData.complement}` : ""}\n${formData.neighborhood}\n${formData.city} - ${formData.state}\nCEP: ${formData.cep}\n\nFrete: ${shipping?.name} - R$ ${shipping?.price.toFixed(2)}`;
-    window.open(`https://wa.me/5511999999999?text=${encodeURIComponent(message)}`, "_blank");
+    setLoadingPayment(true);
+
+    try {
+      // Montar itens do pedido
+      const items = [
+        {
+          title: "Kit Elseve Collagen Lifter (Brinde)",
+          quantity: 1,
+          unitPrice: 0,
+        },
+      ];
+
+      // Adicionar order bumps selecionados
+      selectedBumps.forEach((bumpId) => {
+        const bump = orderBumps.find((b) => b.id === bumpId);
+        if (bump) {
+          items.push({
+            title: bump.name,
+            quantity: 1,
+            unitPrice: Math.round(bump.promoPrice * 100),
+          });
+        }
+      });
+
+      // Adicionar frete
+      const shipping = shippingOptions.find((s) => s.id === selectedShipping);
+      if (shipping) {
+        items.push({
+          title: `Frete ${shipping.name}`,
+          quantity: 1,
+          unitPrice: Math.round(shipping.price * 100),
+        });
+      }
+
+      const totalCents = Math.round(total * 100);
+
+      const { data, error } = await supabase.functions.invoke("create-pix-payment", {
+        body: {
+          amount: totalCents,
+          customer: {
+            name: formData.fullName,
+            email: formData.email,
+            document: formData.cpf,
+            phone: formData.phone,
+          },
+          items,
+          expiresInMinutes: 30,
+        },
+      });
+
+      if (error) {
+        console.error("Payment error:", error);
+        toast.error("Erro ao gerar pagamento Pix");
+        return;
+      }
+
+      setPixData({
+        payload: data.pix?.payload || "",
+        qrCodeUrl: data.pix?.qrCodeUrl,
+        expiresAt: data.pix?.expiresAt,
+      });
+
+      toast.success("QR Code Pix gerado com sucesso!");
+    } catch (err) {
+      console.error("Payment error:", err);
+      toast.error("Erro ao processar pagamento");
+    } finally {
+      setLoadingPayment(false);
+    }
   };
 
   const selectedShippingOption = shippingOptions.find((s) => s.id === selectedShipping);
@@ -603,25 +691,100 @@ const CheckoutPage = ({ userData }: CheckoutPageProps) => {
             </div>
           </div>
         )}
+
+        {/* PIX Payment Modal */}
+        {pixData && (
+          <div className="bg-white rounded-xl p-4 border-2 border-green-500 shadow-lg">
+            <div className="flex items-center gap-2 mb-4">
+              <QrCode className="w-5 h-5 text-green-600" />
+              <h2 className="font-bold text-sm text-gray-900">Pagamento via Pix</h2>
+            </div>
+
+            <div className="text-center space-y-4">
+              {pixData.qrCodeUrl ? (
+                <img
+                  src={pixData.qrCodeUrl}
+                  alt="QR Code Pix"
+                  className="w-48 h-48 mx-auto border border-gray-200 rounded-lg"
+                />
+              ) : (
+                <div className="w-48 h-48 mx-auto border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                  <QrCode className="w-20 h-20 text-gray-400" />
+                </div>
+              )}
+
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs text-gray-500 mb-2">Pix Copia e Cola</p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={pixData.payload}
+                    className="flex-1 text-xs bg-white border border-gray-200 rounded px-2 py-1.5 truncate"
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCopyPix}
+                    className="flex-shrink-0"
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="text-sm text-gray-600">
+                <p className="font-semibold text-lg text-green-600">
+                  R$ {total.toFixed(2).replace(".", ",")}
+                </p>
+                {pixData.expiresAt && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    Expira em 30 minutos
+                  </p>
+                )}
+              </div>
+
+              <p className="text-xs text-gray-500">
+                Escaneie o QR Code ou copie o código para pagar
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Sticky CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
-        <div className="max-w-sm mx-auto">
-          <Button
-            onClick={handleSubmit}
-            disabled={!addressFilled || !selectedShipping || !!errors.cpf || !!errors.cep}
-            className="w-full h-12 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-lg"
-          >
-            FINALIZAR PEDIDO
-          </Button>
-          {!addressFilled && (
-            <p className="text-[10px] text-gray-400 text-center mt-2">
-              Preencha o endereço para ver as opções de frete
-            </p>
-          )}
+      {!pixData && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
+          <div className="max-w-sm mx-auto">
+            <Button
+              onClick={handleSubmit}
+              disabled={!addressFilled || !selectedShipping || !!errors.cpf || !!errors.cep || loadingPayment}
+              className="w-full h-12 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-lg"
+            >
+              {loadingPayment ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  GERANDO PIX...
+                </>
+              ) : (
+                <>
+                  <QrCode className="w-4 h-4 mr-2" />
+                  PAGAR COM PIX
+                </>
+              )}
+            </Button>
+            {!addressFilled && (
+              <p className="text-[10px] text-gray-400 text-center mt-2">
+                Preencha o endereço para ver as opções de frete
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
