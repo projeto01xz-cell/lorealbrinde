@@ -50,8 +50,20 @@ const ProductPage = ({
     window.open("https://wa.me/5511999999999?text=Olá! Quero resgatar meu kit Elseve Collagen Lifter!", "_blank");
   };
   return <div className="min-h-[100svh] bg-white">
+      {/* Promo Banner */}
+      <div className="fixed top-0 left-0 right-0 z-[60] bg-black py-2 px-4">
+        <div className="flex items-center justify-center gap-3">
+          <span className="text-[11px] sm:text-xs font-bold text-yellow-400 uppercase tracking-wider">
+            Oferta Exclusiva Válida
+          </span>
+          <span className="bg-white text-black text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded uppercase">
+            Por Tempo Limitado
+          </span>
+        </div>
+      </div>
+
       {/* Header - Same as main page */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200">
+      <header className="fixed top-[36px] left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200">
         <div className="px-4 h-12 flex items-center justify-between max-w-screen-sm mx-auto">
           <button aria-label="Buscar" className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-purple-600 transition-colors -ml-1">
             <Search className="w-[18px] h-[18px]" />
@@ -67,8 +79,8 @@ const ProductPage = ({
         </div>
       </header>
 
-      {/* Spacer for fixed header */}
-      <div className="h-12" />
+      {/* Spacer for fixed header + banner */}
+      <div className="h-[84px]" />
 
       {/* Product Card - Modern E-commerce Vertical */}
       <section className="px-4 py-6">
