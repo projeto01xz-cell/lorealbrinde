@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const utmifyToken = Deno.env.get("UTMIFY_TOKEN");
+    const utmifyToken = Deno.env.get("UTMIFY_TOKEN")?.trim();
 
     if (!utmifyToken) {
       console.error("Missing UTMIFY_TOKEN");
@@ -102,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${utmifyToken}`,
+        "x-api-token": utmifyToken,
       },
       body: JSON.stringify(payload),
     });
