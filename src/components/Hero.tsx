@@ -66,22 +66,22 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
         <SparkleParticles />
         
         {/* Content container */}
-        <div className="h-full flex flex-col items-center justify-center px-5 pt-16 overflow-hidden">
-          <div className="w-full max-w-sm mx-auto text-center space-y-3 relative z-10">
+        <div className="h-full flex flex-col items-center justify-center px-4 pt-14 pb-4 overflow-hidden">
+          <div className="w-full max-w-sm mx-auto text-center space-y-2 relative z-10">
             
             {/* Initial headline - always visible */}
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-white leading-tight drop-shadow-lg px-2">
+            <div className="space-y-1">
+              <h1 className="text-xl font-bold text-white leading-tight drop-shadow-lg px-2">
                 Descubra novo Brinde da L´oreal Paris.
               </h1>
-              <p className="text-white/80 text-base">Role para descobrir o Brinde</p>
+              <p className="text-white/80 text-sm">Role para descobrir o Brinde</p>
               <motion.div 
                 style={{ opacity: scrollIndicatorOpacity }}
-                animate={{ y: [0, 8, 0] }} 
+                animate={{ y: [0, 6, 0] }} 
                 transition={{ duration: 1.5, repeat: Infinity }} 
-                className="text-white/60 pt-2"
+                className="text-white/60 pt-1"
               >
-                <ChevronDown className="w-7 h-7 mx-auto" />
+                <ChevronDown className="w-6 h-6 mx-auto" />
               </motion.div>
             </div>
 
@@ -92,7 +92,7 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
                 opacity: productOpacity,
                 scale: productScale
               }} 
-              className="relative mx-auto w-full px-4 py-2"
+              className="relative mx-auto w-full px-2 py-1"
             >
               {/* Background glow */}
               <div className="absolute inset-0 bg-white/10 rounded-full blur-3xl scale-90" />
@@ -121,15 +121,15 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
             {/* Release date highlight */}
             <motion.p 
               style={{ opacity: badgeOpacity, y: badgeY }} 
-              className="text-white text-base drop-shadow-lg"
+              className="text-white text-sm drop-shadow-lg"
             >
-              Brinde liberado hoje, <span className="font-bold text-lg bg-white/20 px-2 py-0.5 rounded">09/01</span>
+              Brinde liberado hoje, <span className="font-bold text-base bg-white/20 px-2 py-0.5 rounded">09/01</span>
             </motion.p>
 
             {/* Subheadline */}
             <motion.p 
               style={{ opacity: badgeOpacity }} 
-              className="text-white/90 text-sm px-4 drop-shadow-sm leading-relaxed"
+              className="text-white/90 text-xs px-4 drop-shadow-sm leading-relaxed"
             >
               Tenha a chance de receber nosso mais novo lançamento
             </motion.p>
@@ -137,23 +137,23 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
             {/* CTA Button - appears last */}
             <motion.div 
               style={{ opacity: buttonOpacity, y: buttonY }} 
-              className="pt-2 px-4 space-y-2"
+              className="pt-1 px-4 space-y-1"
             >
               <Button 
                 onClick={onStartQuiz} 
                 size="lg" 
-                className="w-full bg-white text-[hsl(270_50%_35%)] hover:bg-white/95 shadow-xl font-semibold text-base h-14 rounded-xl"
+                className="w-full bg-white text-[hsl(270_50%_35%)] hover:bg-white/95 shadow-xl font-semibold text-base h-12 rounded-xl"
               >
                 Receber o meu brinde
                 <ChevronDown className="w-5 h-5 ml-1" />
               </Button>
-              <p className="text-white/70 text-xs">Últimas unidades disponíveis</p>
+              <p className="text-white/70 text-[10px]">Últimas unidades disponíveis</p>
             </motion.div>
 
             {/* Trust indicators */}
             <motion.div 
               style={{ opacity: trustOpacity }} 
-              className="flex items-center justify-center gap-4 pt-3 text-xs text-white/75"
+              className="flex items-center justify-center gap-3 pt-2 text-[10px] text-white/75"
             >
               <span className="flex items-center gap-1">
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -171,8 +171,8 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
           </div>
 
           {/* Decorative star */}
-          <div className="absolute bottom-4 right-4 opacity-30">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+          <div className="absolute bottom-2 right-2 opacity-30">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
               <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z" />
             </svg>
           </div>
