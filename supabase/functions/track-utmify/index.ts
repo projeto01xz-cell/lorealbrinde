@@ -100,7 +100,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sending to Utmify API...");
 
-    const response = await fetch("https://api.utmify.com.br/api/v1/sales/", {
+    const response = await fetch("https://api.utmify.com.br/api/v1/sales", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
