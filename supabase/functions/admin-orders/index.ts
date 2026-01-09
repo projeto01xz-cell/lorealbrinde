@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-password",
 };
 
 const ADMIN_PASSWORD = "loreal2024admin"; // Simple password protection
@@ -49,10 +49,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Auth successful");
 
-    // List orders
-    if (action === "list" || req.method === "GET") {
+    // List orders (default)
+    if (!action || action === "list" || req.method === "GET") {
       console.log("Fetching all orders...");
-      
       const { data: orders, error } = await supabase
         .from("orders")
         .select("*")

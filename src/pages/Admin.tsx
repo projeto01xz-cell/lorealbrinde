@@ -53,9 +53,12 @@ const Admin = () => {
         description: `${data.orders?.length || 0} pedidos encontrados`,
       });
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Erro desconhecido";
+      const isNetwork = /failed to fetch/i.test(message);
+
       toast({
-        title: "Erro de autenticação",
-        description: "Senha incorreta",
+        title: isNetwork ? "Falha de conexão" : "Erro de autenticação",
+        description: isNetwork ? "Não consegui conectar ao servidor do admin." : "Senha incorreta",
         variant: "destructive",
       });
     } finally {
