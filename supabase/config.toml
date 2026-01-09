@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.get-order-status]
 verify_jwt = false
+
+[functions.admin-orders]
+verify_jwt = false
