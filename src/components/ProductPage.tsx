@@ -10,10 +10,14 @@ import {
   ChevronUp,
   ShoppingCart,
   Users,
-  Package
+  Package,
+  Search,
+  Menu,
+  X
 } from "lucide-react";
 import { motion } from "framer-motion";
 import elseveProducts from "@/assets/elseve-products.png";
+import lorealLogo from "@/assets/loreal-paris-logo.svg";
 
 interface ProductPageProps {
   userData: { name: string; whatsapp: string; answers: string[] };
@@ -69,56 +73,89 @@ const benefits = [
 
 const ProductPage = ({ userData }: ProductPageProps) => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleResgate = () => {
-    // Redirect to checkout or show checkout modal
     window.open("https://wa.me/5511999999999?text=Olá! Quero resgatar meu kit Elseve Collagen Lifter!", "_blank");
   };
 
   return (
     <div className="min-h-[100svh] bg-white">
-      {/* Hero Section */}
-      <section className="bg-[#1a5fb4] text-white py-6 px-4">
+      {/* Header - Same as main page */}
+      <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200">
+        <div className="px-4 h-12 flex items-center justify-between max-w-screen-sm mx-auto">
+          <button 
+            aria-label="Buscar"
+            className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-purple-600 transition-colors -ml-1"
+          >
+            <Search className="w-[18px] h-[18px]" />
+          </button>
+
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <img 
+              src={lorealLogo}
+              alt="L'Oréal Paris"
+              className="h-4 w-auto"
+            />
+          </div>
+
+          <button 
+            aria-label="Menu"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-purple-600 transition-colors -mr-1"
+          >
+            {menuOpen ? <X className="w-[18px] h-[18px]" /> : <Menu className="w-[18px] h-[18px]" />}
+          </button>
+        </div>
+      </header>
+
+      {/* Spacer for fixed header */}
+      <div className="h-12" />
+
+      {/* Hero Section - Similar to reference */}
+      <section className="bg-gradient-to-b from-purple-50 to-white py-6 px-4">
         <div className="max-w-sm mx-auto text-center">
-          <h1 className="text-xl font-bold mb-1">LANÇAMENTO ELSEVE</h1>
-          <p className="text-lg font-semibold text-white/90">COLLAGEN LIFTER</p>
+          <h1 className="text-2xl font-black text-gray-900 mb-1 tracking-tight">LANÇAMENTO ELSEVE</h1>
+          <p className="text-base font-semibold text-gray-600">COLLAGEN LIFTER</p>
           
           {/* Badges */}
           <div className="flex justify-center gap-2 mt-4">
-            <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded">
-              🔥 MAIS VENDIDO
+            <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1">
+              🏆 MAIS VENDIDO
             </span>
-            <span className="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded border border-white/30">
+            <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded flex items-center gap-1 border border-blue-200">
               📦 PAGUE APENAS O FRETE
             </span>
           </div>
 
-          {/* Product Image */}
-          <div className="relative mt-6">
-            <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+          {/* Product Image Card */}
+          <div className="relative mt-6 bg-white rounded-2xl shadow-lg p-4 border border-gray-100">
+            {/* -100% OFF Badge */}
+            <div className="absolute top-3 right-3 bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-md">
               -100% OFF
             </div>
+            
             <motion.img 
               src={elseveProducts} 
               alt="Kit Elseve Collagen Lifter" 
-              className="w-full max-w-[280px] mx-auto"
+              className="w-full max-w-[260px] mx-auto"
               animate={{ y: [0, -5, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
           </div>
 
           {/* Trust Icons */}
-          <div className="flex justify-center gap-6 mt-4 text-xs">
-            <div className="flex flex-col items-center gap-1">
-              <Shield className="w-5 h-5" />
+          <div className="flex justify-center gap-8 mt-5 text-xs text-gray-600">
+            <div className="flex flex-col items-center gap-1.5">
+              <Shield className="w-5 h-5 text-gray-500" />
               <span>Compra Segura</span>
             </div>
-            <div className="flex flex-col items-center gap-1">
-              <Truck className="w-5 h-5" />
+            <div className="flex flex-col items-center gap-1.5">
+              <Truck className="w-5 h-5 text-gray-500" />
               <span>Entrega Rápida</span>
             </div>
-            <div className="flex flex-col items-center gap-1">
-              <Gift className="w-5 h-5" />
+            <div className="flex flex-col items-center gap-1.5">
+              <Gift className="w-5 h-5 text-gray-500" />
               <span>Grátis</span>
             </div>
           </div>
@@ -128,11 +165,11 @@ const ProductPage = ({ userData }: ProductPageProps) => {
             {[...Array(5)].map((_, i) => (
               <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
             ))}
-            <span className="text-xs ml-1">(312 avaliações)</span>
+            <span className="text-xs text-gray-500 ml-1">(312 avaliações)</span>
           </div>
 
           {/* Period */}
-          <p className="text-xs mt-3 text-white/80">
+          <p className="text-xs mt-4 text-gray-500 italic leading-relaxed">
             Período de participação: De 15 de Dezembro de 2025 às 00h00 até 08 de Janeiro de 2026 às 23:59 (horário de Brasília).
           </p>
         </div>
