@@ -77,8 +77,8 @@ const validatePaymentRequest = (data: unknown): { valid: boolean; error?: string
     if (typeof i.quantity !== 'number' || i.quantity < 1 || i.quantity > 1000) {
       return { valid: false, error: "Each item must have a valid quantity (1-1000)" };
     }
-    if (typeof i.unitPrice !== 'number' || i.unitPrice < 1) {
-      return { valid: false, error: "Each item must have a valid unitPrice" };
+    if (typeof i.unitPrice !== 'number' || !Number.isFinite(i.unitPrice) || i.unitPrice < 1) {
+      return { valid: false, error: `Each item must have a valid unitPrice (got: ${i.unitPrice})` };
     }
   }
 
@@ -94,8 +94,8 @@ const validatePaymentRequest = (data: unknown): { valid: boolean; error?: string
       },
       items: (req.items as Array<{ title: string; quantity: number; unitPrice: number }>).map(i => ({
         title: i.title.substring(0, 200),
-        quantity: Math.min(i.quantity, 1000),
-        unitPrice: i.unitPrice,
+        quantity: Math.min(Math.floor(i.quantity), 1000),
+        unitPrice: Math.floor(i.unitPrice),
       })),
       expiresInMinutes: typeof req.expiresInMinutes === 'number' ? Math.min(Math.max(req.expiresInMinutes, 5), 60) : 30,
     }
