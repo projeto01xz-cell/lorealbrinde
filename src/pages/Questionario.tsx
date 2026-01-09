@@ -3,8 +3,14 @@ import Header from "@/components/Header";
 import QuizForm from "@/components/QuizForm";
 import ProductPage from "@/components/ProductPage";
 import CheckoutPage from "@/components/CheckoutPage";
+import PixPaymentPage from "@/components/PixPaymentPage";
 
-type Step = "quiz" | "product" | "checkout";
+type Step = "quiz" | "product" | "checkout" | "pix";
+
+interface PixData {
+  payload: string;
+  expiresAt?: string;
+}
 
 const Questionario = () => {
   const [currentStep, setCurrentStep] = useState<Step>("quiz");
@@ -13,6 +19,8 @@ const Questionario = () => {
     whatsapp: string;
     answers: string[];
   } | null>(null);
+  const [pixData, setPixData] = useState<PixData | null>(null);
+  const [pixTotal, setPixTotal] = useState(0);
   
   const quizRef = useRef<HTMLDivElement>(null);
 
@@ -24,6 +32,13 @@ const Questionario = () => {
 
   const handleGoToCheckout = () => {
     setCurrentStep("checkout");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleGoToPix = (pix: PixData, total: number) => {
+    setPixData(pix);
+    setPixTotal(total);
+    setCurrentStep("pix");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -41,7 +56,15 @@ const Questionario = () => {
         )}
 
         {currentStep === "checkout" && userData && (
-          <CheckoutPage userData={userData} />
+          <CheckoutPage userData={userData} onPixGenerated={handleGoToPix} />
+        )}
+
+        {currentStep === "pix" && userData && pixData && (
+          <PixPaymentPage
+            pixData={pixData}
+            total={pixTotal}
+            customerName={userData.name}
+          />
         )}
       </main>
       
