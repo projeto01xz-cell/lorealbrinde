@@ -101,8 +101,10 @@ const handler = async (req: Request): Promise<Response> => {
         );
       }
 
-      const utmifyToken = Deno.env.get("UTMIFY_TOKEN")?.trim();
-      
+      const utmifyToken = (Deno.env.get("UTMIFY_TOKEN") ?? "")
+        .replace(/^bearer\s+/i, "")
+        .trim();
+
       if (!utmifyToken) {
         return new Response(
           JSON.stringify({ error: "UTMIFY_TOKEN not configured" }),
@@ -158,8 +160,9 @@ const handler = async (req: Request): Promise<Response> => {
         headers: {
           "Content-Type": "application/json",
           // IMPORTANT: do NOT send Authorization header (AWS SigV4 parsing)
-          // UTMify uses a custom token header
+          // UTMify uses custom token headers
           "x-api-token": utmifyToken,
+          "x-api-key": utmifyToken,
         },
         body: JSON.stringify(utmifyPayload),
       });
