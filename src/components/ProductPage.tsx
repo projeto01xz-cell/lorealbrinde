@@ -95,8 +95,13 @@ const ProductPage = ({
 
             {/* Product Image */}
             <div className="relative bg-gradient-to-b from-purple-50 to-white p-4">
-              {/* Discount Badge */}
-              
+              {/* Brinde Badge */}
+              <div className="absolute top-3 left-3 z-10">
+                <span className="bg-green-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase flex items-center gap-1 shadow-lg">
+                  <Gift className="w-3 h-3" />
+                  Brinde Grátis
+                </span>
+              </div>
               
               <img src={productKitFull} alt="Kit Elseve Collagen Lifter" className="w-full" />
             </div>
