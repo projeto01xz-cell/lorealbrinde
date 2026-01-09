@@ -156,7 +156,7 @@ const handler = async (req: Request): Promise<Response> => {
             isTest: false,
           };
 
-          const utmifyResponse = await fetch("https://api.utmify.com.br/api/v1/sales/", {
+          const utmifyResponse = await fetch("https://api.utmify.com.br/api/v1/sales", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

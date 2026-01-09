@@ -155,7 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       console.log("Sending to UTMify:", JSON.stringify(utmifyPayload, null, 2));
 
-      const utmifyResponse = await fetch("https://api.utmify.com.br/api/v1/sales/", {
+      const utmifyResponse = await fetch("https://api.utmify.com.br/api/v1/sales", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
