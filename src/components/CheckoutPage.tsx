@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Search, Menu, X, Truck, Package, Zap, Loader2, Gift, CheckSquare, Square, QrCode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getUtmifyParams, saveUtmParams } from "@/lib/utmify";
 import lorealLogo from "@/assets/loreal-paris-logo.svg";
 import productKitFull from "@/assets/product-kit-full.png";
 
@@ -145,6 +146,11 @@ const CheckoutPage = ({ userData, onPixGenerated }: CheckoutPageProps) => {
   const [errors, setErrors] = useState<{ cpf?: string; cep?: string }>({});
   const [selectedBumps, setSelectedBumps] = useState<string[]>([]);
   const [loadingPayment, setLoadingPayment] = useState(false);
+
+  // Salvar UTM params quando a página carrega
+  useEffect(() => {
+    saveUtmParams();
+  }, []);
 
   const toggleBump = (bumpId: string) => {
     setSelectedBumps((prev) =>
@@ -302,6 +308,49 @@ const CheckoutPage = ({ userData, onPixGenerated }: CheckoutPageProps) => {
         toast.error("Erro ao gerar pagamento Pix");
         return;
       }
+
+      // Enviar tracking para Utmify
+      const utmParams = getUtmifyParams();
+      const orderId = data.id?.toString() || `PIX-${Date.now()}`;
+      
+      // Montar produtos para tracking
+      const trackingProducts = [
+        { name: "Kit Elseve Collagen Lifter (Brinde)", price: 0, quantity: 1 },
+      ];
+      selectedBumps.forEach((bumpId) => {
+        const bump = orderBumps.find((b) => b.id === bumpId);
+        if (bump) {
+          trackingProducts.push({
+            name: bump.name,
+            price: bump.promoPrice,
+            quantity: 1,
+          });
+        }
+      });
+
+      // Track sale async (não bloqueia o fluxo)
+      supabase.functions.invoke("track-utmify", {
+        body: {
+          orderId,
+          status: "pending",
+          customer: {
+            name: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            document: formData.cpf,
+          },
+          products: trackingProducts,
+          paymentMethod: "pix",
+          totalAmount: total,
+          utmParams,
+        },
+      }).then(({ error: trackError }) => {
+        if (trackError) {
+          console.warn("Utmify tracking error:", trackError);
+        } else {
+          console.log("Sale tracked to Utmify");
+        }
+      });
 
       // Navegar para página de pagamento Pix
       onPixGenerated(
