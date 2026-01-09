@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, X, Gift, Percent, ShoppingBag, CheckCircle } from "lucide-react";
+import { Search, Menu, X, Percent, ShoppingBag, CheckCircle, Frown } from "lucide-react";
 import lorealLogo from "@/assets/loreal-paris-logo.svg";
 import serumOleoExtraordinario from "@/assets/serum-oleo-extraordinario.png";
 import serumLisoSonhos from "@/assets/serum-liso-sonhos.png";
@@ -63,11 +63,10 @@ const OfertaEspecial = () => {
   ];
 
   return (
-    <div className="min-h-[100svh] bg-gradient-to-b from-amber-50 to-white pb-32">
+    <div className="min-h-[100svh] bg-white pb-32">
       {/* Promo Banner */}
-      <div className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-red-600 to-red-500 py-2 px-4">
-        <div className="flex items-center justify-center gap-3">
-          <Gift className="w-4 h-4 text-white" />
+      <div className="fixed top-0 left-0 right-0 z-[60] bg-black py-2 px-4">
+        <div className="flex items-center justify-center">
           <span className="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider">
             Pedido de Desculpas - Desconto Exclusivo
           </span>
@@ -103,10 +102,10 @@ const OfertaEspecial = () => {
 
       <div className="px-4 py-6 max-w-md mx-auto">
         {/* Apology Message */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6 border-2 border-amber-400 animate-fade-in">
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6 border border-gray-200 animate-fade-in">
           <div className="text-center mb-4">
-            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Gift className="w-8 h-8 text-amber-600" />
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Frown className="w-10 h-10 text-gray-500" />
             </div>
             
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
