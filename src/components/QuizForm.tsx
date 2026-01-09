@@ -1,7 +1,7 @@
 import { useState, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Check, ArrowRight, Sparkles, Heart, Zap } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 
 interface QuizFormProps {
   onComplete: (data: { name: string; whatsapp: string; answers: string[] }) => void;
@@ -10,29 +10,52 @@ interface QuizFormProps {
 const questions = [
   {
     id: 1,
-    question: "Qual dessas opções mais combina com você?",
+    question: "Qual é o seu tipo de cabelo?",
     options: [
-      { value: "inovador", label: "Gosto de inovar", icon: Sparkles },
-      { value: "pratico", label: "Prefiro praticidade", icon: Zap },
-      { value: "cuidadoso", label: "Valorizo qualidade", icon: Heart },
+      { value: "liso", label: "Liso" },
+      { value: "ondulado", label: "Ondulado" },
+      { value: "cacheado", label: "Cacheado" },
+      { value: "crespo", label: "Crespo" },
     ],
   },
   {
     id: 2,
-    question: "Com que frequência você experimenta novidades?",
+    question: "Qual a sua maior preocupação com o cabelo?",
     options: [
-      { value: "sempre", label: "Sempre que posso", icon: Sparkles },
-      { value: "as-vezes", label: "De vez em quando", icon: Zap },
-      { value: "raramente", label: "Apenas o essencial", icon: Heart },
+      { value: "queda", label: "Queda de cabelo" },
+      { value: "ressecamento", label: "Ressecamento e frizz" },
+      { value: "oleosidade", label: "Oleosidade excessiva" },
+      { value: "pontas-duplas", label: "Pontas duplas e quebra" },
     ],
   },
   {
     id: 3,
-    question: "O que você mais valoriza em um lançamento?",
+    question: "Com que frequência você lava o cabelo?",
     options: [
-      { value: "exclusividade", label: "Exclusividade", icon: Sparkles },
-      { value: "custo-beneficio", label: "Custo-benefício", icon: Zap },
-      { value: "qualidade", label: "Alta qualidade", icon: Heart },
+      { value: "diariamente", label: "Todos os dias" },
+      { value: "dias-alternados", label: "Dia sim, dia não" },
+      { value: "2-3-vezes", label: "2 a 3 vezes por semana" },
+      { value: "1-vez", label: "1 vez por semana" },
+    ],
+  },
+  {
+    id: 4,
+    question: "Você costuma usar ferramentas de calor?",
+    options: [
+      { value: "sempre", label: "Sim, frequentemente" },
+      { value: "as-vezes", label: "Às vezes" },
+      { value: "raramente", label: "Raramente" },
+      { value: "nunca", label: "Nunca uso" },
+    ],
+  },
+  {
+    id: 5,
+    question: "O que você mais busca em um produto capilar?",
+    options: [
+      { value: "hidratacao", label: "Hidratação intensa" },
+      { value: "volume", label: "Mais volume" },
+      { value: "brilho", label: "Brilho e maciez" },
+      { value: "fortalecimento", label: "Fortalecimento" },
     ],
   },
 ];
@@ -103,9 +126,9 @@ const QuizForm = forwardRef<HTMLDivElement, QuizFormProps>(({ onComplete }, ref)
               </h2>
               
               <div className="space-y-2.5">
-                {questions[currentStep].options.map((option) => {
-                  const Icon = option.icon;
+                {questions[currentStep].options.map((option, index) => {
                   const isSelected = answers[currentStep] === option.value;
+                  const letters = ['A', 'B', 'C', 'D'];
                   
                   return (
                     <button
@@ -117,10 +140,10 @@ const QuizForm = forwardRef<HTMLDivElement, QuizFormProps>(({ onComplete }, ref)
                       )}
                     >
                       <div className={cn(
-                        "w-9 h-9 rounded-full flex items-center justify-center transition-colors flex-shrink-0",
+                        "w-9 h-9 rounded-full flex items-center justify-center transition-colors flex-shrink-0 text-sm font-semibold",
                         isSelected ? "bg-primary text-white" : "bg-secondary text-muted-foreground"
                       )}>
-                        {isSelected ? <Check className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+                        {isSelected ? <Check className="w-4 h-4" /> : letters[index]}
                       </div>
                       <span className={cn(
                         "text-sm font-medium transition-colors",
