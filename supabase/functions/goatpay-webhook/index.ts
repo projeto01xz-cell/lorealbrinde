@@ -6,9 +6,52 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Validate webhook payload
+const validateWebhookPayload = (data: unknown): { valid: boolean; error?: string; id?: string; status?: string; event?: string } => {
+  if (!data || typeof data !== 'object') {
+    return { valid: false, error: "Invalid payload" };
+  }
+
+  const payload = data as Record<string, unknown>;
+  
+  // ID is required
+  if (!payload.id || (typeof payload.id !== 'string' && typeof payload.id !== 'number')) {
+    return { valid: false, error: "Missing or invalid transaction ID" };
+  }
+
+  const id = String(payload.id);
+  
+  // Validate ID format (prevent injection)
+  if (id.length > 100 || !/^[a-zA-Z0-9_-]+$/.test(id)) {
+    return { valid: false, error: "Invalid transaction ID format" };
+  }
+
+  // Validate status if present
+  const validStatuses = ['pending', 'paid', 'approved', 'refunded', 'cancelled', 'expired', 'processing'];
+  const status = typeof payload.status === 'string' && validStatuses.includes(payload.status) 
+    ? payload.status 
+    : undefined;
+
+  // Validate event if present
+  const validEvents = ['payment.approved', 'payment.refunded', 'payment.cancelled', 'payment.created'];
+  const event = typeof payload.event === 'string' && validEvents.includes(payload.event)
+    ? payload.event
+    : undefined;
+
+  return { valid: true, id, status, event };
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Only accept POST requests
+  if (req.method !== "POST") {
+    return new Response(
+      JSON.stringify({ error: "Method not allowed" }),
+      { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 
   try {
@@ -16,20 +59,29 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const payload = await req.json();
-    
-    console.log("GoatPay webhook received:", JSON.stringify(payload, null, 2));
-
-    // GoatPay envia o ID da transação e o status
-    const { id, status, event } = payload;
-
-    if (!id) {
-      console.error("Missing transaction ID in webhook payload");
+    let payload: unknown;
+    try {
+      payload = await req.json();
+    } catch {
       return new Response(
-        JSON.stringify({ error: "Missing transaction ID" }),
+        JSON.stringify({ error: "Invalid JSON" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    
+    console.log("GoatPay webhook received");
+
+    const validation = validateWebhookPayload(payload);
+    
+    if (!validation.valid) {
+      console.error("Webhook validation error:", validation.error);
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { id, status, event } = validation;
 
     // Mapear status da GoatPay para nosso status
     let orderStatus = "pending";
@@ -56,7 +108,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { data, error } = await supabase
       .from("orders")
       .update(updateData)
-      .eq("external_id", id.toString())
+      .eq("external_id", id!)
       .select()
       .single();
 

@@ -14,19 +14,30 @@ interface PixData {
   expiresAt?: string;
 }
 
+interface CustomerData {
+  name: string;
+  email: string;
+  document: string;
+  phone: string;
+}
+
 const OfertaEspecial = () => {
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get("order");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [customerName, setCustomerName] = useState("");
+  const [customerData, setCustomerData] = useState<CustomerData | null>(null);
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [copied, setCopied] = useState(false);
+  const [loadingCustomer, setLoadingCustomer] = useState(true);
 
   const totalPrice = 47.10;
 
   useEffect(() => {
-    if (!orderId || orderId === "null") return;
+    if (!orderId || orderId === "null") {
+      setLoadingCustomer(false);
+      return;
+    }
 
     const fetchOrder = async () => {
       try {
@@ -35,10 +46,17 @@ const OfertaEspecial = () => {
         });
 
         if (data) {
-          setCustomerName(data.customerName || "");
+          setCustomerData({
+            name: data.customerName || "",
+            email: data.customerEmail || "",
+            document: data.customerDocument || "",
+            phone: data.customerPhone || "",
+          });
         }
       } catch (err) {
         console.error("Error fetching order:", err);
+      } finally {
+        setLoadingCustomer(false);
       }
     };
 
@@ -76,6 +94,12 @@ const OfertaEspecial = () => {
   ];
 
   const handleGeneratePix = async () => {
+    // Validate we have customer data
+    if (!customerData || !customerData.name || !customerData.email || !customerData.document || !customerData.phone) {
+      toast.error("Dados do cliente não disponíveis. Por favor, volte e tente novamente.");
+      return;
+    }
+
     setLoadingPayment(true);
     
     try {
@@ -91,10 +115,10 @@ const OfertaEspecial = () => {
         body: {
           amount: totalCents,
           customer: {
-            name: customerName || "Cliente Upsell",
-            email: "cliente@upsell.com",
-            document: "00000000000",
-            phone: "00000000000"
+            name: customerData.name,
+            email: customerData.email,
+            document: customerData.document,
+            phone: customerData.phone
           },
           items,
           expiresInMinutes: 30
@@ -313,7 +337,7 @@ const OfertaEspecial = () => {
             </div>
             
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              {customerName ? `${customerName}, pedimos desculpas!` : "Pedimos desculpas!"}
+              {customerData?.name ? `${customerData.name}, pedimos desculpas!` : "Pedimos desculpas!"}
             </h1>
             
             <p className="text-gray-600 text-sm leading-relaxed">

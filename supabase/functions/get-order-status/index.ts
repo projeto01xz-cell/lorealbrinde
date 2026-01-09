@@ -16,20 +16,38 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { externalId } = await req.json();
-
-    if (!externalId) {
+    let body: Record<string, unknown>;
+    try {
+      body = await req.json();
+    } catch {
       return new Response(
-        JSON.stringify({ error: "Missing externalId" }),
+        JSON.stringify({ error: "Invalid JSON" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("Fetching order status for:", externalId);
+    const externalId = body.externalId;
+
+    if (!externalId || typeof externalId !== 'string') {
+      return new Response(
+        JSON.stringify({ error: "Missing or invalid externalId" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate externalId format
+    if (externalId.length > 100 || !/^[a-zA-Z0-9_-]+$/.test(externalId)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid externalId format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Fetching order status for:", externalId.substring(0, 8) + "***");
 
     const { data, error } = await supabase
       .from("orders")
-      .select("status, customer_name")
+      .select("status, customer_name, customer_email, customer_document, customer_phone")
       .eq("external_id", externalId)
       .single();
 
@@ -41,13 +59,14 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Retornar apenas dados não sensíveis (primeiro nome e status)
-    const firstName = data.customer_name?.split(" ")[0] || "";
-
+    // Retornar dados do cliente para uso no upsell
     return new Response(
       JSON.stringify({ 
         status: data.status,
-        customerName: firstName
+        customerName: data.customer_name,
+        customerEmail: data.customer_email,
+        customerDocument: data.customer_document,
+        customerPhone: data.customer_phone,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
