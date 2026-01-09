@@ -88,11 +88,23 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
               }}
               className="relative mx-auto w-full max-w-sm my-6"
             >
+              {/* Background glow */}
               <div className="absolute inset-0 bg-white/10 rounded-full blur-3xl scale-75" />
+              
+              {/* Product image */}
               <img 
                 src={elseveProducts}
                 alt="Kit Elseve Collagen Lifter"
                 className="relative w-full h-auto object-contain drop-shadow-2xl"
+              />
+              
+              {/* Shadow below product */}
+              <motion.div 
+                className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[70%] h-8"
+                style={{
+                  background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 40%, transparent 70%)',
+                  filter: 'blur(8px)',
+                }}
               />
             </motion.div>
 
