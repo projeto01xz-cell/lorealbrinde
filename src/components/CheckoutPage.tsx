@@ -330,6 +330,21 @@ const CheckoutPage = ({
       });
 
       // Track sale async (não bloqueia o fluxo)
+      console.log("Calling track-utmify with:", {
+        orderId,
+        status: "pending",
+        customer: {
+          name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          document: formData.cpf
+        },
+        products: trackingProducts,
+        paymentMethod: "pix",
+        totalAmount: total,
+        utmParams
+      });
+      
       supabase.functions.invoke("track-utmify", {
         body: {
           orderId,
@@ -345,14 +360,15 @@ const CheckoutPage = ({
           totalAmount: total,
           utmParams
         }
-      }).then(({
-        error: trackError
-      }) => {
-        if (trackError) {
-          console.warn("Utmify tracking error:", trackError);
+      }).then((response) => {
+        console.log("Utmify tracking response:", response);
+        if (response.error) {
+          console.error("Utmify tracking error:", response.error);
         } else {
-          console.log("Sale tracked to Utmify");
+          console.log("Sale tracked to Utmify successfully:", response.data);
         }
+      }).catch((err) => {
+        console.error("Utmify tracking network error:", err);
       });
 
       // Facebook Pixel - Purchase
