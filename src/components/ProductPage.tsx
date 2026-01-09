@@ -1,109 +1,67 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  Shield, 
-  Truck, 
-  Gift, 
-  Star, 
-  Check, 
-  ChevronDown, 
-  ChevronUp,
-  ShoppingCart,
-  Users,
-  Package,
-  Search,
-  Menu,
-  X
-} from "lucide-react";
+import { Shield, Truck, Gift, Star, Check, ChevronDown, ChevronUp, ShoppingCart, Users, Search, Menu, X } from "lucide-react";
 import { motion } from "framer-motion";
 import productKitFull from "@/assets/product-kit-full.png";
 import lorealLogo from "@/assets/loreal-paris-logo.svg";
-
 interface ProductPageProps {
-  userData: { name: string; whatsapp: string; answers: string[] };
+  userData: {
+    name: string;
+    whatsapp: string;
+    answers: string[];
+  };
 }
-
-const faqs = [
-  {
-    question: "O produto é realmente grátis?",
-    answer: "Sim! O produto é 100% gratuito, você paga apenas o valor do frete para recebê-lo na sua casa."
-  },
-  {
-    question: "É confiável? Receberei meu produto mesmo?",
-    answer: "Com certeza! Todos os pedidos são processados e enviados normalmente. Temos diversos feedbacks de clientes satisfeitos."
-  },
-  {
-    question: "Por que o produto está sendo oferecido de graça?",
-    answer: "Essa é uma ação promocional de divulgação. Queremos que mais pessoas testem e conheçam a qualidade do nosso produto."
-  },
-  {
-    question: "Quantas vezes posso participar da promoção?",
-    answer: "Cada CPF pode participar apenas uma vez para garantir que mais pessoas tenham acesso ao brinde."
-  }
-];
-
-const reviews = [
-  {
-    name: "Maria S.",
-    initial: "M",
-    rating: 5,
-    text: "Recebi meu kit e estou amando! Meus fios nunca estiveram tão fortes!"
-  },
-  {
-    name: "Renata P.",
-    initial: "R",
-    rating: 5,
-    text: "💜 Não acreditei que estava levando pagando só o frete!"
-  },
-  {
-    name: "Ana C.",
-    initial: "A",
-    rating: 4,
-    text: "Recebi meu kit e estou amando! Meus fios nunca estiveram tão fortes!"
-  }
-];
-
-const benefits = [
-  "Tecnologia Avançada para Cabelos Mais Fortes e Saudáveis",
-  "Fórmulas Desenvolvidas por Especialistas em Tratamento Capilar",
-  "Tratamento Completo: Limpeza, Nutrição e Reparação Profunda",
-  "Resultados Visíveis Desde a Primeira Aplicação",
-  "Cuidado Profissional para Todos os Tipos de Cabelo"
-];
-
-const ProductPage = ({ userData }: ProductPageProps) => {
+const faqs = [{
+  question: "O produto é realmente grátis?",
+  answer: "Sim! O produto é 100% gratuito, você paga apenas o valor do frete para recebê-lo na sua casa."
+}, {
+  question: "É confiável? Receberei meu produto mesmo?",
+  answer: "Com certeza! Todos os pedidos são processados e enviados normalmente. Temos diversos feedbacks de clientes satisfeitos."
+}, {
+  question: "Por que o produto está sendo oferecido de graça?",
+  answer: "Essa é uma ação promocional de divulgação. Queremos que mais pessoas testem e conheçam a qualidade do nosso produto."
+}, {
+  question: "Quantas vezes posso participar da promoção?",
+  answer: "Cada CPF pode participar apenas uma vez para garantir que mais pessoas tenham acesso ao brinde."
+}];
+const reviews = [{
+  name: "Maria S.",
+  initial: "M",
+  rating: 5,
+  text: "Recebi meu kit e estou amando! Meus fios nunca estiveram tão fortes!"
+}, {
+  name: "Renata P.",
+  initial: "R",
+  rating: 5,
+  text: "💜 Não acreditei que estava levando pagando só o frete!"
+}, {
+  name: "Ana C.",
+  initial: "A",
+  rating: 4,
+  text: "Recebi meu kit e estou amando! Meus fios nunca estiveram tão fortes!"
+}];
+const benefits = ["Tecnologia Avançada para Cabelos Mais Fortes e Saudáveis", "Fórmulas Desenvolvidas por Especialistas em Tratamento Capilar", "Tratamento Completo: Limpeza, Nutrição e Reparação Profunda", "Resultados Visíveis Desde a Primeira Aplicação", "Cuidado Profissional para Todos os Tipos de Cabelo"];
+const ProductPage = ({
+  userData
+}: ProductPageProps) => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-
   const handleResgate = () => {
     window.open("https://wa.me/5511999999999?text=Olá! Quero resgatar meu kit Elseve Collagen Lifter!", "_blank");
   };
-
-  return (
-    <div className="min-h-[100svh] bg-white">
+  return <div className="min-h-[100svh] bg-white">
       {/* Header - Same as main page */}
       <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200">
         <div className="px-4 h-12 flex items-center justify-between max-w-screen-sm mx-auto">
-          <button 
-            aria-label="Buscar"
-            className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-purple-600 transition-colors -ml-1"
-          >
+          <button aria-label="Buscar" className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-purple-600 transition-colors -ml-1">
             <Search className="w-[18px] h-[18px]" />
           </button>
 
           <div className="absolute left-1/2 -translate-x-1/2">
-            <img 
-              src={lorealLogo}
-              alt="L'Oréal Paris"
-              className="h-4 w-auto"
-            />
+            <img src={lorealLogo} alt="L'Oréal Paris" className="h-4 w-auto" />
           </div>
 
-          <button 
-            aria-label="Menu"
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-purple-600 transition-colors -mr-1"
-          >
+          <button aria-label="Menu" onClick={() => setMenuOpen(!menuOpen)} className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-purple-600 transition-colors -mr-1">
             {menuOpen ? <X className="w-[18px] h-[18px]" /> : <Menu className="w-[18px] h-[18px]" />}
           </button>
         </div>
@@ -119,26 +77,16 @@ const ProductPage = ({ userData }: ProductPageProps) => {
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
             {/* Header Badges */}
             <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-4 py-3 flex items-center justify-between">
-              <span className="bg-orange-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
-                🏆 Mais Vendido
-              </span>
-              <span className="bg-white/20 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
-                📦 Pague só o frete
-              </span>
+              
+              
             </div>
 
             {/* Product Image */}
             <div className="relative bg-gradient-to-b from-purple-50 to-white p-4">
               {/* Discount Badge */}
-              <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10">
-                -100% OFF
-              </div>
               
-              <img 
-                src={productKitFull} 
-                alt="Kit Elseve Collagen Lifter" 
-                className="w-full"
-              />
+              
+              <img src={productKitFull} alt="Kit Elseve Collagen Lifter" className="w-full" />
             </div>
 
             {/* Product Info */}
@@ -153,42 +101,18 @@ const ProductPage = ({ userData }: ProductPageProps) => {
 
               {/* Rating */}
               <div className="flex items-center justify-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                ))}
+                {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
                 <span className="text-xs text-gray-500 ml-1.5">(312 avaliações)</span>
               </div>
 
               {/* Price */}
-              <div className="text-center py-2">
-                <p className="text-xs text-gray-400 line-through">R$ 89,90</p>
-                <p className="text-2xl font-black text-green-600">GRÁTIS</p>
-                <p className="text-xs text-gray-500 mt-0.5">+ frete</p>
-              </div>
+              
 
               {/* Trust Icons */}
-              <div className="flex justify-between px-2 py-3 bg-gray-50 rounded-xl">
-                <div className="flex flex-col items-center gap-1 flex-1">
-                  <Shield className="w-5 h-5 text-purple-600" />
-                  <span className="text-[10px] text-gray-600 font-medium">Compra Segura</span>
-                </div>
-                <div className="w-px bg-gray-200" />
-                <div className="flex flex-col items-center gap-1 flex-1">
-                  <Truck className="w-5 h-5 text-purple-600" />
-                  <span className="text-[10px] text-gray-600 font-medium">Entrega Rápida</span>
-                </div>
-                <div className="w-px bg-gray-200" />
-                <div className="flex flex-col items-center gap-1 flex-1">
-                  <Gift className="w-5 h-5 text-purple-600" />
-                  <span className="text-[10px] text-gray-600 font-medium">100% Grátis</span>
-                </div>
-              </div>
+              
 
               {/* CTA Button */}
-              <Button 
-                onClick={handleResgate}
-                className="w-full h-14 bg-green-500 hover:bg-green-600 text-white font-bold text-base rounded-xl shadow-lg shadow-green-500/30"
-              >
+              <Button onClick={handleResgate} className="w-full h-14 bg-green-500 hover:bg-green-600 text-white font-bold text-base rounded-xl shadow-lg shadow-green-500/30">
                 <ShoppingCart className="w-5 h-5 mr-2" />
                 RESGATAR AGORA
               </Button>
@@ -196,7 +120,7 @@ const ProductPage = ({ userData }: ProductPageProps) => {
               {/* Urgency */}
               <div className="text-center space-y-1">
                 <p className="text-xs text-orange-600 font-semibold flex items-center justify-center gap-1">
-                  <Package className="w-3.5 h-3.5" />
+                  
                   Apenas 7 unidades em estoque
                 </p>
                 <p className="text-[10px] text-gray-400">
@@ -205,9 +129,7 @@ const ProductPage = ({ userData }: ProductPageProps) => {
               </div>
 
               {/* Period */}
-              <p className="text-[10px] text-gray-400 text-center leading-relaxed pt-2 border-t border-gray-100">
-                Período: 15/12/2025 até 08/01/2026 (horário de Brasília)
-              </p>
+              <p className="text-[10px] text-gray-400 text-center leading-relaxed pt-2 border-t border-gray-100">Período: 09/01/2026 até 11/01/2026 (horário de Brasília)</p>
             </div>
           </div>
         </div>
@@ -218,9 +140,7 @@ const ProductPage = ({ userData }: ProductPageProps) => {
         <div className="max-w-sm mx-auto text-center">
           <p className="text-xs text-gray-500 mb-2">Formas de pagamento:</p>
           <div className="flex justify-center gap-3">
-            {["💳", "📱", "🏦", "💰"].map((icon, i) => (
-              <span key={i} className="text-lg bg-gray-50 w-10 h-10 rounded-lg flex items-center justify-center">{icon}</span>
-            ))}
+            {["💳", "📱", "🏦", "💰"].map((icon, i) => <span key={i} className="text-lg bg-gray-50 w-10 h-10 rounded-lg flex items-center justify-center">{icon}</span>)}
           </div>
           <p className="text-xs text-green-600 mt-3 flex items-center justify-center gap-1 font-medium">
             <Truck className="w-3.5 h-3.5" />
@@ -252,12 +172,10 @@ const ProductPage = ({ userData }: ProductPageProps) => {
             Por que escolher L'Oréal Paris Elseve?
           </h2>
           <div className="space-y-3">
-            {benefits.map((benefit, index) => (
-              <div key={index} className="flex items-start gap-2">
+            {benefits.map((benefit, index) => <div key={index} className="flex items-start gap-2">
                 <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                 <span className="text-sm text-gray-700">{benefit}</span>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </section>
@@ -269,8 +187,7 @@ const ProductPage = ({ userData }: ProductPageProps) => {
             O que nossos clientes dizem
           </h2>
           <div className="space-y-4">
-            {reviews.map((review, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg border border-gray-200">
+            {reviews.map((review, index) => <div key={index} className="bg-white p-4 rounded-lg border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-sm font-bold text-gray-600">
                     {review.initial}
@@ -278,18 +195,12 @@ const ProductPage = ({ userData }: ProductPageProps) => {
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{review.name}</p>
                     <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          className={`w-3 h-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
-                        />
-                      ))}
+                      {[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />)}
                     </div>
                   </div>
                 </div>
                 <p className="text-sm text-gray-600 italic">"{review.text}"</p>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </section>
@@ -301,26 +212,15 @@ const ProductPage = ({ userData }: ProductPageProps) => {
             Perguntas Frequentes
           </h2>
           <div className="space-y-2">
-            {faqs.map((faq, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full flex items-center justify-between p-3 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
-                >
+            {faqs.map((faq, index) => <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
+                <button onClick={() => setOpenFaq(openFaq === index ? null : index)} className="w-full flex items-center justify-between p-3 text-left bg-gray-50 hover:bg-gray-100 transition-colors">
                   <span className="text-sm font-semibold text-gray-900">{faq.question}</span>
-                  {openFaq === index ? (
-                    <ChevronUp className="w-4 h-4 text-gray-500" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-gray-500" />
-                  )}
+                  {openFaq === index ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
                 </button>
-                {openFaq === index && (
-                  <div className="p-3 bg-white border-t border-gray-200">
+                {openFaq === index && <div className="p-3 bg-white border-t border-gray-200">
                     <p className="text-sm text-gray-600">{faq.answer}</p>
-                  </div>
-                )}
-              </div>
-            ))}
+                  </div>}
+              </div>)}
           </div>
         </div>
       </section>
@@ -328,10 +228,7 @@ const ProductPage = ({ userData }: ProductPageProps) => {
       {/* Sticky CTA */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
         <div className="max-w-sm mx-auto">
-          <Button 
-            onClick={handleResgate}
-            className="w-full h-12 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full"
-          >
+          <Button onClick={handleResgate} className="w-full h-12 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full">
             <ShoppingCart className="w-4 h-4 mr-2" />
             RESGATAR AGORA
           </Button>
@@ -340,8 +237,6 @@ const ProductPage = ({ userData }: ProductPageProps) => {
 
       {/* Bottom padding for sticky button */}
       <div className="h-20" />
-    </div>
-  );
+    </div>;
 };
-
 export default ProductPage;
