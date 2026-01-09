@@ -2,30 +2,47 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, X, Percent, ShoppingBag, CheckCircle, Frown } from "lucide-react";
+import { Search, Menu, X, Percent, ShoppingBag, CheckCircle, Frown, Loader2, Copy, Check, Clock, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 import lorealLogo from "@/assets/loreal-paris-logo.svg";
 import serumOleoExtraordinario from "@/assets/serum-oleo-extraordinario.png";
 import serumLisoSonhos from "@/assets/serum-liso-sonhos.png";
 import leaveInCicatriRenov from "@/assets/leave-in-cicatri-renov.png";
+
+interface PixData {
+  payload: string;
+  expiresAt?: string;
+}
 
 const OfertaEspecial = () => {
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get("order");
   const [menuOpen, setMenuOpen] = useState(false);
   const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerDocument, setCustomerDocument] = useState("");
+  const [loadingPayment, setLoadingPayment] = useState(false);
+  const [pixData, setPixData] = useState<PixData | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const totalPrice = 47.10;
 
   useEffect(() => {
-    if (!orderId) return;
+    if (!orderId || orderId === "null") return;
 
     const fetchOrder = async () => {
       const { data } = await supabase
         .from("orders")
-        .select("customer_name")
+        .select("customer_name, customer_email, customer_phone, customer_document")
         .eq("external_id", orderId)
         .single();
 
       if (data) {
         setCustomerName(data.customer_name?.split(" ")[0] || "");
+        setCustomerEmail(data.customer_email || "");
+        setCustomerPhone(data.customer_phone || "");
+        setCustomerDocument(data.customer_document || "");
       }
     };
 
@@ -61,6 +78,197 @@ const OfertaEspecial = () => {
       discount: 82,
     },
   ];
+
+  const handleGeneratePix = async () => {
+    setLoadingPayment(true);
+    
+    try {
+      const items = products.map(p => ({
+        title: p.name,
+        quantity: 1,
+        unitPrice: Math.round(p.discountPrice * 100)
+      }));
+
+      const totalCents = Math.round(totalPrice * 100);
+
+      const { data, error } = await supabase.functions.invoke("create-pix-payment", {
+        body: {
+          amount: totalCents,
+          customer: {
+            name: customerName || "Cliente Upsell",
+            email: customerEmail || "cliente@email.com",
+            document: customerDocument || "00000000000",
+            phone: customerPhone || "00000000000"
+          },
+          items,
+          expiresInMinutes: 30
+        }
+      });
+
+      if (error) {
+        console.error("Payment error:", error);
+        toast.error("Erro ao gerar pagamento Pix");
+        return;
+      }
+
+      setPixData({
+        payload: data.pix?.payload || "",
+        expiresAt: data.pix?.expiresAt
+      });
+
+      // Facebook Pixel - Purchase Upsell
+      if (typeof window !== 'undefined' && (window as any).fbq) {
+        (window as any).fbq('track', 'Purchase', {
+          content_name: 'Upsell - Kit Completo Elseve',
+          content_category: 'Hair Care Upsell',
+          content_ids: products.map(p => p.id),
+          num_items: 3,
+          currency: 'BRL',
+          value: totalPrice
+        });
+      }
+    } catch (err) {
+      console.error("Payment error:", err);
+      toast.error("Erro ao processar pagamento");
+    } finally {
+      setLoadingPayment(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    if (pixData?.payload) {
+      await navigator.clipboard.writeText(pixData.payload);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    }
+  };
+
+  // Se já gerou o PIX, mostrar tela de pagamento
+  if (pixData) {
+    return (
+      <div className="min-h-[100svh] bg-white pb-8">
+        {/* Promo Banner */}
+        <div className="fixed top-0 left-0 right-0 z-[60] bg-black py-2 px-4">
+          <div className="flex items-center justify-center">
+            <span className="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider">
+              Finalize seu Pagamento
+            </span>
+          </div>
+        </div>
+
+        {/* Header */}
+        <header className="fixed top-[36px] left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200">
+          <div className="px-4 h-12 flex items-center justify-between max-w-screen-sm mx-auto">
+            <button
+              aria-label="Buscar"
+              className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-purple-600 transition-colors -ml-1"
+            >
+              <Search className="w-[18px] h-[18px]" />
+            </button>
+
+            <div className="absolute left-1/2 -translate-x-1/2">
+              <img src={lorealLogo} alt="L'Oréal Paris" className="h-4 w-auto" />
+            </div>
+
+            <button
+              aria-label="Menu"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-purple-600 transition-colors -mr-1"
+            >
+              {menuOpen ? <X className="w-[18px] h-[18px]" /> : <Menu className="w-[18px] h-[18px]" />}
+            </button>
+          </div>
+        </header>
+
+        {/* Spacer */}
+        <div className="h-[84px]" />
+
+        <div className="px-4 py-6 max-w-sm mx-auto space-y-4">
+          {/* Success Message */}
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <ShieldCheck className="w-6 h-6 text-green-600" />
+            </div>
+            <h1 className="text-lg font-bold text-gray-900 mb-1">
+              Pedido Gerado com Sucesso!
+            </h1>
+            <p className="text-sm text-gray-600">
+              Pague agora para garantir seus produtos com desconto.
+            </p>
+          </div>
+
+          {/* Payment Info */}
+          <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-sm text-gray-900">Pagamento via Pix</h2>
+              <div className="flex items-center gap-1 text-orange-500">
+                <Clock className="w-4 h-4" />
+                <span className="text-xs font-medium">Expira em 30 min</span>
+              </div>
+            </div>
+
+            <div className="text-center mb-4">
+              <p className="text-sm text-gray-600 mb-1">Valor a pagar</p>
+              <p className="text-3xl font-black text-green-600">
+                R$ {totalPrice.toFixed(2).replace(".", ",")}
+              </p>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+              <p className="text-xs text-gray-500 mb-2 font-medium">Pix Copia e Cola</p>
+              <div className="bg-white border border-gray-200 rounded-lg p-3 break-all">
+                <p className="text-xs text-gray-700 font-mono leading-relaxed">
+                  {pixData.payload}
+                </p>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleCopy}
+              className={`w-full h-12 font-bold rounded-lg transition-all ${
+                copied
+                  ? "bg-green-500 hover:bg-green-600"
+                  : "bg-purple-600 hover:bg-purple-700"
+              } text-white`}
+            >
+              {copied ? (
+                <>
+                  <Check className="w-5 h-5 mr-2" />
+                  CÓDIGO COPIADO!
+                </>
+              ) : (
+                <>
+                  <Copy className="w-5 h-5 mr-2" />
+                  COPIAR CÓDIGO PIX
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Products Summary */}
+          <div className="bg-gray-50 rounded-xl p-4">
+            <h3 className="font-bold text-sm text-gray-900 mb-3">Seus produtos:</h3>
+            <div className="space-y-2">
+              {products.map(product => (
+                <div key={product.id} className="flex justify-between text-sm">
+                  <span className="text-gray-600">{product.name}</span>
+                  <span className="font-medium text-gray-900">R$ {product.discountPrice.toFixed(2).replace(".", ",")}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Security Note */}
+          <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+            <ShieldCheck className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-blue-800">
+              Pagamento 100% seguro. Após a confirmação, você receberá um e-mail com os detalhes do seu pedido.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[100svh] bg-white pb-32">
@@ -191,7 +399,7 @@ const OfertaEspecial = () => {
             </div>
             <div className="text-right">
               <p className="text-xs opacity-80">Pague apenas</p>
-              <p className="text-3xl font-black">R$ 47,10</p>
+              <p className="text-3xl font-black">R$ {totalPrice.toFixed(2).replace(".", ",")}</p>
             </div>
           </div>
           <div className="border-t border-white/30 pt-3 text-center">
@@ -204,14 +412,21 @@ const OfertaEspecial = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
         <div className="max-w-md mx-auto">
           <Button
-            className="w-full h-14 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold text-base rounded-xl shadow-lg"
-            onClick={() => {
-              // Aqui você pode redirecionar para um checkout com os produtos
-              console.log("Comprar produtos com desconto");
-            }}
+            className="w-full h-14 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold text-base rounded-xl shadow-lg disabled:opacity-70"
+            onClick={handleGeneratePix}
+            disabled={loadingPayment}
           >
-            <ShoppingBag className="w-5 h-5 mr-2" />
-            APROVEITAR DESCONTO AGORA
+            {loadingPayment ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                GERANDO PIX...
+              </>
+            ) : (
+              <>
+                <ShoppingBag className="w-5 h-5 mr-2" />
+                APROVEITAR DESCONTO AGORA
+              </>
+            )}
           </Button>
           <p className="text-center text-xs text-gray-500 mt-2">
             Oferta válida apenas nesta página
