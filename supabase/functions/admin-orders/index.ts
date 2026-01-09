@@ -157,7 +157,7 @@ const handler = async (req: Request): Promise<Response> => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${utmifyToken}`,
+          "x-api-token": utmifyToken,
         },
         body: JSON.stringify(utmifyPayload),
       });
