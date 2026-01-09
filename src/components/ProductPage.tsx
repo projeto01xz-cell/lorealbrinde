@@ -10,6 +10,7 @@ interface ProductPageProps {
     whatsapp: string;
     answers: string[];
   };
+  onCheckout: () => void;
 }
 const faqs = [{
   question: "O produto é realmente grátis?",
@@ -42,12 +43,13 @@ const reviews = [{
 }];
 const benefits = ["Tecnologia Avançada para Cabelos Mais Fortes e Saudáveis", "Fórmulas Desenvolvidas por Especialistas em Tratamento Capilar", "Tratamento Completo: Limpeza, Nutrição e Reparação Profunda", "Resultados Visíveis Desde a Primeira Aplicação", "Cuidado Profissional para Todos os Tipos de Cabelo"];
 const ProductPage = ({
-  userData
+  userData,
+  onCheckout
 }: ProductPageProps) => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const handleResgate = () => {
-    window.open("https://wa.me/5511999999999?text=Olá! Quero resgatar meu kit Elseve Collagen Lifter!", "_blank");
+    onCheckout();
   };
   return <div className="min-h-[100svh] bg-white">
       {/* Promo Banner */}

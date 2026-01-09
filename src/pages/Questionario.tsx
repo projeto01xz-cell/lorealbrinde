@@ -2,8 +2,9 @@ import { useState, useRef } from "react";
 import Header from "@/components/Header";
 import QuizForm from "@/components/QuizForm";
 import ProductPage from "@/components/ProductPage";
+import CheckoutPage from "@/components/CheckoutPage";
 
-type Step = "quiz" | "product";
+type Step = "quiz" | "product" | "checkout";
 
 const Questionario = () => {
   const [currentStep, setCurrentStep] = useState<Step>("quiz");
@@ -21,6 +22,11 @@ const Questionario = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleGoToCheckout = () => {
+    setCurrentStep("checkout");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="min-h-[100svh] bg-background overflow-x-hidden flex flex-col">
       {currentStep === "quiz" && <Header />}
@@ -31,7 +37,11 @@ const Questionario = () => {
         )}
         
         {currentStep === "product" && userData && (
-          <ProductPage userData={userData} />
+          <ProductPage userData={userData} onCheckout={handleGoToCheckout} />
+        )}
+
+        {currentStep === "checkout" && userData && (
+          <CheckoutPage userData={userData} />
         )}
       </main>
       
