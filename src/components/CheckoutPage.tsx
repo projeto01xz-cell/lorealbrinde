@@ -9,6 +9,9 @@ import { toast } from "sonner";
 import { getUtmifyParams, saveUtmParams } from "@/lib/utmify";
 import lorealLogo from "@/assets/loreal-paris-logo.svg";
 import productKitFull from "@/assets/product-kit-full.png";
+import serumOleoExtraordinario from "@/assets/serum-oleo-extraordinario.png";
+import serumLisoSonhos from "@/assets/serum-liso-sonhos.png";
+import leaveInCicatriRenov from "@/assets/leave-in-cicatri-renov.png";
 interface CheckoutPageProps {
   userData: {
     name: string;
@@ -41,25 +44,25 @@ const shippingOptions = [{
 }];
 const orderBumps = [{
   id: "bump1",
-  name: "Sérum Reparador Intensivo",
-  description: "Tratamento noturno com vitamina E para cabelos danificados",
-  image: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=200&h=200&fit=crop",
-  oldPrice: 89.90,
-  promoPrice: 29.90
+  name: "Sérum Óleo Extraordinário 100ml",
+  description: "Óleo de flores preciosas. Nutre instantaneamente sem pesar.",
+  image: serumOleoExtraordinario,
+  oldPrice: 39.16,
+  promoPrice: 18.40
 }, {
   id: "bump2",
-  name: "Máscara Hidratação Profunda",
-  description: "Máscara capilar com ácido hialurônico para hidratação extrema",
-  image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=200&h=200&fit=crop",
-  oldPrice: 79.90,
-  promoPrice: 24.90
+  name: "Sérum Liso dos Sonhos 100ml",
+  description: "Cabelos à prova de umidade & lisos por 1 semana. Sem química.",
+  image: serumLisoSonhos,
+  oldPrice: 31.99,
+  promoPrice: 16.30
 }, {
   id: "bump3",
-  name: "Óleo Finalizador Premium",
-  description: "Óleo multifuncional para brilho e proteção térmica",
-  image: "https://images.unsplash.com/photo-1599305090598-fe179d501227?w=200&h=200&fit=crop",
-  oldPrice: 69.90,
-  promoPrice: 19.90
+  name: "Leave-In Cicatri Renov 100ml",
+  description: "12% complexo reparador com micro queratina. Repara a fibra capilar.",
+  image: leaveInCicatriRenov,
+  oldPrice: 28.45,
+  promoPrice: 12.40
 }];
 
 // Máscaras
