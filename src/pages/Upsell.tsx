@@ -19,8 +19,9 @@ const Upsell = () => {
   const [customerName, setCustomerName] = useState("");
 
   useEffect(() => {
+    // Se não tem orderId, mostrar estado de loading como demo
     if (!orderId) {
-      navigate("/");
+      setStep("loading");
       return;
     }
 
