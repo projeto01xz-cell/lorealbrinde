@@ -58,8 +58,8 @@ const Hero = ({
         <SparkleParticles />
         
         {/* Sticky content container - mobile optimized */}
-        <div className="sticky top-0 min-h-[100svh] flex flex-col items-center justify-center px-5 py-8 overflow-hidden">
-          <div className="w-full max-w-sm mx-auto text-center space-y-4 relative z-10">
+        <div className="sticky top-0 h-[100svh] flex flex-col items-center justify-center px-5 overflow-hidden">
+          <div className="w-full max-w-sm mx-auto text-center space-y-3 relative z-10">
             
             {/* Initial headline - always visible */}
             <motion.div style={{
