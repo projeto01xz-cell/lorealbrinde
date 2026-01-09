@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Search, Menu, X, Truck, Package, Zap } from "lucide-react";
+import { Search, Menu, X, Truck, Package, Zap, Loader2 } from "lucide-react";
 import lorealLogo from "@/assets/loreal-paris-logo.svg";
 import productKitFull from "@/assets/product-kit-full.png";
 
@@ -39,6 +39,61 @@ const shippingOptions = [
   },
 ];
 
+// Máscaras
+const maskCPF = (value: string) => {
+  return value
+    .replace(/\D/g, "")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})/, "$1-$2")
+    .replace(/(-\d{2})\d+?$/, "$1");
+};
+
+const maskCEP = (value: string) => {
+  return value
+    .replace(/\D/g, "")
+    .replace(/(\d{5})(\d)/, "$1-$2")
+    .replace(/(-\d{3})\d+?$/, "$1");
+};
+
+const maskPhone = (value: string) => {
+  return value
+    .replace(/\D/g, "")
+    .replace(/(\d{2})(\d)/, "($1) $2")
+    .replace(/(\d{5})(\d)/, "$1-$2")
+    .replace(/(-\d{4})\d+?$/, "$1");
+};
+
+// Validações
+const validateCPF = (cpf: string): boolean => {
+  const cleanCPF = cpf.replace(/\D/g, "");
+  if (cleanCPF.length !== 11) return false;
+  if (/^(\d)\1+$/.test(cleanCPF)) return false;
+  
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(cleanCPF.charAt(i)) * (10 - i);
+  }
+  let remainder = (sum * 10) % 11;
+  if (remainder === 10 || remainder === 11) remainder = 0;
+  if (remainder !== parseInt(cleanCPF.charAt(9))) return false;
+  
+  sum = 0;
+  for (let i = 0; i < 10; i++) {
+    sum += parseInt(cleanCPF.charAt(i)) * (11 - i);
+  }
+  remainder = (sum * 10) % 11;
+  if (remainder === 10 || remainder === 11) remainder = 0;
+  if (remainder !== parseInt(cleanCPF.charAt(10))) return false;
+  
+  return true;
+};
+
+const validateCEP = (cep: string): boolean => {
+  const cleanCEP = cep.replace(/\D/g, "");
+  return cleanCEP.length === 8;
+};
+
 const CheckoutPage = ({ userData }: CheckoutPageProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -56,22 +111,92 @@ const CheckoutPage = ({ userData }: CheckoutPageProps) => {
   });
   const [selectedShipping, setSelectedShipping] = useState("");
   const [addressFilled, setAddressFilled] = useState(false);
+  const [loadingCep, setLoadingCep] = useState(false);
+  const [errors, setErrors] = useState<{ cpf?: string; cep?: string }>({});
+
+  const checkAddressFilled = (form: typeof formData) => {
+    const requiredAddressFields = ["cep", "street", "number", "neighborhood", "city", "state"];
+    return requiredAddressFields.every(
+      (field) => form[field as keyof typeof form]?.trim() !== ""
+    );
+  };
+
+  const fetchAddress = async (cep: string) => {
+    const cleanCEP = cep.replace(/\D/g, "");
+    if (cleanCEP.length !== 8) return;
+
+    setLoadingCep(true);
+    setErrors((prev) => ({ ...prev, cep: undefined }));
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`);
+      const data = await response.json();
+
+      if (data.erro) {
+        setErrors((prev) => ({ ...prev, cep: "CEP não encontrado" }));
+        return;
+      }
+
+      const updatedForm = {
+        ...formData,
+        cep: maskCEP(cleanCEP),
+        street: data.logradouro || "",
+        neighborhood: data.bairro || "",
+        city: data.localidade || "",
+        state: data.uf || "",
+      };
+
+      setFormData(updatedForm);
+      setAddressFilled(checkAddressFilled(updatedForm));
+    } catch {
+      setErrors((prev) => ({ ...prev, cep: "Erro ao buscar CEP" }));
+    } finally {
+      setLoadingCep(false);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    let maskedValue = value;
 
-    // Check if address is filled
-    const requiredAddressFields = ["cep", "street", "number", "neighborhood", "city", "state"];
-    const updatedForm = { ...formData, [name]: value };
-    const isAddressFilled = requiredAddressFields.every(
-      (field) => updatedForm[field as keyof typeof updatedForm]?.trim() !== ""
-    );
-    setAddressFilled(isAddressFilled);
+    // Aplicar máscaras
+    if (name === "cpf") {
+      maskedValue = maskCPF(value);
+      if (maskedValue.replace(/\D/g, "").length === 11) {
+        if (!validateCPF(maskedValue)) {
+          setErrors((prev) => ({ ...prev, cpf: "CPF inválido" }));
+        } else {
+          setErrors((prev) => ({ ...prev, cpf: undefined }));
+        }
+      } else {
+        setErrors((prev) => ({ ...prev, cpf: undefined }));
+      }
+    } else if (name === "cep") {
+      maskedValue = maskCEP(value);
+      const cleanCEP = maskedValue.replace(/\D/g, "");
+      if (cleanCEP.length === 8) {
+        fetchAddress(cleanCEP);
+      }
+    } else if (name === "phone") {
+      maskedValue = maskPhone(value);
+    }
+
+    const updatedForm = { ...formData, [name]: maskedValue };
+    setFormData(updatedForm);
+    setAddressFilled(checkAddressFilled(updatedForm));
   };
 
   const handleSubmit = () => {
     if (!selectedShipping) return;
+    if (!validateCPF(formData.cpf)) {
+      setErrors((prev) => ({ ...prev, cpf: "CPF inválido" }));
+      return;
+    }
+    if (!validateCEP(formData.cep)) {
+      setErrors((prev) => ({ ...prev, cep: "CEP inválido" }));
+      return;
+    }
+
     const shipping = shippingOptions.find((s) => s.id === selectedShipping);
     const message = `Olá! Quero finalizar meu pedido do Kit Elseve Collagen Lifter!\n\nDados:\nNome: ${formData.fullName}\nEmail: ${formData.email}\nCPF: ${formData.cpf}\nTelefone: ${formData.phone}\n\nEndereço:\n${formData.street}, ${formData.number}${formData.complement ? ` - ${formData.complement}` : ""}\n${formData.neighborhood}\n${formData.city} - ${formData.state}\nCEP: ${formData.cep}\n\nFrete: ${shipping?.name} - R$ ${shipping?.price.toFixed(2)}`;
     window.open(`https://wa.me/5511999999999?text=${encodeURIComponent(message)}`, "_blank");
@@ -184,8 +309,11 @@ const CheckoutPage = ({ userData }: CheckoutPageProps) => {
                   value={formData.cpf}
                   onChange={handleInputChange}
                   placeholder="000.000.000-00"
-                  className="mt-1 h-11"
+                  className={`mt-1 h-11 ${errors.cpf ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                 />
+                {errors.cpf && (
+                  <p className="text-[10px] text-red-500 mt-1">{errors.cpf}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="phone" className="text-xs text-gray-600">
@@ -212,14 +340,22 @@ const CheckoutPage = ({ userData }: CheckoutPageProps) => {
               <Label htmlFor="cep" className="text-xs text-gray-600">
                 CEP
               </Label>
-              <Input
-                id="cep"
-                name="cep"
-                value={formData.cep}
-                onChange={handleInputChange}
-                placeholder="00000-000"
-                className="mt-1 h-11"
-              />
+              <div className="relative">
+                <Input
+                  id="cep"
+                  name="cep"
+                  value={formData.cep}
+                  onChange={handleInputChange}
+                  placeholder="00000-000"
+                  className={`mt-1 h-11 ${errors.cep ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                />
+                {loadingCep && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 w-4 h-4 animate-spin text-gray-400" />
+                )}
+              </div>
+              {errors.cep && (
+                <p className="text-[10px] text-red-500 mt-1">{errors.cep}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="street" className="text-xs text-gray-600">
@@ -365,7 +501,7 @@ const CheckoutPage = ({ userData }: CheckoutPageProps) => {
         <div className="max-w-sm mx-auto">
           <Button
             onClick={handleSubmit}
-            disabled={!addressFilled || !selectedShipping}
+            disabled={!addressFilled || !selectedShipping || !!errors.cpf || !!errors.cep}
             className="w-full h-12 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-lg"
           >
             FINALIZAR PEDIDO
