@@ -118,13 +118,38 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
               />
             </motion.div>
 
-            {/* Badge - appears after product */}
+            {/* Confetti celebration text */}
             <motion.div 
               style={{ opacity: badgeOpacity, y: badgeY }} 
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-medium border border-white/20"
+              className="relative"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              Vagas Limitadas
+              {/* Confetti particles */}
+              {[...Array(12)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-2 h-2 rounded-sm"
+                  style={{
+                    background: ['#FFD700', '#FF6B6B', '#4ECDC4', '#A855F7', '#F472B6', '#34D399'][i % 6],
+                    left: `${10 + (i * 7)}%`,
+                    top: '-10px',
+                  }}
+                  animate={{
+                    y: [0, 30, 60],
+                    x: [0, (i % 2 === 0 ? 10 : -10), (i % 2 === 0 ? -5 : 5)],
+                    rotate: [0, 180, 360],
+                    opacity: [1, 1, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    delay: i * 0.15,
+                    ease: "easeOut"
+                  }}
+                />
+              ))}
+              <p className="text-white font-semibold text-lg drop-shadow-lg">
+                🎉 Vamos distribuir o brinde hoje! 🎉
+              </p>
             </motion.div>
 
             {/* Subheadline */}
@@ -145,7 +170,7 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
                 size="lg" 
                 className="w-full bg-white text-[hsl(270_50%_35%)] hover:bg-white/95 shadow-xl font-semibold text-base h-14 rounded-xl"
               >
-                Começar Questionário
+                Receber o meu brinde
                 <ChevronDown className="w-5 h-5 ml-1" />
               </Button>
             </motion.div>
