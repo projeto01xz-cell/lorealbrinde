@@ -1,6 +1,5 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import HowItWorks from "@/components/HowItWorks";
 import { useNavigate } from "react-router-dom";
 
 const Index = () => {
@@ -14,7 +13,6 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <Hero onStartQuiz={handleStartQuiz} />
-      <HowItWorks />
       
       {/* Footer */}
       <footer className="py-6 px-4 border-t border-border/50 bg-secondary/20">
