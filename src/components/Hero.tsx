@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
-import productKit from "@/assets/product-kit.png";
+import productKit from "@/assets/product-kit.jpg";
 
 interface HeroProps {
   onStartQuiz: () => void;
@@ -18,12 +18,12 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
       
       <div className="w-full max-w-md mx-auto text-center space-y-6 animate-fade-up">
         {/* Product Image */}
-        <div className="relative mx-auto w-56 h-56 mb-8">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-2xl" />
+        <div className="relative mx-auto w-full max-w-xs mb-6">
+          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(270_30%_60%/0.3)] to-transparent rounded-3xl blur-2xl" />
           <img 
             src={productKit}
-            alt="Kit de Lançamento"
-            className="relative w-full h-full object-contain drop-shadow-2xl"
+            alt="Kit Elseve Collagen Lifter"
+            className="relative w-full h-auto object-cover rounded-2xl shadow-xl"
           />
         </div>
         
