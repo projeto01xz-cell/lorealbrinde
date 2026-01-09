@@ -183,10 +183,20 @@ const OfertaEspecial = () => {
         </div>
 
         {/* Total Savings */}
-        <div className="mt-6 bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white text-center">
-          <p className="text-sm opacity-90 mb-1">Economia total comprando os 3:</p>
-          <p className="text-2xl font-black">R$ 192,60</p>
-          <p className="text-xs opacity-80 mt-1">Você pagaria R$ 239,70 | Pague apenas R$ 47,10</p>
+        <div className="mt-6 bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-5 text-white">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-xs opacity-80">Você pagaria</p>
+              <p className="text-lg line-through opacity-70">R$ 239,70</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs opacity-80">Pague apenas</p>
+              <p className="text-3xl font-black">R$ 47,10</p>
+            </div>
+          </div>
+          <div className="border-t border-white/30 pt-3 text-center">
+            <p className="text-sm font-semibold">Economia total: <span className="font-black">R$ 192,60</span></p>
+          </div>
         </div>
       </div>
 
