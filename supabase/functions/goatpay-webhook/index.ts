@@ -125,7 +125,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Se foi pago, enviar tracking de aprovação para Utmify
     if (orderStatus === "paid" && data) {
-      const utmifyToken = Deno.env.get("UTMIFY_TOKEN");
+      const utmifyToken = Deno.env.get("UTMIFY_TOKEN")?.trim();
       
       if (utmifyToken) {
         try {

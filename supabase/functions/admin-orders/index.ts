@@ -101,7 +101,7 @@ const handler = async (req: Request): Promise<Response> => {
         );
       }
 
-      const utmifyToken = Deno.env.get("UTMIFY_TOKEN");
+      const utmifyToken = Deno.env.get("UTMIFY_TOKEN")?.trim();
       
       if (!utmifyToken) {
         return new Response(
@@ -109,6 +109,13 @@ const handler = async (req: Request): Promise<Response> => {
           { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
+
+      // Log token format for debugging (first/last 4 chars only)
+      console.log("UTMify token format check:", {
+        length: utmifyToken.length,
+        startsWithBearer: utmifyToken.toLowerCase().startsWith("bearer"),
+        preview: `${utmifyToken.substring(0, 4)}...${utmifyToken.substring(utmifyToken.length - 4)}`
+      });
 
       // Determine status for UTMify
       let utmifyStatus = "pending";
