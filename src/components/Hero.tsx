@@ -77,7 +77,7 @@ const Hero = ({
               </motion.div>
             </motion.div>
 
-            {/* Product - reveals on scroll */}
+            {/* Product - reveals on scroll with floating effect */}
             <motion.div style={{
             y: productY,
             opacity: productOpacity,
@@ -86,14 +86,38 @@ const Hero = ({
               {/* Background glow */}
               <div className="absolute inset-0 bg-white/10 rounded-full blur-3xl scale-90" />
               
-              {/* Product image */}
-              <img src={elseveProducts} alt="Kit Elseve Collagen Lifter" className="relative w-full h-auto object-contain drop-shadow-2xl" />
+              {/* Product image with floating animation */}
+              <motion.img 
+                src={elseveProducts} 
+                alt="Kit Elseve Collagen Lifter" 
+                className="relative w-full h-auto object-contain drop-shadow-2xl"
+                animate={{
+                  y: [0, -8, 0],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
               
-              {/* Shadow below product */}
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[65%] h-6" style={{
-              background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.15) 45%, transparent 75%)',
-              filter: 'blur(6px)'
-            }} />
+              {/* Shadow below product - also animates with floating */}
+              <motion.div 
+                className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[65%] h-6"
+                style={{
+                  background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.15) 45%, transparent 75%)',
+                  filter: 'blur(6px)'
+                }}
+                animate={{
+                  scale: [1, 0.9, 1],
+                  opacity: [1, 0.7, 1],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
             </motion.div>
 
             {/* Badge - appears after product */}
