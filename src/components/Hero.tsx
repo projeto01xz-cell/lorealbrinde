@@ -118,39 +118,13 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
               />
             </motion.div>
 
-            {/* Confetti celebration text */}
-            <motion.div 
+            {/* Release date highlight */}
+            <motion.p 
               style={{ opacity: badgeOpacity, y: badgeY }} 
-              className="relative"
+              className="text-white text-base drop-shadow-lg"
             >
-              {/* Confetti particles */}
-              {[...Array(12)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-2 h-2 rounded-sm"
-                  style={{
-                    background: ['#FFD700', '#FF6B6B', '#4ECDC4', '#A855F7', '#F472B6', '#34D399'][i % 6],
-                    left: `${10 + (i * 7)}%`,
-                    top: '-10px',
-                  }}
-                  animate={{
-                    y: [0, 30, 60],
-                    x: [0, (i % 2 === 0 ? 10 : -10), (i % 2 === 0 ? -5 : 5)],
-                    rotate: [0, 180, 360],
-                    opacity: [1, 1, 0],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    delay: i * 0.15,
-                    ease: "easeOut"
-                  }}
-                />
-              ))}
-              <p className="text-white font-semibold text-lg drop-shadow-lg">
-                🎉 Vamos distribuir o brinde hoje! 🎉
-              </p>
-            </motion.div>
+              Brinde liberado hoje, <span className="font-bold text-lg bg-white/20 px-2 py-0.5 rounded">09/01</span>
+            </motion.p>
 
             {/* Subheadline */}
             <motion.p 
@@ -163,7 +137,7 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
             {/* CTA Button - appears last */}
             <motion.div 
               style={{ opacity: buttonOpacity, y: buttonY }} 
-              className="pt-2 px-4"
+              className="pt-2 px-4 space-y-2"
             >
               <Button 
                 onClick={onStartQuiz} 
@@ -173,6 +147,7 @@ const Hero = ({ onStartQuiz }: HeroProps) => {
                 Receber o meu brinde
                 <ChevronDown className="w-5 h-5 ml-1" />
               </Button>
+              <p className="text-white/70 text-xs">Últimas unidades disponíveis</p>
             </motion.div>
 
             {/* Trust indicators */}
