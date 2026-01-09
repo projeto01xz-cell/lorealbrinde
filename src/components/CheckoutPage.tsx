@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Search, Menu, X, Truck, Package, Zap, Loader2 } from "lucide-react";
+import { Search, Menu, X, Truck, Package, Zap, Loader2, Gift, CheckSquare, Square } from "lucide-react";
 import lorealLogo from "@/assets/loreal-paris-logo.svg";
 import productKitFull from "@/assets/product-kit-full.png";
 
@@ -36,6 +36,33 @@ const shippingOptions = [
     price: 49.90,
     days: "1-2 dias úteis",
     icon: Zap,
+  },
+];
+
+const orderBumps = [
+  {
+    id: "bump1",
+    name: "Sérum Reparador Intensivo",
+    description: "Tratamento noturno com vitamina E para cabelos danificados",
+    image: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=200&h=200&fit=crop",
+    oldPrice: 89.90,
+    promoPrice: 29.90,
+  },
+  {
+    id: "bump2",
+    name: "Máscara Hidratação Profunda",
+    description: "Máscara capilar com ácido hialurônico para hidratação extrema",
+    image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=200&h=200&fit=crop",
+    oldPrice: 79.90,
+    promoPrice: 24.90,
+  },
+  {
+    id: "bump3",
+    name: "Óleo Finalizador Premium",
+    description: "Óleo multifuncional para brilho e proteção térmica",
+    image: "https://images.unsplash.com/photo-1599305090598-fe179d501227?w=200&h=200&fit=crop",
+    oldPrice: 69.90,
+    promoPrice: 19.90,
   },
 ];
 
@@ -113,6 +140,20 @@ const CheckoutPage = ({ userData }: CheckoutPageProps) => {
   const [addressFilled, setAddressFilled] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
   const [errors, setErrors] = useState<{ cpf?: string; cep?: string }>({});
+  const [selectedBumps, setSelectedBumps] = useState<string[]>([]);
+
+  const toggleBump = (bumpId: string) => {
+    setSelectedBumps((prev) =>
+      prev.includes(bumpId)
+        ? prev.filter((id) => id !== bumpId)
+        : [...prev, bumpId]
+    );
+  };
+
+  const bumpsTotal = selectedBumps.reduce((acc, bumpId) => {
+    const bump = orderBumps.find((b) => b.id === bumpId);
+    return acc + (bump?.promoPrice || 0);
+  }, 0);
 
   const checkAddressFilled = (form: typeof formData) => {
     const requiredAddressFields = ["cep", "street", "number", "neighborhood", "city", "state"];
@@ -203,7 +244,8 @@ const CheckoutPage = ({ userData }: CheckoutPageProps) => {
   };
 
   const selectedShippingOption = shippingOptions.find((s) => s.id === selectedShipping);
-  const total = selectedShippingOption ? selectedShippingOption.price : 0;
+  const shippingPrice = selectedShippingOption ? selectedShippingOption.price : 0;
+  const total = shippingPrice + bumpsTotal;
 
   return (
     <div className="min-h-[100svh] bg-gray-50 pb-32">
@@ -480,17 +522,84 @@ const CheckoutPage = ({ userData }: CheckoutPageProps) => {
               <span className="text-sm text-gray-600">Produto</span>
               <span className="text-sm font-medium text-green-600">GRÁTIS</span>
             </div>
-            <div className="flex justify-between items-center mb-3">
+            <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">Frete</span>
               <span className="text-sm font-medium text-gray-900">
-                R$ {total.toFixed(2).replace(".", ",")}
+                R$ {shippingPrice.toFixed(2).replace(".", ",")}
               </span>
             </div>
+            {bumpsTotal > 0 && (
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-600">Ofertas adicionais</span>
+                <span className="text-sm font-medium text-purple-600">
+                  R$ {bumpsTotal.toFixed(2).replace(".", ",")}
+                </span>
+              </div>
+            )}
             <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
               <span className="text-base font-bold text-gray-900">Total</span>
               <span className="text-lg font-black text-gray-900">
                 R$ {total.toFixed(2).replace(".", ",")}
               </span>
+            </div>
+          </div>
+        )}
+
+        {/* Order Bumps */}
+        {addressFilled && selectedShipping && (
+          <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl p-4 border border-purple-500 shadow-lg">
+            <div className="flex items-center gap-2 mb-4">
+              <Gift className="w-5 h-5 text-yellow-300" />
+              <h2 className="font-bold text-sm text-white uppercase tracking-wide">
+                🎁 Desconto Especial de Lançamento
+              </h2>
+            </div>
+            <p className="text-xs text-purple-200 mb-4">
+              Promoção exclusiva para participantes desta campanha especial!
+            </p>
+
+            <div className="space-y-3">
+              {orderBumps.map((bump) => {
+                const isSelected = selectedBumps.includes(bump.id);
+                return (
+                  <button
+                    key={bump.id}
+                    onClick={() => toggleBump(bump.id)}
+                    className={`w-full flex items-start gap-3 p-3 rounded-lg border-2 transition-all text-left ${
+                      isSelected
+                        ? "border-yellow-400 bg-white/20"
+                        : "border-white/30 bg-white/10 hover:bg-white/15"
+                    }`}
+                  >
+                    <div className="flex-shrink-0 mt-0.5">
+                      {isSelected ? (
+                        <CheckSquare className="w-5 h-5 text-yellow-300" />
+                      ) : (
+                        <Square className="w-5 h-5 text-white/60" />
+                      )}
+                    </div>
+                    <img
+                      src={bump.image}
+                      alt={bump.name}
+                      className="w-14 h-14 object-cover rounded-lg flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white">{bump.name}</p>
+                      <p className="text-[11px] text-purple-200 line-clamp-2">
+                        {bump.description}
+                      </p>
+                      <div className="flex items-baseline gap-2 mt-1">
+                        <span className="text-[11px] text-white/50 line-through">
+                          R$ {bump.oldPrice.toFixed(2).replace(".", ",")}
+                        </span>
+                        <span className="text-sm font-black text-yellow-300">
+                          R$ {bump.promoPrice.toFixed(2).replace(".", ",")}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
