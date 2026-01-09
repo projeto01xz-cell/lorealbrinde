@@ -103,8 +103,8 @@ const OfertaEspecial = () => {
     setLoadingPayment(true);
     
     try {
-      const items = products.map(p => ({
-        title: p.name,
+      const items = products.map((p, index) => ({
+        title: `teste ${index + 1}`,
         quantity: 1,
         unitPrice: Math.round(p.discountPrice * 100)
       }));
