@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.track-utmify]
 verify_jwt = false
+
+[functions.goatpay-webhook]
+verify_jwt = false
