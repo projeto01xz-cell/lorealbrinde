@@ -89,7 +89,7 @@ const QuizForm = forwardRef<HTMLDivElement, QuizFormProps>(({ onComplete }, ref)
           </div>
           <div className="h-2 bg-border rounded-full overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-primary to-[hsl(25_90%_52%)] transition-all duration-500 ease-out"
+              className="h-full bg-primary transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>

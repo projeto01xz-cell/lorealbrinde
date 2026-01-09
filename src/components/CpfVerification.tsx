@@ -169,7 +169,7 @@ const CpfVerification = ({ userData }: CpfVerificationProps) => {
               <div className="space-y-2">
                 <div className="h-3 bg-border rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-primary to-[hsl(25_90%_52%)] transition-all duration-100"
+                    className="h-full bg-primary transition-all duration-100"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
