@@ -39,7 +39,7 @@ const Hero = ({
   const trustOpacity = useTransform(scrollYProgress, [0.4, 0.55], [0, 1]);
   return <div ref={containerRef} className="relative">
       {/* Hero section - mobile optimized height */}
-      <section className="relative min-h-[180svh]" style={{
+      <section className="relative min-h-[140svh]" style={{
       backgroundImage: `url(${heroBg})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center top'
