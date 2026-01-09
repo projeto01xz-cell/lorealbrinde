@@ -64,3 +64,67 @@ export const saveUtmParams = (): void => {
     }
   });
 };
+
+// Capturar o leadId da Utmify (salvo pelo pixel script)
+export const getUtmifyLeadId = (): string | null => {
+  // O pixel da Utmify salva o leadId no localStorage
+  try {
+    // Tentar pegar do localStorage (formato mais comum)
+    const utmifyData = localStorage.getItem("utmify_lead");
+    if (utmifyData) {
+      const parsed = JSON.parse(utmifyData);
+      if (parsed._id) return parsed._id;
+      if (parsed.id) return parsed.id;
+    }
+    
+    // Tentar formato alternativo
+    const leadId = localStorage.getItem("utmify_lead_id");
+    if (leadId) return leadId;
+    
+    // Tentar pegar do cookie _utmify
+    const cookies = document.cookie.split(";");
+    for (const cookie of cookies) {
+      const [name, value] = cookie.trim().split("=");
+      if (name === "_utmify" || name === "utmify_lead") {
+        try {
+          const decoded = decodeURIComponent(value);
+          const parsed = JSON.parse(decoded);
+          if (parsed._id) return parsed._id;
+          if (parsed.id) return parsed.id;
+        } catch {
+          // Se não for JSON, pode ser o ID direto
+          return value;
+        }
+      }
+    }
+    
+    // Tentar pegar do window (o pixel pode expor lá)
+    const windowUtmify = (window as any).utmify;
+    if (windowUtmify?.lead?._id) return windowUtmify.lead._id;
+    if (windowUtmify?.leadId) return windowUtmify.leadId;
+    
+    return null;
+  } catch (err) {
+    console.error("Error getting Utmify leadId:", err);
+    return null;
+  }
+};
+
+// Capturar IP do cliente (para tracking server-side)
+export const getClientIP = async (): Promise<string> => {
+  try {
+    // Tentar IPv4 primeiro
+    const response = await fetch("https://api.ipify.org?format=json");
+    const data = await response.json();
+    return data.ip || "";
+  } catch {
+    try {
+      // Fallback para IPv6
+      const response = await fetch("https://api6.ipify.org?format=json");
+      const data = await response.json();
+      return data.ip || "";
+    } catch {
+      return "";
+    }
+  }
+};

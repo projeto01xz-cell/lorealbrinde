@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Search, Menu, X, Truck, Package, Zap, Loader2, Gift, CheckSquare, Square, QrCode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { getUtmifyParams, saveUtmParams } from "@/lib/utmify";
+import { getUtmifyParams, saveUtmParams, getUtmifyLeadId, getClientIP } from "@/lib/utmify";
 import lorealLogo from "@/assets/loreal-paris-logo.svg";
 import productKitFull from "@/assets/product-kit-full.png";
 import serumOleoExtraordinario from "@/assets/serum-oleo-extraordinario.png";
@@ -129,10 +129,32 @@ const CheckoutPage = ({
   }>({});
   const [selectedBumps, setSelectedBumps] = useState<string[]>([]);
   const [loadingPayment, setLoadingPayment] = useState(false);
+  const [clientIP, setClientIP] = useState<string>("");
+  const [utmifyLeadId, setUtmifyLeadId] = useState<string | null>(null);
 
-  // Salvar UTM params quando a página carrega e disparar evento InitiateCheckout
+  // Salvar UTM params, capturar leadId e IP quando a página carrega
   useEffect(() => {
     saveUtmParams();
+    
+    // Capturar leadId da Utmify (pode demorar um pouco para o pixel criar)
+    const captureLeadId = () => {
+      const leadId = getUtmifyLeadId();
+      if (leadId) {
+        setUtmifyLeadId(leadId);
+        console.log("Utmify leadId captured:", leadId);
+      }
+    };
+    
+    // Tentar imediatamente e depois a cada 2 segundos por 10 segundos
+    captureLeadId();
+    const leadIdInterval = setInterval(captureLeadId, 2000);
+    setTimeout(() => clearInterval(leadIdInterval), 10000);
+    
+    // Capturar IP do cliente
+    getClientIP().then(ip => {
+      setClientIP(ip);
+      console.log("Client IP captured:", ip);
+    });
     
     // Facebook Pixel - InitiateCheckout
     if (typeof window !== 'undefined' && (window as any).fbq) {
@@ -143,6 +165,8 @@ const CheckoutPage = ({
         value: 0
       });
     }
+    
+    return () => clearInterval(leadIdInterval);
   }, []);
   const toggleBump = (bumpId: string) => {
     setSelectedBumps(prev => prev.includes(bumpId) ? prev.filter(id => id !== bumpId) : [...prev, bumpId]);
@@ -390,12 +414,14 @@ const CheckoutPage = ({
             name: formData.fullName,
             email: formData.email,
             phone: formData.phone,
-            document: formData.cpf
+            document: formData.cpf,
+            ip: clientIP
           },
           products: trackingProducts,
           paymentMethod: "pix",
           totalAmount: total,
-          utmParams
+          utmParams,
+          leadId: utmifyLeadId
         }
       }).then((response) => {
         console.log("Utmify tracking response:", response);
