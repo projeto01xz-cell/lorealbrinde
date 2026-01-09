@@ -21,6 +21,7 @@ interface CheckoutPageProps {
   onPixGenerated: (pixData: {
     payload: string;
     expiresAt?: string;
+    orderId?: string;
   }, total: number) => void;
 }
 const shippingOptions = [{
@@ -329,6 +330,42 @@ const CheckoutPage = ({
         }
       });
 
+      // Salvar pedido no banco para tracking de webhook
+      const shippingOption = shippingOptions.find(s => s.id === selectedShipping);
+      const orderData = {
+        external_id: orderId,
+        customer_name: formData.fullName,
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        customer_document: formData.cpf,
+        total_amount: total,
+        status: "pending",
+        pix_payload: data.pix?.payload || "",
+        shipping_option: shippingOption?.name || "",
+        shipping_price: shippingOption?.price || 0,
+        address_cep: formData.cep,
+        address_street: formData.street,
+        address_number: formData.number,
+        address_complement: formData.complement,
+        address_neighborhood: formData.neighborhood,
+        address_city: formData.city,
+        address_state: formData.state,
+        products: trackingProducts,
+        utm_params: utmParams
+      };
+
+      console.log("Saving order to database:", orderData);
+      
+      const { error: orderError } = await supabase
+        .from("orders")
+        .insert(orderData);
+
+      if (orderError) {
+        console.error("Error saving order:", orderError);
+      } else {
+        console.log("Order saved successfully");
+      }
+
       // Track sale async (não bloqueia o fluxo)
       console.log("Calling track-utmify with:", {
         orderId,
@@ -383,10 +420,11 @@ const CheckoutPage = ({
         });
       }
 
-      // Navegar para página de pagamento Pix
+      // Navegar para página de pagamento Pix com orderId para upsell depois
       onPixGenerated({
         payload: data.pix?.payload || "",
-        expiresAt: data.pix?.expiresAt
+        expiresAt: data.pix?.expiresAt,
+        orderId: orderId
       }, total);
     } catch (err) {
       console.error("Payment error:", err);

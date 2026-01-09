@@ -1,20 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, X, Copy, Check, Clock, ShieldCheck } from "lucide-react";
+import { Search, Menu, X, Copy, Check, Clock, ShieldCheck, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import lorealLogo from "@/assets/loreal-paris-logo.svg";
 
 interface PixPaymentPageProps {
   pixData: {
     payload: string;
     expiresAt?: string;
+    orderId?: string;
   };
   total: number;
   customerName: string;
 }
 
 const PixPaymentPage = ({ pixData, total, customerName }: PixPaymentPageProps) => {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<string>("pending");
 
   const handleCopy = async () => {
     if (pixData.payload) {
@@ -23,6 +28,42 @@ const PixPaymentPage = ({ pixData, total, customerName }: PixPaymentPageProps) =
       setTimeout(() => setCopied(false), 3000);
     }
   };
+
+  // Escutar atualizações em tempo real do pagamento
+  useEffect(() => {
+    if (!pixData.orderId) return;
+
+    console.log("Listening for payment updates on order:", pixData.orderId);
+
+    const channel = supabase
+      .channel("pix-payment-updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "orders",
+          filter: `external_id=eq.${pixData.orderId}`,
+        },
+        (payload) => {
+          console.log("Payment status updated:", payload);
+          const newStatus = (payload.new as { status: string }).status;
+          setPaymentStatus(newStatus);
+          
+          // Se pagou, redirecionar para upsell
+          if (newStatus === "paid") {
+            setTimeout(() => {
+              navigate(`/upsell?order=${pixData.orderId}`);
+            }, 1500);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [pixData.orderId, navigate]);
 
   return (
     <div className="min-h-[100svh] bg-gray-50 pb-8">
@@ -66,6 +107,16 @@ const PixPaymentPage = ({ pixData, total, customerName }: PixPaymentPageProps) =
       <div className="h-[84px]" />
 
       <div className="px-4 py-6 max-w-sm mx-auto space-y-4">
+        {/* Payment Confirmed Message */}
+        {paymentStatus === "paid" && (
+          <div className="bg-green-100 border border-green-300 rounded-xl p-4 text-center animate-pulse">
+            <div className="flex items-center justify-center gap-2 text-green-700">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span className="font-bold">Pagamento Confirmado! Redirecionando...</span>
+            </div>
+          </div>
+        )}
+
         {/* Success Message */}
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
           <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -151,6 +202,14 @@ const PixPaymentPage = ({ pixData, total, customerName }: PixPaymentPageProps) =
             </li>
           </ol>
         </div>
+
+        {/* Awaiting Payment Indicator */}
+        {paymentStatus === "pending" && (
+          <div className="flex items-center justify-center gap-2 p-3 bg-amber-50 rounded-lg text-amber-700">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-xs font-medium">Aguardando confirmação do pagamento...</span>
+          </div>
+        )}
 
         {/* Security Note */}
         <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">

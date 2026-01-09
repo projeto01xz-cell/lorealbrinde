@@ -14,7 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      orders: {
+        Row: {
+          address_cep: string | null
+          address_city: string | null
+          address_complement: string | null
+          address_neighborhood: string | null
+          address_number: string | null
+          address_state: string | null
+          address_street: string | null
+          created_at: string
+          customer_document: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          external_id: string
+          id: string
+          paid_at: string | null
+          pix_payload: string | null
+          products: Json | null
+          shipping_option: string | null
+          shipping_price: number | null
+          status: string
+          total_amount: number
+          updated_at: string
+          utm_params: Json | null
+        }
+        Insert: {
+          address_cep?: string | null
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          created_at?: string
+          customer_document: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          external_id: string
+          id?: string
+          paid_at?: string | null
+          pix_payload?: string | null
+          products?: Json | null
+          shipping_option?: string | null
+          shipping_price?: number | null
+          status?: string
+          total_amount: number
+          updated_at?: string
+          utm_params?: Json | null
+        }
+        Update: {
+          address_cep?: string | null
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          created_at?: string
+          customer_document?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string
+          external_id?: string
+          id?: string
+          paid_at?: string | null
+          pix_payload?: string | null
+          products?: Json | null
+          shipping_option?: string | null
+          shipping_price?: number | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          utm_params?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

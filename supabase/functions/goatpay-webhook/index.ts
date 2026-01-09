@@ -1,0 +1,135 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const handler = async (req: Request): Promise<Response> => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const payload = await req.json();
+    
+    console.log("GoatPay webhook received:", JSON.stringify(payload, null, 2));
+
+    // GoatPay envia o ID da transação e o status
+    const { id, status, event } = payload;
+
+    if (!id) {
+      console.error("Missing transaction ID in webhook payload");
+      return new Response(
+        JSON.stringify({ error: "Missing transaction ID" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Mapear status da GoatPay para nosso status
+    let orderStatus = "pending";
+    if (status === "paid" || status === "approved" || event === "payment.approved") {
+      orderStatus = "paid";
+    } else if (status === "refunded" || event === "payment.refunded") {
+      orderStatus = "refunded";
+    } else if (status === "cancelled" || status === "expired" || event === "payment.cancelled") {
+      orderStatus = "cancelled";
+    }
+
+    console.log(`Updating order ${id} to status: ${orderStatus}`);
+
+    // Atualizar o pedido no banco
+    const updateData: Record<string, unknown> = {
+      status: orderStatus,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (orderStatus === "paid") {
+      updateData.paid_at = new Date().toISOString();
+    }
+
+    const { data, error } = await supabase
+      .from("orders")
+      .update(updateData)
+      .eq("external_id", id.toString())
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating order:", error);
+      // Mesmo com erro, retornamos 200 para a GoatPay não reenviar
+      return new Response(
+        JSON.stringify({ received: true, error: error.message }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Order updated successfully:", data);
+
+    // Se foi pago, enviar tracking de aprovação para Utmify
+    if (orderStatus === "paid" && data) {
+      const utmifyToken = Deno.env.get("UTMIFY_TOKEN");
+      
+      if (utmifyToken) {
+        try {
+          const utmifyPayload = {
+            orderId: data.external_id,
+            platform: "website",
+            paymentMethod: "pix",
+            status: "approved",
+            createdAt: data.created_at,
+            approvedDate: new Date().toISOString(),
+            customer: {
+              name: data.customer_name,
+              email: data.customer_email,
+              phone: data.customer_phone?.replace(/\D/g, ""),
+              document: data.customer_document?.replace(/\D/g, ""),
+              country: "BR",
+            },
+            products: data.products || [],
+            trackingParameters: data.utm_params || {},
+            commission: {
+              totalPrice: Number(data.total_amount),
+              gatewayFee: 0,
+              integrationFee: 0,
+              totalCommission: Number(data.total_amount),
+            },
+            isTest: false,
+          };
+
+          const utmifyResponse = await fetch("https://api.utmify.com.br/api/v1/sales", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${utmifyToken}`,
+            },
+            body: JSON.stringify(utmifyPayload),
+          });
+
+          console.log("Utmify approval tracking response:", await utmifyResponse.text());
+        } catch (utmifyError) {
+          console.error("Error sending to Utmify:", utmifyError);
+        }
+      }
+    }
+
+    return new Response(
+      JSON.stringify({ success: true, order: data }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    console.error("Webhook error:", error);
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+};
+
+serve(handler);

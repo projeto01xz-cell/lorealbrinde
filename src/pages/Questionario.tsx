@@ -11,6 +11,7 @@ type Step = "quiz" | "cpf" | "product" | "checkout" | "pix";
 interface PixData {
   payload: string;
   expiresAt?: string;
+  orderId?: string;
 }
 
 const Questionario = () => {
