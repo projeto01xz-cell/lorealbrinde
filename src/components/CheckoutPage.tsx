@@ -129,9 +129,19 @@ const CheckoutPage = ({
   const [selectedBumps, setSelectedBumps] = useState<string[]>([]);
   const [loadingPayment, setLoadingPayment] = useState(false);
 
-  // Salvar UTM params quando a página carrega
+  // Salvar UTM params quando a página carrega e disparar evento InitiateCheckout
   useEffect(() => {
     saveUtmParams();
+    
+    // Facebook Pixel - InitiateCheckout
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'InitiateCheckout', {
+        content_name: 'Kit Elseve Collagen Lifter',
+        content_category: 'Hair Care',
+        currency: 'BRL',
+        value: 0
+      });
+    }
   }, []);
   const toggleBump = (bumpId: string) => {
     setSelectedBumps(prev => prev.includes(bumpId) ? prev.filter(id => id !== bumpId) : [...prev, bumpId]);
@@ -344,6 +354,18 @@ const CheckoutPage = ({
           console.log("Sale tracked to Utmify");
         }
       });
+
+      // Facebook Pixel - Purchase
+      if (typeof window !== 'undefined' && (window as any).fbq) {
+        (window as any).fbq('track', 'Purchase', {
+          content_name: 'Kit Elseve Collagen Lifter',
+          content_category: 'Hair Care',
+          content_ids: ['kit-elseve-collagen', ...selectedBumps],
+          num_items: 1 + selectedBumps.length,
+          currency: 'BRL',
+          value: total
+        });
+      }
 
       // Navegar para página de pagamento Pix
       onPixGenerated({
