@@ -153,13 +153,12 @@ const handler = async (req: Request): Promise<Response> => {
 
       console.log("Sending to UTMify:", JSON.stringify(utmifyPayload, null, 2));
 
-      const utmifyResponse = await fetch("https://api.utmify.com.br/api/v1/sales", {
+      const utmifyResponse = await fetch("https://api.utmify.com.br/api/v1/sales/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // UTMify expects the token directly (no "Bearer ")
-          "Authorization": utmifyToken,
-          // keep compatibility in case UTMify also reads x-api-token
+          // IMPORTANT: do NOT send Authorization header (AWS SigV4 parsing)
+          // UTMify uses a custom token header
           "x-api-token": utmifyToken,
         },
         body: JSON.stringify(utmifyPayload),
