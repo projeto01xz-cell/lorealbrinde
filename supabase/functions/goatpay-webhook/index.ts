@@ -6,6 +6,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Utmify Pixel ID (same as used in index.html)
+const PIXEL_ID = "696119dd7b2c89894cd5fa85";
+const UTMIFY_EVENTS_URL = "https://tracking.utmify.com.br/tracking/v1/events";
+
 // Validate webhook payload
 const validateWebhookPayload = (data: unknown): { valid: boolean; error?: string; id?: string; status?: string; event?: string } => {
   if (!data || typeof data !== 'object') {
@@ -123,55 +127,63 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Order updated successfully:", data);
 
-    // Se foi pago, enviar tracking de aprovação para Utmify
+    // Se foi pago, enviar tracking de aprovação para Utmify via Events API
     if (orderStatus === "paid" && data) {
-      const utmifyToken = (Deno.env.get("UTMIFY_TOKEN") ?? "")
-        .replace(/^bearer\s+/i, "")
-        .trim();
-      
-      if (utmifyToken) {
-        try {
-          const utmifyPayload = {
-            orderId: data.external_id,
-            platform: "website",
-            paymentMethod: "pix",
-            status: "approved",
-            createdAt: data.created_at,
-            approvedDate: new Date().toISOString(),
-            customer: {
-              name: data.customer_name,
-              email: data.customer_email,
-              phone: data.customer_phone?.replace(/\D/g, ""),
-              document: data.customer_document?.replace(/\D/g, ""),
+      try {
+        const utmifyPayload = {
+          type: "Purchase",
+          lead: {
+            pixelId: PIXEL_ID,
+            _id: null,
+            metaPixelIds: ["826039799862526"],
+            tikTokPixelIds: [],
+            geolocation: {
               country: "BR",
+              city: "",
+              state: "",
+              zipcode: "",
             },
-            products: data.products || [],
-            trackingParameters: data.utm_params || {},
-            commission: {
-              totalPrice: Number(data.total_amount),
-              gatewayFee: 0,
-              integrationFee: 0,
-              totalCommission: Number(data.total_amount),
-            },
-            isTest: false,
-          };
+            userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            ip: "177.0.0.1",
+            parameters: "",
+            icTextMatch: null,
+            icCSSMatch: null,
+            icURLMatch: null,
+            leadTextMatch: null,
+            addToCartTextMatch: null,
+            ipConfiguration: "IPV6_OR_IPV4",
+          },
+          event: {
+            sourceUrl: "https://loreal-paris-campanha.lovable.app/checkout",
+            pageTitle: "Payment Approved",
+            value: Number(data.total_amount),
+            currency: "BRL",
+            content_ids: (data.products as Array<{ name: string }> || []).map((_, i) => `product_${i + 1}`),
+            content_type: "product",
+            contents: (data.products as Array<{ price: number; quantity: number }> || []).map((p, i) => ({
+              id: `product_${i + 1}`,
+              quantity: p.quantity || 1,
+              item_price: p.price || 0,
+            })),
+            num_items: (data.products as Array<{ quantity: number }> || []).reduce((sum, p) => sum + (p.quantity || 1), 0),
+            order_id: data.external_id,
+          },
+          tikTokPageInfo: null,
+        };
 
-          const utmifyResponse = await fetch("https://api.utmify.com.br/api/v1/sales", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              // IMPORTANT: do NOT send Authorization header (AWS SigV4 parsing)
-              // UTMify uses custom token headers
-              "x-api-token": utmifyToken,
-              "x-api-key": utmifyToken,
-            },
-            body: JSON.stringify(utmifyPayload),
-          });
+        console.log("Sending Purchase event to Utmify:", JSON.stringify(utmifyPayload, null, 2));
 
-          console.log("Utmify approval tracking response:", await utmifyResponse.text());
-        } catch (utmifyError) {
-          console.error("Error sending to Utmify:", utmifyError);
-        }
+        const utmifyResponse = await fetch(UTMIFY_EVENTS_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(utmifyPayload),
+        });
+
+        console.log("Utmify approval tracking response:", await utmifyResponse.text());
+      } catch (utmifyError) {
+        console.error("Error sending to Utmify:", utmifyError);
       }
     }
 

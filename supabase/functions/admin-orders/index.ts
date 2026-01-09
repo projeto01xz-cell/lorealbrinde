@@ -8,6 +8,10 @@ const corsHeaders = {
 
 const ADMIN_PASSWORD = "loreal2024admin"; // Simple password protection
 
+// Utmify Pixel ID (same as used in index.html)
+const PIXEL_ID = "696119dd7b2c89894cd5fa85";
+const UTMIFY_EVENTS_URL = "https://tracking.utmify.com.br/tracking/v1/events";
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -101,68 +105,61 @@ const handler = async (req: Request): Promise<Response> => {
         );
       }
 
-      const utmifyToken = (Deno.env.get("UTMIFY_TOKEN") ?? "")
-        .replace(/^bearer\s+/i, "")
-        .trim();
-
-      if (!utmifyToken) {
-        return new Response(
-          JSON.stringify({ error: "UTMIFY_TOKEN not configured" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      // Log token format for debugging (first/last 4 chars only)
-      console.log("UTMify token format check:", {
-        length: utmifyToken.length,
-        startsWithBearer: utmifyToken.toLowerCase().startsWith("bearer"),
-        preview: `${utmifyToken.substring(0, 4)}...${utmifyToken.substring(utmifyToken.length - 4)}`
-      });
-
-      // Determine status for UTMify
-      let utmifyStatus = "pending";
-      if (order.status === "paid") {
-        utmifyStatus = "approved";
+      // Determine event type for UTMify
+      let eventType = "Purchase";
+      if (order.status === "pending") {
+        eventType = "InitiateCheckout";
       } else if (order.status === "refunded") {
-        utmifyStatus = "refunded";
+        eventType = "Refund";
       }
 
       const utmifyPayload = {
-        orderId: order.external_id,
-        platform: "website",
-        paymentMethod: "pix",
-        status: utmifyStatus,
-        createdAt: order.created_at,
-        approvedDate: order.paid_at || (utmifyStatus === "approved" ? new Date().toISOString() : null),
-        refundedAt: utmifyStatus === "refunded" ? new Date().toISOString() : null,
-        customer: {
-          name: order.customer_name,
-          email: order.customer_email,
-          phone: order.customer_phone?.replace(/\D/g, ""),
-          document: order.customer_document?.replace(/\D/g, ""),
-          country: "BR",
+        type: eventType,
+        lead: {
+          pixelId: PIXEL_ID,
+          _id: null,
+          metaPixelIds: ["826039799862526"],
+          tikTokPixelIds: [],
+          geolocation: {
+            country: "BR",
+            city: "",
+            state: "",
+            zipcode: "",
+          },
+          userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          ip: "177.0.0.1",
+          parameters: "",
+          icTextMatch: null,
+          icCSSMatch: null,
+          icURLMatch: null,
+          leadTextMatch: null,
+          addToCartTextMatch: null,
+          ipConfiguration: "IPV6_OR_IPV4",
         },
-        products: order.products || [],
-        trackingParameters: order.utm_params || {},
-        commission: {
-          totalPrice: Number(order.total_amount),
-          gatewayFee: 0,
-          integrationFee: 0,
-          totalCommission: Number(order.total_amount),
+        event: {
+          sourceUrl: "https://loreal-paris-campanha.lovable.app/checkout",
+          pageTitle: `Admin Resend - ${order.status}`,
+          value: Number(order.total_amount),
+          currency: "BRL",
+          content_ids: (order.products as Array<{ name: string }> || []).map((_, i) => `product_${i + 1}`),
+          content_type: "product",
+          contents: (order.products as Array<{ price: number; quantity: number }> || []).map((p, i) => ({
+            id: `product_${i + 1}`,
+            quantity: p.quantity || 1,
+            item_price: p.price || 0,
+          })),
+          num_items: (order.products as Array<{ quantity: number }> || []).reduce((sum, p) => sum + (p.quantity || 1), 0),
+          order_id: order.external_id,
         },
-        isTest: false,
+        tikTokPageInfo: null,
       };
 
-      console.log("Sending to UTMify:", JSON.stringify(utmifyPayload, null, 2));
+      console.log("Sending to UTMify Events API:", JSON.stringify(utmifyPayload, null, 2));
 
-      const utmifyResponse = await fetch("https://api.utmify.com.br/api/v1/sales", {
+      const utmifyResponse = await fetch(UTMIFY_EVENTS_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // IMPORTANT: do NOT send Authorization header (AWS SigV4 parsing)
-          // UTMify uses custom token headers
-          "x-api-token": utmifyToken,
-          "x-api-key": utmifyToken,
         },
         body: JSON.stringify(utmifyPayload),
       });
