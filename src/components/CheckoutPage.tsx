@@ -26,19 +26,19 @@ interface CheckoutPageProps {
 const shippingOptions = [{
   id: "pac",
   name: "PAC",
-  price: 19.90,
+  price: 16.40,
   days: "8-12 dias úteis",
   icon: Package
 }, {
   id: "sedex",
   name: "SEDEX",
-  price: 29.90,
+  price: 24.80,
   days: "3-5 dias úteis",
   icon: Truck
 }, {
-  id: "sedex10",
-  name: "SEDEX 10",
-  price: 49.90,
+  id: "jadlog",
+  name: "JADLOG FULL",
+  price: 37.70,
   days: "1-2 dias úteis",
   icon: Zap
 }];
