@@ -47,7 +47,9 @@ const handler = async (req: Request): Promise<Response> => {
     const credentials = btoa(`${publicKey}:${secretKey}`);
 
     const cleanDocument = customer.document.replace(/\D/g, "");
-    
+    const cleanPhone = customer.phone.replace(/\D/g, "");
+
+    // GoatPay valida phone como string (conforme retorno de erro da API)
     const payload = {
       amount,
       paymentMethod: "pix",
@@ -58,16 +60,12 @@ const handler = async (req: Request): Promise<Response> => {
           type: "cpf",
           number: cleanDocument,
         },
-        phone: {
-          country_code: "55",
-          area_code: customer.phone.replace(/\D/g, "").slice(0, 2),
-          number: customer.phone.replace(/\D/g, "").slice(2),
-        },
+        phone: cleanPhone,
       },
       items: items.map((item) => ({
         title: item.title,
         quantity: item.quantity,
-        unit_price: item.unitPrice,
+        unitPrice: item.unitPrice,
         tangible: true,
       })),
       pix: {
@@ -103,9 +101,13 @@ const handler = async (req: Request): Promise<Response> => {
         id: data.id,
         status: data.status,
         pix: {
-          payload: data.pix?.payload || data.pix?.qr_code,
-          qrCodeUrl: data.pix?.qr_code_url || data.pix?.qrcode_url,
-          expiresAt: data.pix?.expires_at,
+          payload: data.pix?.payload || data.pix?.qr_code || data.pix?.qrcode,
+          qrCodeUrl:
+            data.pix?.qr_code_url ||
+            data.pix?.qrcode_url ||
+            data.pix?.qrCodeUrl,
+          expiresAt:
+            data.pix?.expires_at || data.pix?.expiration_date || data.pix?.expiresAt,
         },
         amount: data.amount,
       }),
