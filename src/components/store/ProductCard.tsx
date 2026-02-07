@@ -10,7 +10,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const discount = calculateDiscount(product.price, product.originalPrice);
 
   return (
-    <article className="card-product flex flex-col bg-card overflow-hidden">
+    <article className="card-product flex flex-col bg-card overflow-visible mb-2">
       {/* Top Row: Image + Content */}
       <div className="flex flex-row">
         {/* Image Container - Left side */}
@@ -80,10 +80,10 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       </div>
 
-      {/* Full Width CTA Button - Bottom */}
+      {/* Full Width CTA Button - Extends outside card */}
       <button 
-        className="w-full bg-primary text-primary-foreground font-bold text-sm py-3
-                 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+        className="w-[calc(100%+16px)] -mx-2 -mb-2 bg-primary text-primary-foreground font-bold text-sm py-3
+                 flex items-center justify-center gap-2 active:scale-[0.99] transition-transform rounded-none"
         disabled={!product.inStock}
         aria-label={product.inStock ? 'Adicionar ao carrinho' : 'Produto indisponível'}
       >
