@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
-import { ChevronLeft, Loader2, MapPin, User, CreditCard, Truck, Package, Zap } from "lucide-react";
+import { Loader2, MapPin, User, CreditCard, Truck, Package, Zap, ShieldCheck, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
-import Navbar from "@/components/store/Navbar";
 import { getProductById, formatPrice, Product } from "@/lib/products";
+import gtsm1Logo from "@/assets/gtsm1-logo.png";
 
 // Máscaras
 const maskCPF = (value: string) => {
@@ -95,6 +95,7 @@ export default function Checkout() {
   
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("pix");
   
   const [formData, setFormData] = useState({
     fullName: "",
@@ -283,21 +284,20 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-      
-      <main className="flex-1 pb-32">
-        {/* Header */}
-        <div className="px-4 py-4 bg-card border-b border-border sticky top-0 z-10">
-          <div className="flex items-center gap-3">
-            <Link 
-              to={`/produto/${product.id}`}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-secondary transition-colors"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Link>
-            <h1 className="text-lg font-bold text-foreground">Finalizar Compra</h1>
+      {/* Custom Checkout Header */}
+      <header className="sticky top-0 z-50 bg-card border-b border-border">
+        <div className="px-4 py-3 flex items-center justify-between max-w-lg mx-auto">
+          <Link to="/">
+            <img src={gtsm1Logo} alt="GTSM1" className="h-8 w-auto" />
+          </Link>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            <span className="text-xs font-medium">Ambiente Seguro</span>
           </div>
         </div>
+      </header>
+      
+      <main className="flex-1 pb-8">
 
         <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
           {/* Product Summary */}
@@ -584,18 +584,53 @@ export default function Checkout() {
             </RadioGroup>
           </div>
 
-          {/* Payment Method Info */}
+          {/* Payment Method */}
           <div className="bg-card rounded-xl p-4 border border-border">
-            <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+            <h2 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
               <CreditCard className="h-4 w-4 text-primary" />
               Forma de Pagamento
             </h2>
-            <div className="bg-primary/10 rounded-lg p-3">
-              <p className="text-sm font-medium text-primary">PIX</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Pagamento instantâneo com aprovação imediata
-              </p>
-            </div>
+            
+            <RadioGroup
+              value={selectedPaymentMethod}
+              onValueChange={setSelectedPaymentMethod}
+              className="space-y-3"
+            >
+              <label
+                htmlFor="pix"
+                className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                  selectedPaymentMethod === "pix"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-muted-foreground"
+                }`}
+              >
+                <RadioGroupItem value="pix" id="pix" />
+                <QrCode className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">PIX</p>
+                  <p className="text-xs text-muted-foreground">Aprovação imediata</p>
+                </div>
+                <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded">
+                  5% OFF
+                </span>
+              </label>
+              
+              <label
+                htmlFor="credit"
+                className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                  selectedPaymentMethod === "credit"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-muted-foreground"
+                }`}
+              >
+                <RadioGroupItem value="credit" id="credit" />
+                <CreditCard className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">Cartão de Crédito</p>
+                  <p className="text-xs text-muted-foreground">Até 12x sem juros</p>
+                </div>
+              </label>
+            </RadioGroup>
           </div>
 
           {/* Order Summary */}
@@ -612,34 +647,43 @@ export default function Checkout() {
                   {shippingPrice === 0 ? "GRÁTIS" : formatPrice(shippingPrice)}
                 </span>
               </div>
+              {selectedPaymentMethod === "pix" && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Desconto PIX (5%)</span>
+                  <span className="text-primary font-medium">-{formatPrice(subtotal * 0.05)}</span>
+                </div>
+              )}
               <div className="border-t border-border pt-2 mt-2">
                 <div className="flex justify-between">
                   <span className="text-base font-bold text-foreground">Total</span>
-                  <span className="text-xl font-bold text-primary">{formatPrice(total)}</span>
+                  <span className="text-xl font-bold text-primary">
+                    {formatPrice(selectedPaymentMethod === "pix" ? total * 0.95 : total)}
+                  </span>
                 </div>
+                {selectedPaymentMethod === "credit" && (
+                  <p className="text-xs text-muted-foreground text-right mt-1">
+                    ou 12x de {formatPrice(total / 12)} sem juros
+                  </p>
+                )}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Fixed Bottom CTA */}
-        <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-20">
-          <div className="max-w-lg mx-auto">
-            <Button
-              onClick={handleSubmit}
-              disabled={loadingPayment}
-              className="w-full h-14 text-base font-bold bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-xl"
-            >
-              {loadingPayment ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Processando...
-                </>
-              ) : (
-                `PAGAR ${formatPrice(total)}`
-              )}
-            </Button>
-          </div>
+          {/* Submit Button */}
+          <Button
+            onClick={handleSubmit}
+            disabled={loadingPayment}
+            className="w-full h-14 text-base font-bold bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-xl"
+          >
+            {loadingPayment ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Processando...
+              </>
+            ) : (
+              `FINALIZAR COMPRA`
+            )}
+          </Button>
         </div>
       </main>
     </div>
