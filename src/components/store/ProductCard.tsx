@@ -82,8 +82,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Full Width CTA Button - Extends outside card */}
       <button 
-        className="w-[calc(100%+8px)] -mx-1 -mb-1 bg-primary text-primary-foreground font-semibold text-xs py-2
-                 flex items-center justify-center gap-1.5 active:scale-[0.99] transition-transform rounded-none"
+        className="w-full bg-primary text-primary-foreground font-semibold text-xs py-2
+                 flex items-center justify-center gap-1.5 active:scale-[0.99] transition-transform"
         disabled={!product.inStock}
         aria-label={product.inStock ? 'Adicionar ao carrinho' : 'Produto indisponível'}
       >
