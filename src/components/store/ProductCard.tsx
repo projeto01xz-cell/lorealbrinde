@@ -82,12 +82,12 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Full Width CTA Button - Extends outside card */}
       <button 
-        className="w-[calc(100%+8px)] -mx-1 -mb-1 bg-primary text-primary-foreground font-bold text-sm py-3
-                 flex items-center justify-center gap-2 active:scale-[0.99] transition-transform rounded-none"
+        className="w-[calc(100%+8px)] -mx-1 -mb-1 bg-primary text-primary-foreground font-semibold text-xs py-2
+                 flex items-center justify-center gap-1.5 active:scale-[0.99] transition-transform rounded-none"
         disabled={!product.inStock}
         aria-label={product.inStock ? 'Adicionar ao carrinho' : 'Produto indisponível'}
       >
-        <ShoppingCart className="h-4 w-4" />
+        <ShoppingCart className="h-3.5 w-3.5" />
         {product.inStock ? 'COMPRAR' : 'ESGOTADO'}
       </button>
     </article>
