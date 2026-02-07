@@ -452,8 +452,8 @@ Recomendamos sempre o uso de equipamentos de segurança (capacete e itens de pro
   // Acessórios
   {
     id: '12',
-    name: 'Capacete Inteligente LED Bluetooth',
-    description: 'Capacete inteligente com luz LED integrada, seta direcional e conectividade Bluetooth.',
+    name: 'Triciclo Elétrico Raphynus 650W 48V 20Ah',
+    description: 'Triciclo elétrico com motor 650W, bateria 48V 20Ah e design confortável para mobilidade urbana.',
     price: 387.00,
     originalPrice: 499,
     image: capaceteSmart01,
