@@ -80,20 +80,20 @@ Seu conjunto de aro 14" com pneus urbanos semi slick garante boa estabilidade e 
 O display digital colorido permite acompanhar velocidade, nível de bateria e informações de desempenho em tempo real. Além disso, a scooter conta com entrada USB para recarga de dispositivos e cesta dianteira aramada para transporte de objetos.
 
 📋 Ficha Técnica
+• Motor: 400W com limitador eletrônico de velocidade
+• Velocidade Máxima: Até 32 km/h
+• Bateria: Chumbo-ácido 48V / 12Ah
+• Autonomia Média: Até 30 km*
+• Pneus: Aro 14" urbano semi slick
+• Freios: Sistema de freio a tambor
+• Display: Digital colorido
+• Iluminação: Dianteira e traseira
+• Capacidade Máxima: 120 kg
+• Altura recomendada: 1,50m a 1,75m
+• Peso Aproximado: 34 kg
+• Extras: Sistema antifurto com chave, cesta dianteira e entrada USB
 
-Motor: 400W com limitador eletrônico de velocidade
-Velocidade Máxima: Até 32 km/h
-Bateria: Chumbo-ácido 48V / 12Ah
-Autonomia Média: Até 30 km*
-Pneus: Aro 14" urbano semi slick
-Freios: Sistema de freio a tambor
-Display: Digital colorido
-Iluminação: Dianteira e traseira
-Capacidade Máxima: 120 kg
-Altura recomendada: 1,50m a 1,75m
-Peso Aproximado: 34 kg
-Extras: Sistema antifurto com chave, cesta dianteira e entrada USB
-
+⚠️ Aviso
 *A autonomia pode variar conforme peso do condutor, tipo de terreno e uso em subidas.`,
     price: 387.00,
     originalPrice: 5500,
