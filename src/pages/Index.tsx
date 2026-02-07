@@ -1,28 +1,17 @@
-import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import { useNavigate } from "react-router-dom";
-import heroBg from "@/assets/hero-bg.png";
+import Navbar from "@/components/store/Navbar";
+import HeroBanner from "@/components/store/HeroBanner";
+import FeaturedProducts from "@/components/store/FeaturedProducts";
+import Footer from "@/components/store/Footer";
 
-const Index = () => {
-  const navigate = useNavigate();
-
-  const handleStartQuiz = () => {
-    navigate("/questionario");
-  };
-
+export default function Index() {
   return (
-    <div 
-      className="min-h-[100svh] overflow-x-hidden"
-      style={{
-        backgroundImage: `url(${heroBg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center top'
-      }}
-    >
-      <Header />
-      <Hero onStartQuiz={handleStartQuiz} />
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navbar />
+      <main className="flex-1">
+        <HeroBanner />
+        <FeaturedProducts />
+      </main>
+      <Footer />
     </div>
   );
-};
-
-export default Index;
+}
