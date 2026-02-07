@@ -40,7 +40,7 @@ export default function Navbar() {
             <img 
               src={gtsm1Logo} 
               alt="GTSM1" 
-              className="h-6 w-auto"
+              className="h-5 w-auto"
             />
           </Link>
 
