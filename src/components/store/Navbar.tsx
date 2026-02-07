@@ -64,7 +64,7 @@ export default function Navbar() {
 
         {/* Search Bar */}
         <div className="pb-3">
-          <div className="relative flex items-center bg-secondary rounded-full border border-border">
+          <div className="relative flex items-center bg-secondary rounded-md border border-border">
             <button className="p-3 text-muted-foreground" aria-label="Busca por voz">
               <Mic className="h-5 w-5" />
             </button>
