@@ -55,26 +55,6 @@ export default function HeroBanner() {
           <ArrowRight className="h-5 w-5 flex-shrink-0" />
         </div>
       </Link>
-
-      {/* Stats Row */}
-      <div className="flex justify-around py-4 bg-card border-b border-border">
-        <div className="text-center">
-          <p className="text-lg font-bold text-foreground">10k+</p>
-          <p className="text-[10px] text-muted-foreground uppercase">Clientes</p>
-        </div>
-        <div className="text-center">
-          <p className="text-lg font-bold text-foreground">500+</p>
-          <p className="text-[10px] text-muted-foreground uppercase">Produtos</p>
-        </div>
-        <div className="text-center">
-          <p className="text-lg font-bold text-primary">4.9★</p>
-          <p className="text-[10px] text-muted-foreground uppercase">Avaliação</p>
-        </div>
-        <div className="text-center">
-          <p className="text-lg font-bold text-foreground">24h</p>
-          <p className="text-[10px] text-muted-foreground uppercase">Envio</p>
-        </div>
-      </div>
     </section>
   );
 }
