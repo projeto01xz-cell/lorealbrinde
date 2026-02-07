@@ -53,12 +53,10 @@ export default function ProdutoDetalhe() {
 
   const discount = calculateDiscount(product.price, product.originalPrice);
   
-  // Simula múltiplas imagens do produto
-  const productImages = [
-    product.image,
-    product.image,
-    product.image,
-  ];
+  // Usa as imagens do produto ou apenas a imagem principal
+  const productImages = product.images && product.images.length > 0 
+    ? product.images 
+    : [product.image];
 
   const getCategoryLabel = (cat: string) => {
     switch (cat) {
