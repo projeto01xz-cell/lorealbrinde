@@ -23,6 +23,67 @@ export const categories = [
 ];
 
 export const products: Product[] = [
+  // Produtos em destaque da imagem
+  {
+    id: '16',
+    name: 'Scooter Elétrica Demarche 400W 48V 12AH',
+    description: 'Scooter elétrica compacta com cesto frontal, ideal para deslocamentos urbanos. Motor 400W e bateria 48V 12Ah.',
+    price: 3597.30,
+    originalPrice: 5500,
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop',
+    category: 'scooters',
+    rating: 4.7,
+    reviews: 189,
+    inStock: true,
+    featured: true,
+    freeShipping: true,
+    specs: {
+      'Motor': '400W',
+      'Bateria': '48V 12Ah',
+      'Autonomia': 'Até 35km',
+      'Velocidade': '25 km/h',
+    },
+  },
+  {
+    id: '17',
+    name: 'Bicicleta Elétrica 750W Konnan Conquest 48V 18,2Ah',
+    description: 'E-bike estilo fat bike com motor 750W, pneus largos e design agressivo. Perfeita para trilhas e cidade.',
+    price: 7179.30,
+    originalPrice: 11190,
+    image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=500&h=500&fit=crop',
+    category: 'ebikes',
+    rating: 4.9,
+    reviews: 312,
+    inStock: true,
+    featured: true,
+    freeShipping: true,
+    specs: {
+      'Motor': '750W Brushless',
+      'Bateria': '48V 18,2Ah Lítio',
+      'Autonomia': 'Até 70km',
+      'Pneus': 'Fat Tire 20x4.0',
+    },
+  },
+  {
+    id: '18',
+    name: 'Scooter Elétrica GTS 500W 48V 20Ah JD-06',
+    description: 'Scooter elétrica retrô com design elegante, banco confortável e excelente autonomia. Não precisa de CNH.',
+    price: 5559.30,
+    originalPrice: 8300,
+    image: 'https://images.unsplash.com/photo-1604868189265-219ba7ffc595?w=500&h=500&fit=crop',
+    category: 'scooters',
+    rating: 4.8,
+    reviews: 245,
+    inStock: true,
+    featured: true,
+    freeShipping: true,
+    specs: {
+      'Motor': '500W',
+      'Bateria': '48V 20Ah',
+      'Autonomia': 'Até 60km',
+      'Velocidade': '35 km/h',
+    },
+  },
   // E-Bikes
   {
     id: '1',
@@ -35,7 +96,6 @@ export const products: Product[] = [
     rating: 4.8,
     reviews: 234,
     inStock: true,
-    featured: true,
     freeShipping: true,
     specs: {
       'Motor': '350W Brushless',
