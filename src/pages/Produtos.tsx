@@ -36,23 +36,23 @@ export default function Produtos() {
       />
       
       <main className="flex-1">
-        <div className="px-4 py-4">
+        <div className="px-4 py-3">
           {/* Results count */}
-          <p className="text-sm text-muted-foreground mb-4">
-            {filteredProducts.length} produtos encontrados
+          <p className="text-xs text-muted-foreground mb-3">
+            {filteredProducts.length} produtos
           </p>
 
-          {/* Products - Single column on mobile for max readability */}
-          <div className="flex flex-col gap-4">
+          {/* Products List */}
+          <div className="flex flex-col gap-3">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
 
           {filteredProducts.length === 0 && (
-            <div className="text-center py-16">
-              <p className="text-muted-foreground">
-                Nenhum produto encontrado nesta categoria.
+            <div className="text-center py-12">
+              <p className="text-muted-foreground text-sm">
+                Nenhum produto encontrado.
               </p>
             </div>
           )}
