@@ -4,6 +4,10 @@ import produto03 from '@/assets/products/produto-03.png';
 import produto04 from '@/assets/products/produto-04.png';
 import produto05 from '@/assets/products/produto-05.png';
 import produto06 from '@/assets/products/produto-06.png';
+import scooterDemarche01 from '@/assets/products/scooter-demarche-01.png';
+import scooterDemarche02 from '@/assets/products/scooter-demarche-02.png';
+import scooterDemarche03 from '@/assets/products/scooter-demarche-03.png';
+import scooterDemarche04 from '@/assets/products/scooter-demarche-04.png';
 
 export interface Product {
   id: string;
@@ -12,6 +16,7 @@ export interface Product {
   price: number;
   originalPrice?: number;
   image: string;
+  images?: string[];
   category: string;
   rating: number;
   reviews: number;
@@ -33,11 +38,47 @@ export const products: Product[] = [
   // Produtos em destaque da imagem
   {
     id: '16',
-    name: 'Scooter Elétrica Demarche 400W 48V 12AH',
-    description: 'Scooter elétrica compacta com cesto frontal, ideal para deslocamentos urbanos. Motor 400W e bateria 48V 12Ah.',
+    name: 'Scooter Elétrica Demarche 400w 48V 12AH',
+    description: `🛴 Scooter Elétrica Demarche 400W Aro 14 Urbana
+
+A Scooter Elétrica Demarche possui design moderno e alta praticidade, sendo ideal para deslocamentos urbanos rápidos e econômicos. Desenvolvida para o dia a dia, ela entrega conforto, segurança e ótimo desempenho para trajetos curtos e médios.
+
+Equipada com motor elétrico de 400W, a scooter atinge velocidade máxima de até 32 km/h, regulada por normas de segurança, garantindo uma condução estável e confiável no uso urbano.
+
+⚡ Autonomia e Desempenho Urbano
+
+A bateria 48V / 12Ah de chumbo-ácido oferece carregamento eficiente e autonomia média de até 30 km, variando conforme peso do condutor, tipo de terreno e uso em subidas. Ideal para deslocamentos diários como trabalho, estudos e tarefas do cotidiano.
+
+🔐 Sistema Antifurto Integrado
+
+Conta com sistema antifurto mecânico acionado por chave. Ao girar a chave localizada próxima ao eixo da roda, um mecanismo interno bloqueia fisicamente a rotação, dificultando o deslocamento da scooter quando estacionada.
+
+🛞 Conforto, Segurança e Praticidade
+
+Seu conjunto de aro 14" com pneus urbanos semi slick garante boa estabilidade e rodagem suave. O sistema de freio a tambor proporciona frenagens seguras e progressivas, enquanto a iluminação dianteira e traseira aumenta a segurança em trajetos noturnos.
+
+O display digital colorido permite acompanhar velocidade, nível de bateria e informações de desempenho em tempo real. Além disso, a scooter conta com entrada USB para recarga de dispositivos e cesta dianteira aramada para transporte de objetos.
+
+📋 Ficha Técnica
+
+Motor: 400W com limitador eletrônico de velocidade
+Velocidade Máxima: Até 32 km/h
+Bateria: Chumbo-ácido 48V / 12Ah
+Autonomia Média: Até 30 km*
+Pneus: Aro 14" urbano semi slick
+Freios: Sistema de freio a tambor
+Display: Digital colorido
+Iluminação: Dianteira e traseira
+Capacidade Máxima: 120 kg
+Altura recomendada: 1,50m a 1,75m
+Peso Aproximado: 34 kg
+Extras: Sistema antifurto com chave, cesta dianteira e entrada USB
+
+*A autonomia pode variar conforme peso do condutor, tipo de terreno e uso em subidas.`,
     price: 387.00,
     originalPrice: 5500,
-    image: produto01,
+    image: scooterDemarche01,
+    images: [scooterDemarche01, scooterDemarche02, scooterDemarche03, scooterDemarche04],
     category: 'scooters',
     rating: 4.7,
     reviews: 189,
@@ -46,9 +87,13 @@ export const products: Product[] = [
     freeShipping: true,
     specs: {
       'Motor': '400W',
-      'Bateria': '48V 12Ah',
-      'Autonomia': 'Até 35km',
-      'Velocidade': '25 km/h',
+      'Bateria': '48V 12Ah Chumbo-ácido',
+      'Autonomia': 'Até 30km',
+      'Velocidade': '32 km/h',
+      'Pneus': 'Aro 14" semi slick',
+      'Freios': 'Tambor',
+      'Display': 'Digital colorido',
+      'Capacidade': '120 kg',
     },
   },
   {
