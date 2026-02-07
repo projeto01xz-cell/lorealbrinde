@@ -81,13 +81,6 @@ export default function ProductCard({ product }: ProductCardProps) {
         </button>
       </div>
 
-      {/* Compare Option */}
-      <div className="px-3 pb-3 pt-0">
-        <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-          <input type="checkbox" className="w-4 h-4 rounded border-border" />
-          Comparar produto
-        </label>
-      </div>
     </article>
   );
 }
