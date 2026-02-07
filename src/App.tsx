@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Produtos from "./pages/Produtos";
 import ProdutoDetalhe from "./pages/ProdutoDetalhe";
 import Checkout from "./pages/Checkout";
+import PagamentoPix from "./pages/PagamentoPix";
 import Sobre from "./pages/Sobre";
 import NotFound from "./pages/NotFound";
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/produtos" element={<Produtos />} />
           <Route path="/produto/:id" element={<ProdutoDetalhe />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/pagamento-pix" element={<PagamentoPix />} />
           <Route path="/sobre" element={<Sobre />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
