@@ -23,8 +23,8 @@ export default function FeaturedProducts() {
           </Link>
         </div>
 
-        {/* Products Grid - 2 columns */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Products List - vertical */}
+        <div className="flex flex-col gap-3">
           {featured.slice(0, 6).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
