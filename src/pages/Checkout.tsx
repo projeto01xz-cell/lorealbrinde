@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { Loader2, MapPin, User, CreditCard, Truck, Package, Zap, Lock, QrCode } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -251,19 +252,99 @@ export default function Checkout() {
     
     setLoadingPayment(true);
     
-    // Aqui será integrado com o gateway de pagamento
-    // Por enquanto, simula o processamento
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const shippingOption = shippingOptions.find((s) => s.id === selectedShipping);
+      const shippingCost = shippingOption?.price || 0;
+      const productTotal = product.price * quantity;
       
-      toast.success("Pedido processado! Aguardando integração com gateway.");
+      // Apply 5% PIX discount when payment method is PIX
+      const pixDiscount = selectedPaymentMethod === "pix" ? 0.05 : 0;
+      const totalWithDiscount = (productTotal + shippingCost) * (1 - pixDiscount);
+      const amountInCents = Math.round(totalWithDiscount * 100);
       
-      // Futuramente: redirecionar para página de pagamento PIX
-      // navigate(`/pagamento?orderId=${orderId}`);
+      const paymentData = {
+        amount: amountInCents,
+        customer: {
+          name: formData.fullName.trim(),
+          email: formData.email.trim(),
+          document: formData.cpf.replace(/\D/g, ""),
+          phone: formData.phone.replace(/\D/g, ""),
+        },
+        items: [
+          {
+            title: `teste ${quantity}`, // Masked product name for privacy
+            quantity: quantity,
+            unitPrice: Math.round(product.price * (1 - pixDiscount) * 100),
+          },
+        ],
+        expiresInMinutes: 30,
+      };
+      
+      // Store order data in sessionStorage for PixPaymentPage
+      const orderData = {
+        product: {
+          id: product.id,
+          name: product.name,
+          image: product.image,
+          price: product.price,
+        },
+        quantity,
+        customer: {
+          name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          cpf: formData.cpf,
+        },
+        address: {
+          cep: formData.cep,
+          street: formData.street,
+          number: formData.number,
+          complement: formData.complement,
+          neighborhood: formData.neighborhood,
+          city: formData.city,
+          state: formData.state,
+        },
+        shipping: {
+          option: selectedShipping,
+          price: shippingCost,
+        },
+        paymentMethod: selectedPaymentMethod,
+        total: totalWithDiscount,
+      };
+      
+      sessionStorage.setItem("checkoutOrder", JSON.stringify(orderData));
+      
+      const { data, error } = await supabase.functions.invoke("create-pix-payment", {
+        body: paymentData,
+      });
+      
+      if (error) {
+        console.error("Payment error:", error);
+        toast.error("Erro ao gerar pagamento PIX. Tente novamente.");
+        return;
+      }
+      
+      if (!data || !data.pix?.payload) {
+        console.error("Invalid payment response:", data);
+        toast.error("Resposta inválida do gateway de pagamento.");
+        return;
+      }
+      
+      // Store PIX data in sessionStorage
+      sessionStorage.setItem("pixPayment", JSON.stringify({
+        id: data.id,
+        payload: data.pix.payload,
+        qrCodeUrl: data.pix.qrCodeUrl,
+        expiresAt: data.pix.expiresAt,
+        amount: data.amount,
+      }));
+      
+      // Navigate to PIX payment page
+      navigate("/pagamento-pix");
       
     } catch (error) {
       console.error("Payment error:", error);
-      toast.error("Erro ao processar pagamento");
+      toast.error("Erro ao processar pagamento. Tente novamente.");
     } finally {
       setLoadingPayment(false);
     }
