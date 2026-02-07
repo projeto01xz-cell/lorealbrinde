@@ -453,21 +453,52 @@ Recomendamos sempre o uso de equipamentos de segurança (capacete e itens de pro
   {
     id: '12',
     name: 'Triciclo Elétrico Raphynus 650W 48V 20Ah',
-    description: 'Triciclo elétrico com motor 650W, bateria 48V 20Ah e design confortável para mobilidade urbana.',
+    description: `🛵 Triciclo Elétrico Raphynus 650W 48V 20Ah — Conforto e Estabilidade
+
+O Triciclo Elétrico Raphynus foi desenvolvido para quem busca mobilidade com segurança, conforto e praticidade. Seu design de três rodas proporciona excelente estabilidade, sendo ideal para pessoas de todas as idades, incluindo idosos e pessoas com dificuldades de equilíbrio.
+
+Equipado com motor elétrico de 650W e sistema 48V, oferece potência suficiente para deslocamentos urbanos e pequenas subidas, com velocidade máxima de até 25 km/h. A bateria de 20Ah proporciona autonomia de aproximadamente 40 a 50 km, variando conforme peso do condutor e tipo de terreno.
+
+⚡ Sistema Elétrico
+Motor: 650W – 48V
+Bateria: 48V 20Ah (removível para recarga)
+Velocidade máxima: Até 25 km/h
+Autonomia: 40 a 50 km aproximadamente
+Tempo de recarga: 6 a 8 horas
+
+🛡️ Conforto e Segurança
+Assento acolchoado com encosto
+Cesto traseiro para transporte de compras
+Freios a disco nas rodas traseiras
+Iluminação dianteira e traseira
+Espelhos retrovisores
+Buzina elétrica
+
+📋 Especificações
+Estrutura em aço reforçado
+Rodas aro 16"
+Capacidade de carga: até 150 kg
+Peso aproximado: 55 kg
+Painel digital com velocímetro e indicador de bateria
+
+⚠️ Aviso Importante
+Recomendamos sempre o uso de equipamentos de segurança. Respeite as leis de trânsito e utilize o produto de forma responsável.`,
     price: 387.00,
-    originalPrice: 499,
+    originalPrice: 6990,
     image: capaceteSmart01,
     images: [capaceteSmart01, capaceteSmart02, capaceteSmart03, capaceteSmart04],
-    category: 'accessories',
+    category: 'scooters',
     rating: 4.5,
     reviews: 267,
     inStock: true,
     featured: true,
     specs: {
-      'Material': 'ABS + EPS',
-      'LED': 'Frontal + Traseiro',
-      'Bateria': '800mAh',
-      'Bluetooth': '5.0',
+      'Motor': '650W',
+      'Bateria': '48V 20Ah',
+      'Autonomia': '40 a 50km',
+      'Velocidade': '25 km/h',
+      'Capacidade': '150 kg',
+      'Rodas': 'Aro 16"',
     },
   },
   {
