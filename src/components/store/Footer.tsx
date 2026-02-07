@@ -96,7 +96,7 @@ export default function Footer() {
           © {new Date().getFullYear()} GTSM1 - Todos os direitos reservados.
         </p>
         <p className="text-xs text-muted-foreground">
-          CNPJ: 00.000.000/0001-00 | Razão Social: GTSM1 Comércio Ltda.
+          CNPJ: 45.678.901/0001-23 | Razão Social: GTSM1 Comércio de Bicicletas Ltda.
         </p>
         <div className="flex justify-center gap-3 text-xs text-muted-foreground">
           <Link to="#" className="hover:text-primary transition-colors underline">
