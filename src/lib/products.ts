@@ -1,3 +1,10 @@
+import produto01 from '@/assets/products/produto-01.png';
+import produto02 from '@/assets/products/produto-02.png';
+import produto03 from '@/assets/products/produto-03.png';
+import produto04 from '@/assets/products/produto-04.png';
+import produto05 from '@/assets/products/produto-05.png';
+import produto06 from '@/assets/products/produto-06.png';
+
 export interface Product {
   id: string;
   name: string;
@@ -30,7 +37,7 @@ export const products: Product[] = [
     description: 'Scooter elétrica compacta com cesto frontal, ideal para deslocamentos urbanos. Motor 400W e bateria 48V 12Ah.',
     price: 3597.30,
     originalPrice: 5500,
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop',
+    image: produto01,
     category: 'scooters',
     rating: 4.7,
     reviews: 189,
@@ -50,7 +57,7 @@ export const products: Product[] = [
     description: 'E-bike estilo fat bike com motor 750W, pneus largos e design agressivo. Perfeita para trilhas e cidade.',
     price: 7179.30,
     originalPrice: 11190,
-    image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=500&h=500&fit=crop',
+    image: produto02,
     category: 'ebikes',
     rating: 4.9,
     reviews: 312,
@@ -70,7 +77,7 @@ export const products: Product[] = [
     description: 'Scooter elétrica retrô com design elegante, banco confortável e excelente autonomia. Não precisa de CNH.',
     price: 5559.30,
     originalPrice: 8300,
-    image: 'https://images.unsplash.com/photo-1604868189265-219ba7ffc595?w=500&h=500&fit=crop',
+    image: produto03,
     category: 'scooters',
     rating: 4.8,
     reviews: 245,
@@ -91,7 +98,7 @@ export const products: Product[] = [
     description: 'Bicicleta elétrica urbana com motor 350W, bateria de lítio 36V 10Ah e autonomia de até 40km.',
     price: 4299,
     originalPrice: 5499,
-    image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=500&h=500&fit=crop',
+    image: produto04,
     category: 'ebikes',
     rating: 4.8,
     reviews: 234,
@@ -110,7 +117,7 @@ export const products: Product[] = [
     description: 'Bicicleta elétrica para trilhas com motor 500W, suspensão dianteira e pneus off-road.',
     price: 6999,
     originalPrice: 8499,
-    image: 'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=500&h=500&fit=crop',
+    image: produto05,
     category: 'ebikes',
     rating: 4.9,
     reviews: 156,
@@ -130,7 +137,7 @@ export const products: Product[] = [
     description: 'Bicicleta elétrica dobrável, perfeita para transporte público. Motor 250W e peso de apenas 18kg.',
     price: 3499,
     originalPrice: 3999,
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=500&fit=crop',
+    image: produto06,
     category: 'ebikes',
     rating: 4.6,
     reviews: 89,
