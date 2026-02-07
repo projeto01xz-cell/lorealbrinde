@@ -286,7 +286,7 @@ export default function Checkout() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Custom Checkout Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border">
-        <div className="px-4 py-3 flex items-center justify-between max-w-lg mx-auto">
+        <div className="px-4 py-3 flex items-center justify-between">
           <Link to="/">
             <img src={gtsm1Logo} alt="GTSM1" className="h-6 w-auto" />
           </Link>
