@@ -66,30 +66,26 @@ export default function ProductCard({ product }: ProductCardProps) {
           </p>
         </div>
 
-        {/* Free Shipping + CTA Row */}
-        <div className="flex items-center justify-between gap-2 mt-2">
-          {product.freeShipping ? (
-            <div className="flex items-center gap-1">
-              <Truck className="h-3 w-3 text-primary" />
-              <span className="text-[10px] font-medium text-primary">
-                Frete Grátis
-              </span>
-            </div>
-          ) : (
-            <div />
-          )}
-          
-          {/* Compact Add Button */}
-          <button 
-            className="bg-primary text-primary-foreground font-bold text-xs px-3 py-2 rounded-lg
-                     flex items-center gap-1.5 min-h-[36px] active:scale-95 transition-transform"
-            disabled={!product.inStock}
-            aria-label={product.inStock ? 'Adicionar ao carrinho' : 'Produto indisponível'}
-          >
-            <ShoppingCart className="h-3.5 w-3.5" />
-            {product.inStock ? 'COMPRAR' : 'ESGOTADO'}
-          </button>
-        </div>
+        {/* Free Shipping Badge */}
+        {product.freeShipping && (
+          <div className="flex items-center gap-1 mt-1">
+            <Truck className="h-3 w-3 text-primary" />
+            <span className="text-[10px] font-medium text-primary">
+              Frete Grátis
+            </span>
+          </div>
+        )}
+
+        {/* Full Width CTA Button */}
+        <button 
+          className="w-full bg-primary text-primary-foreground font-bold text-sm py-2.5 rounded-lg
+                   flex items-center justify-center gap-2 mt-2 active:scale-[0.98] transition-transform"
+          disabled={!product.inStock}
+          aria-label={product.inStock ? 'Adicionar ao carrinho' : 'Produto indisponível'}
+        >
+          <ShoppingCart className="h-4 w-4" />
+          {product.inStock ? 'COMPRAR' : 'ESGOTADO'}
+        </button>
       </div>
     </article>
   );
