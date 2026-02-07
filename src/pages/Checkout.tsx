@@ -669,6 +669,15 @@ export default function Checkout() {
             </div>
           </div>
 
+          {/* PIX Discount Banner */}
+          <div className="bg-black rounded-xl p-4 text-center">
+            <p className="text-white text-sm font-medium">
+              ⚡ Valor de <span className="font-bold">QUEIMÃO DE ESTOQUE</span> apenas via PIX.
+              <br />
+              No cartão, o pagamento será no valor integral.
+            </p>
+          </div>
+
           {/* Submit Button */}
           <Button
             onClick={handleSubmit}
