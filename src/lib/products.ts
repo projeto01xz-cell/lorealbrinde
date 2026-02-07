@@ -460,26 +460,26 @@ O Triciclo Elétrico Raphynus foi desenvolvido para quem busca mobilidade com se
 Equipado com motor elétrico de 650W e sistema 48V, oferece potência suficiente para deslocamentos urbanos e pequenas subidas, com velocidade máxima de até 25 km/h. A bateria de 20Ah proporciona autonomia de aproximadamente 40 a 50 km, variando conforme peso do condutor e tipo de terreno.
 
 ⚡ Sistema Elétrico
-Motor: 650W – 48V
-Bateria: 48V 20Ah (removível para recarga)
-Velocidade máxima: Até 25 km/h
-Autonomia: 40 a 50 km aproximadamente
-Tempo de recarga: 6 a 8 horas
+• Motor: 650W – 48V
+• Bateria: 48V 20Ah (removível para recarga)
+• Velocidade máxima: Até 25 km/h
+• Autonomia: 40 a 50 km aproximadamente
+• Tempo de recarga: 6 a 8 horas
 
 🛡️ Conforto e Segurança
-Assento acolchoado com encosto
-Cesto traseiro para transporte de compras
-Freios a disco nas rodas traseiras
-Iluminação dianteira e traseira
-Espelhos retrovisores
-Buzina elétrica
+• Assento acolchoado com encosto
+• Cesto traseiro para transporte de compras
+• Freios a disco nas rodas traseiras
+• Iluminação dianteira e traseira
+• Espelhos retrovisores
+• Buzina elétrica
 
-📋 Especificações
-Estrutura em aço reforçado
-Rodas aro 16"
-Capacidade de carga: até 150 kg
-Peso aproximado: 55 kg
-Painel digital com velocímetro e indicador de bateria
+📋 Especificações Técnicas
+• Estrutura em aço reforçado
+• Rodas aro 16"
+• Capacidade de carga: até 150 kg
+• Peso aproximado: 55 kg
+• Painel digital com velocímetro e indicador de bateria
 
 ⚠️ Aviso Importante
 Recomendamos sempre o uso de equipamentos de segurança. Respeite as leis de trânsito e utilize o produto de forma responsável.`,
