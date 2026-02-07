@@ -299,6 +299,14 @@ export default function Checkout() {
       
       <main className="flex-1 pb-8">
 
+        {/* PIX Discount Banner - Full Width */}
+        <div className="bg-black py-3 text-center">
+          <p className="text-white text-xs font-medium px-4 max-w-lg mx-auto">
+            ⚡ O preço promocional é <span className="font-bold">EXCLUSIVO</span> para pagamento via PIX.
+            No cartão de crédito, será cobrado o valor integral.
+          </p>
+        </div>
+
         <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
           {/* Product Summary */}
           <div className="bg-card rounded-xl p-4 border border-border">
@@ -325,17 +333,7 @@ export default function Checkout() {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* PIX Discount Banner - Full Width */}
-        <div className="bg-black py-3 text-center">
-          <p className="text-white text-xs font-medium px-4 max-w-lg mx-auto">
-            ⚡ O preço promocional é <span className="font-bold">EXCLUSIVO</span> para pagamento via PIX.
-            No cartão de crédito, será cobrado o valor integral.
-          </p>
-        </div>
-
-        <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
           {/* Personal Data */}
           <div className="bg-card rounded-xl p-4 border border-border">
             <h2 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
