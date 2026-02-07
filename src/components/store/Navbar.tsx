@@ -12,8 +12,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
-            <h1 className="text-xl font-bold text-foreground">
-              Tech<span className="text-primary">Store</span>
+            <h1 className="text-xl font-bold text-green-600">
+              Tech<span className="text-green-500">Store</span>
             </h1>
           </Link>
 

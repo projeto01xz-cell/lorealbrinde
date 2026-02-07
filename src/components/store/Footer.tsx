@@ -8,8 +8,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-foreground">
-              Tech<span className="text-primary">Store</span>
+            <h3 className="text-xl font-bold text-green-600">
+              Tech<span className="text-green-500">Store</span>
             </h3>
             <p className="text-sm text-muted-foreground">
               A melhor loja de eletrônicos do Brasil. 
