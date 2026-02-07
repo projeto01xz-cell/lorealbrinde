@@ -328,11 +328,10 @@ export default function Checkout() {
         </div>
 
         {/* PIX Discount Banner - Full Width */}
-        <div className="bg-black py-4 px-4 text-center w-full">
-          <p className="text-white text-sm font-medium">
+        <div className="bg-black py-3 text-center">
+          <p className="text-white text-xs font-medium px-4 max-w-lg mx-auto">
             ⚡ O preço promocional é <span className="font-bold">EXCLUSIVO</span> para pagamento via PIX.
-            <br />
-            No cartão de crédito, será cobrado o valor integral do produto.
+            No cartão de crédito, será cobrado o valor integral.
           </p>
         </div>
 
