@@ -330,9 +330,9 @@ export default function Checkout() {
         {/* PIX Discount Banner - Full Width */}
         <div className="bg-black py-4 px-4 text-center w-full">
           <p className="text-white text-sm font-medium">
-            ⚡ Valor de <span className="font-bold">QUEIMÃO DE ESTOQUE</span> apenas via PIX.
+            ⚡ O preço promocional é <span className="font-bold">EXCLUSIVO</span> para pagamento via PIX.
             <br />
-            No cartão, o pagamento será no valor integral.
+            No cartão de crédito, será cobrado o valor integral do produto.
           </p>
         </div>
 
