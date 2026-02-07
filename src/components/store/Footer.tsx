@@ -1,118 +1,154 @@
-import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from "lucide-react";
+import { Mail, Phone, MapPin, Instagram, Facebook, Youtube, CreditCard, Banknote, ShieldCheck, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
-    <footer className="bg-secondary/30 border-t border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-bold text-green-600">
-              Tech<span className="text-green-500">Store</span>
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              A melhor loja de eletrônicos do Brasil. 
-              Qualidade e preço justo desde 2020.
-            </p>
-            <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-            </div>
-          </div>
+    <footer className="bg-card border-t border-border mt-8">
+      {/* Newsletter */}
+      <div className="px-4 py-6 bg-primary/5 border-b border-border">
+        <div className="text-center mb-4">
+          <h3 className="text-lg font-bold text-foreground mb-1">
+            Receba ofertas exclusivas
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Cadastre-se e ganhe 10% OFF na primeira compra
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="email"
+            placeholder="Seu e-mail"
+            className="input-field flex-1"
+          />
+          <button className="btn-primary px-6">
+            Enviar
+          </button>
+        </div>
+      </div>
 
-          {/* Links */}
+      {/* Links */}
+      <div className="px-4 py-6 border-b border-border">
+        <div className="grid grid-cols-2 gap-6">
           <div>
-            <h4 className="font-semibold text-foreground mb-4">Navegação</h4>
+            <h4 className="font-semibold text-foreground mb-3">Navegação</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/" className="text-sm text-muted-foreground">
                   Início
                 </Link>
               </li>
               <li>
-                <Link to="/produtos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/produtos" className="text-sm text-muted-foreground">
                   Produtos
                 </Link>
               </li>
               <li>
-                <Link to="/sobre" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/sobre" className="text-sm text-muted-foreground">
                   Sobre
                 </Link>
               </li>
             </ul>
           </div>
-
-          {/* Categories */}
+          
           <div>
-            <h4 className="font-semibold text-foreground mb-4">Categorias</h4>
+            <h4 className="font-semibold text-foreground mb-3">Categorias</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/produtos?categoria=smartphones" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Smartphones
+                <Link to="/produtos?categoria=ebikes" className="text-sm text-muted-foreground">
+                  E-Bikes
                 </Link>
               </li>
               <li>
-                <Link to="/produtos?categoria=laptops" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Notebooks
+                <Link to="/produtos?categoria=scooters" className="text-sm text-muted-foreground">
+                  Scooters
                 </Link>
               </li>
               <li>
-                <Link to="/produtos?categoria=audio" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Áudio
+                <Link to="/produtos?categoria=parts" className="text-sm text-muted-foreground">
+                  Peças
                 </Link>
               </li>
               <li>
-                <Link to="/produtos?categoria=accessories" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/produtos?categoria=accessories" className="text-sm text-muted-foreground">
                   Acessórios
                 </Link>
               </li>
             </ul>
           </div>
+        </div>
+      </div>
 
-          {/* Contact */}
-          <div>
-            <h4 className="font-semibold text-foreground mb-4">Contato</h4>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                (11) 99999-9999
-              </li>
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                contato@techstore.com
-              </li>
-              <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4 mt-0.5" />
-                São Paulo, SP
-              </li>
-            </ul>
+      {/* Contact */}
+      <div className="px-4 py-6 border-b border-border">
+        <h4 className="font-semibold text-foreground mb-3">Contato</h4>
+        <ul className="space-y-3">
+          <li className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Phone className="h-4 w-4" />
+            (11) 99999-9999
+          </li>
+          <li className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Mail className="h-4 w-4" />
+            contato@gtsm1.com.br
+          </li>
+          <li className="flex items-start gap-2 text-sm text-muted-foreground">
+            <MapPin className="h-4 w-4 mt-0.5" />
+            São Paulo, SP
+          </li>
+        </ul>
+
+        {/* Social */}
+        <div className="flex gap-4 mt-4">
+          <a href="#" className="p-2 bg-secondary rounded-lg text-muted-foreground hover:text-primary transition-colors">
+            <Instagram className="h-5 w-5" />
+          </a>
+          <a href="#" className="p-2 bg-secondary rounded-lg text-muted-foreground hover:text-primary transition-colors">
+            <Facebook className="h-5 w-5" />
+          </a>
+          <a href="#" className="p-2 bg-secondary rounded-lg text-muted-foreground hover:text-primary transition-colors">
+            <Youtube className="h-5 w-5" />
+          </a>
+        </div>
+      </div>
+
+      {/* Trust Badges */}
+      <div className="px-4 py-6 border-b border-border">
+        <div className="flex flex-wrap justify-center gap-6">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            <span>Compra Segura</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Truck className="h-5 w-5 text-primary" />
+            <span>Frete Grátis</span>
           </div>
         </div>
+      </div>
 
-        {/* Bottom */}
-        <div className="mt-12 pt-8 border-t border-border">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              © 2025 TechStore. Todos os direitos reservados.
-            </p>
-            <div className="flex gap-6">
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Termos de Uso
-              </a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Privacidade
-              </a>
-            </div>
+      {/* Payment Methods */}
+      <div className="px-4 py-4 border-b border-border">
+        <p className="text-xs text-muted-foreground text-center mb-3">
+          Formas de Pagamento
+        </p>
+        <div className="flex justify-center gap-3">
+          <div className="flex items-center gap-1 px-3 py-2 bg-secondary rounded text-xs text-muted-foreground">
+            <Banknote className="h-4 w-4" />
+            PIX
+          </div>
+          <div className="flex items-center gap-1 px-3 py-2 bg-secondary rounded text-xs text-muted-foreground">
+            <CreditCard className="h-4 w-4" />
+            Cartão
+          </div>
+          <div className="px-3 py-2 bg-secondary rounded text-xs text-muted-foreground">
+            Boleto
           </div>
         </div>
+      </div>
+
+      {/* Copyright */}
+      <div className="px-4 py-4 bg-secondary/30">
+        <p className="text-xs text-muted-foreground text-center">
+          © 2025 GTSM1. Todos os direitos reservados.
+        </p>
       </div>
     </footer>
   );
