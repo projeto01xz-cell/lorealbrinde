@@ -3,6 +3,7 @@ import HeroBanner from "@/components/store/HeroBanner";
 import FeaturedProducts from "@/components/store/FeaturedProducts";
 import Footer from "@/components/store/Footer";
 import promoBanner from "@/assets/promo-banner.png";
+import freteGratisBanner from "@/assets/frete-gratis-banner.png";
 
 export default function Index() {
   return (
@@ -10,6 +11,15 @@ export default function Index() {
       <Navbar />
       <main className="flex-1">
         <HeroBanner />
+        
+        {/* Frete Grátis Banner */}
+        <div className="bg-card">
+          <img 
+            src={freteGratisBanner} 
+            alt="Frete Grátis para todo Brasil" 
+            className="w-full h-auto"
+          />
+        </div>
         
         {/* Promo Banner - GTSM1 Desde 1994 */}
         <div className="bg-card py-4">
