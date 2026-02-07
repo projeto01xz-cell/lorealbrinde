@@ -42,8 +42,8 @@ export default function Produtos() {
             {filteredProducts.length} produtos
           </p>
 
-          {/* Products List */}
-          <div className="flex flex-col gap-3">
+          {/* Products Grid - 2 columns on mobile */}
+          <div className="grid grid-cols-2 gap-3">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
