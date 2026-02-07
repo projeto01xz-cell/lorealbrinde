@@ -484,7 +484,7 @@ Painel digital com velocímetro e indicador de bateria
 ⚠️ Aviso Importante
 Recomendamos sempre o uso de equipamentos de segurança. Respeite as leis de trânsito e utilize o produto de forma responsável.`,
     price: 387.00,
-    originalPrice: 6990,
+    originalPrice: 6789,
     image: capaceteSmart01,
     images: [capaceteSmart01, capaceteSmart02, capaceteSmart03, capaceteSmart04],
     category: 'scooters',
