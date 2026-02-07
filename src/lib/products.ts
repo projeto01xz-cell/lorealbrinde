@@ -120,6 +120,7 @@ O display digital colorido permite acompanhar velocidade, nível de bateria e in
     id: '17',
     name: 'Bicicleta Elétrica 750w Konnan Conquest 48V 18,2Ah',
     description: `⚡ Bicicleta Elétrica Aro 20 Fat 4.0 750W 48V — Conforto, Estilo e Mobilidade
+
 Esta bicicleta elétrica aro 20 com pneus fat 4.0 foi desenvolvida para quem busca mobilidade elétrica com equilíbrio entre potência, conforto e controle. O quadro em aço reforçado e os pneus largos garantem excelente estabilidade, trazendo mais segurança no uso urbano e em pisos irregulares.
 
 Equipada com motor traseiro de 750W e sistema elétrico 48V, oferece ótimo desempenho em arrancadas e subidas, com velocidade limitada em até 32 km/h, conforme a legislação. A bateria 48V com 18,2Ah proporciona autonomia adequada para deslocamentos diários, trabalho e lazer.
@@ -127,71 +128,56 @@ Equipada com motor traseiro de 750W e sistema elétrico 48V, oferece ótimo dese
 O conforto é garantido pela suspensão dianteira com coroa dupla, enquanto os freios a disco nas duas rodas asseguram frenagens confiáveis. A transmissão de 7 velocidades indexadas permite ajustar a pedalada conforme o trajeto, e o display facilita o acompanhamento de velocidade, bateria e percurso durante a pilotagem.
 
 🛡️ Estrutura e Conforto
-Quadro em aço aro 20
-Garfo com suspensão em aço e coroa dupla
-Pneus fat 20" x 4.0 para maior estabilidade
-Guidão largo com posição de pilotagem confortável
-Selim confortável
+• Quadro em aço aro 20
+• Garfo com suspensão em aço e coroa dupla
+• Pneus fat 20" x 4.0 para maior estabilidade
+• Guidão largo com posição de pilotagem confortável
+• Selim confortável
 
 ⚙️ Sistema Elétrico
-Motor: Traseiro 750W – 48V
-Bateria: 48V 18,2Ah
-Velocidade máxima: Limitada a 32 km/h
-Autonomia aproximadamente: 30km a 40km.
-Acelerador integrado à manopla (fiação à prova d'água)
-Manetes com corte de energia do motor
-Carregador 54.6V 2A
+• Motor: Traseiro 750W – 48V
+• Bateria: 48V 18,2Ah
+• Velocidade máxima: Limitada a 32 km/h
+• Autonomia: 30km a 40km aproximadamente
+• Acelerador integrado à manopla (fiação à prova d'água)
+• Manetes com corte de energia do motor
+• Carregador 54.6V 2A
 
 🛑 Segurança
-Freio a disco dianteiro
-Freio a disco traseiro
-Discos Ø160 mm
-Iluminação dianteira e traseira
+• Freio a disco dianteiro e traseiro
+• Discos Ø160 mm
+• Iluminação dianteira e traseira
 
 🔧 Transmissão e Componentes
-Transmissão com 7 velocidades indexadas
-Catraca 14–28 dentes
-Câmbio traseiro de fixação direta
-Pedivela em alumínio com coroa 42 dentes e braço 170 mm
-Corrente 1/2 x 3/32 com 114 elos
+• Transmissão com 7 velocidades indexadas
+• Catraca 14–28 dentes
+• Câmbio traseiro de fixação direta
+• Pedivela em alumínio com coroa 42 dentes e braço 170 mm
+• Corrente 1/2 x 3/32 com 114 elos
 
 📊 Painel e Recursos
-Display 48V com suporte (Ø31.8)
-Indicação de velocidade
-Nível de carga da bateria
-Distância/viagem (trip)
-Controle de luz
+• Display 48V com suporte (Ø31.8)
+• Indicação de velocidade
+• Nível de carga da bateria
+• Distância/viagem (trip)
+• Controle de luz
 
 📦 Peso e Capacidade
-Referência de mercado: e-bike 20x4" 48V 750W 40 kg com bateria (o peso real pode variar conforme quadro, componentes e tipo de bateria).
-Referência de mercado: há anúncios indicando até 150 kg de carga máxima (pode variar conforme estrutura e fabricante).
+• Peso aproximado: 40 kg com bateria
+• Carga máxima: até 150 kg
 
 📋 Especificações Técnicas
-Quadro: Aço, aro 20", compatível com pneus 4.0. Indicado para ciclista de 1,60 cm a 1,85 cm
-Garfo: Suspensão aro 20", aço, coroa dupla, pernas ED Ø38, threadless
-Amortecedor: 1200 lbs x 150 l (f/r: 24/31)
-Caixa de direção: 1-1/8", Ø28.6/44/30, sem rosca
-Espaçadores: 1-1/8" x 10 mm (2 pcs) + 1-1/8" x 5 mm (1 pc)
-Guidão: 22.2 x 2.0 x 640 mm, Ø31.8, altura 220 mm
-Mesa: Ø22.2 x Ø28.6
-Manoplas: 130 mm, duas cores
-Movimento central: Rolamento selado, 120/175 mm
-Pedais: Liga de alumínio com refletor, rosca 9/16", com esferas
-Cubo dianteiro: M3/8 x 135 x 175, 36 furos, com rolamentos
-Aros: Alumínio aro 20", largura 4.0, 36 furos
-Raios: 13G (F: 171/172 | R: 128/129), niple UCP, raios com tratamento ED
-Pneus: 20" x 4.0 com logo KONNAN
-Câmaras: 20" x 4.0, válvula AV, butil
-Fita de aro: 20 x 70 mm
-Freios: Disco dianteiro e traseiro (BK alloy), discos Ø160 mm
-Motor: Traseiro 48V 750W (freio a disco)
-Transmissão: 7v indexada, catraca 14–28T
-Controlador: 9 tubos, 48V 750W, 115 mm
-Iluminação: Farol dianteiro e lanterna traseira
-Paralamas: Aro 20", tipo redondo 110 mm + suportes
-Descanso: Traseiro ajustável
-Interruptor: Farol/buzina, fiação à prova d'água
-Sensor: 12 ímãs
+• Quadro: Aço, aro 20", compatível com pneus 4.0 (ciclista de 1,60m a 1,85m)
+• Garfo: Suspensão aro 20", aço, coroa dupla, pernas ED Ø38
+• Guidão: 22.2 x 2.0 x 640 mm, Ø31.8, altura 220 mm
+• Pedais: Liga de alumínio com refletor, rosca 9/16"
+• Aros: Alumínio aro 20", largura 4.0, 36 furos
+• Pneus: 20" x 4.0 com logo KONNAN
+• Freios: Disco dianteiro e traseiro (BK alloy), discos Ø160 mm
+• Motor: Traseiro 48V 750W
+• Controlador: 9 tubos, 48V 750W
+• Iluminação: Farol dianteiro e lanterna traseira
+• Paralamas: Aro 20", tipo redondo 110 mm
 
 ⚠️ Aviso Importante
 Recomendamos sempre o uso de equipamentos de segurança (capacete e itens de proteção). Respeite as leis de trânsito e utilize o produto de forma responsável.`,
