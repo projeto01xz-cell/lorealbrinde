@@ -10,11 +10,11 @@ export default function ProductCard({ product }: ProductCardProps) {
   const discount = calculateDiscount(product.price, product.originalPrice);
 
   return (
-    <article className="card-product flex flex-col">
-      {/* Image Container */}
+    <article className="card-product flex flex-row bg-card">
+      {/* Image Container - Left side */}
       <Link 
         to={`/produto/${product.id}`}
-        className="relative aspect-square overflow-hidden bg-secondary/30"
+        className="relative w-32 h-32 flex-shrink-0 overflow-hidden bg-secondary/30"
       >
         <img
           src={product.image}
@@ -23,82 +23,73 @@ export default function ProductCard({ product }: ProductCardProps) {
           loading="lazy"
         />
         
-        {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
-          {discount > 0 && (
-            <span className="badge badge-offer">
-              -{discount}%
-            </span>
-          )}
-          {!product.inStock && (
-            <span className="badge bg-muted text-muted-foreground">
-              Esgotado
-            </span>
-          )}
-        </div>
+        {/* Discount Badge */}
+        {discount > 0 && (
+          <span className="absolute top-1 left-1 badge badge-offer text-[10px] px-1.5 py-0.5">
+            -{discount}%
+          </span>
+        )}
       </Link>
 
-      {/* Content */}
-      <div className="flex flex-col flex-1 p-3">
-        {/* Category */}
-        <span className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-          {product.category === 'ebikes' && 'Bicicleta Elétrica'}
-          {product.category === 'scooters' && 'Scooter'}
-          {product.category === 'parts' && 'Peças'}
-          {product.category === 'accessories' && 'Acessório'}
-        </span>
-
-        {/* Name */}
+      {/* Content - Right side */}
+      <div className="flex flex-col flex-1 p-3 min-w-0">
+        {/* Title - max 2 lines */}
         <Link to={`/produto/${product.id}`}>
-          <h3 className="font-medium text-foreground line-clamp-2 mb-2 text-sm leading-tight">
+          <h3 className="font-medium text-foreground line-clamp-2 text-sm leading-snug mb-1">
             {product.name}
           </h3>
         </Link>
 
         {/* Rating */}
-        <div className="flex items-center gap-1 mb-2">
-          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-          <span className="text-xs font-medium text-foreground">
+        <div className="flex items-center gap-1 mb-1">
+          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+          <span className="text-[11px] font-medium text-foreground">
             {product.rating}
           </span>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-[11px] text-muted-foreground">
             ({product.reviews})
           </span>
         </div>
 
-        {/* Free Shipping */}
-        {product.freeShipping && (
-          <div className="flex items-center gap-1 mb-2">
-            <Truck className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-medium text-primary">
-              Frete Grátis
-            </span>
-          </div>
-        )}
-
-        {/* Price */}
-        <div className="mt-auto space-y-0.5">
+        {/* Price Section */}
+        <div className="mt-auto">
           {product.originalPrice && (
-            <span className="price-original block">
+            <span className="text-xs text-muted-foreground line-through">
               {formatPrice(product.originalPrice)}
             </span>
           )}
-          <p className="price-current">
+          <p className="text-lg font-bold text-primary leading-tight">
             {formatPrice(product.price)}
           </p>
-          <p className="price-installments">
-            12x de {formatPrice(product.price / 12)} sem juros
+          <p className="text-[10px] text-muted-foreground">
+            12x {formatPrice(product.price / 12)}
           </p>
         </div>
 
-        {/* Add to Cart Button */}
-        <button 
-          className="btn-cart mt-3"
-          disabled={!product.inStock}
-        >
-          <ShoppingCart className="h-4 w-4" />
-          {product.inStock ? 'Adicionar' : 'Indisponível'}
-        </button>
+        {/* Free Shipping + CTA Row */}
+        <div className="flex items-center justify-between gap-2 mt-2">
+          {product.freeShipping ? (
+            <div className="flex items-center gap-1">
+              <Truck className="h-3 w-3 text-primary" />
+              <span className="text-[10px] font-medium text-primary">
+                Frete Grátis
+              </span>
+            </div>
+          ) : (
+            <div />
+          )}
+          
+          {/* Compact Add Button */}
+          <button 
+            className="bg-primary text-primary-foreground font-bold text-xs px-3 py-2 rounded-lg
+                     flex items-center gap-1.5 min-h-[36px] active:scale-95 transition-transform"
+            disabled={!product.inStock}
+            aria-label={product.inStock ? 'Adicionar ao carrinho' : 'Produto indisponível'}
+          >
+            <ShoppingCart className="h-3.5 w-3.5" />
+            {product.inStock ? 'COMPRAR' : 'ESGOTADO'}
+          </button>
+        </div>
       </div>
     </article>
   );
