@@ -125,7 +125,7 @@
 
   /* Product Card */
   .card-product {
-    @apply bg-card rounded-lg shadow-sm overflow-hidden
+    @apply bg-card rounded-lg shadow-sm
            transition-all duration-300 hover:shadow-md;
   }
 
