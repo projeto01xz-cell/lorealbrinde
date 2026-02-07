@@ -325,16 +325,18 @@ export default function Checkout() {
               </div>
             </div>
           </div>
+        </div>
 
-          {/* PIX Discount Banner */}
-          <div className="bg-black rounded-xl p-4 text-center">
-            <p className="text-white text-sm font-medium">
-              ⚡ Valor de <span className="font-bold">QUEIMÃO DE ESTOQUE</span> apenas via PIX.
-              <br />
-              No cartão, o pagamento será no valor integral.
-            </p>
-          </div>
+        {/* PIX Discount Banner - Full Width */}
+        <div className="bg-black py-4 px-4 text-center w-full">
+          <p className="text-white text-sm font-medium">
+            ⚡ Valor de <span className="font-bold">QUEIMÃO DE ESTOQUE</span> apenas via PIX.
+            <br />
+            No cartão, o pagamento será no valor integral.
+          </p>
+        </div>
 
+        <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
           {/* Personal Data */}
           <div className="bg-card rounded-xl p-4 border border-border">
             <h2 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
