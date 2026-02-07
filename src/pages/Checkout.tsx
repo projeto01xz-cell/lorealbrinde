@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
-import { Loader2, MapPin, User, CreditCard, Truck, Package, Zap, ShieldCheck, QrCode } from "lucide-react";
+import { Loader2, MapPin, User, CreditCard, Truck, Package, Zap, Lock, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -288,10 +288,10 @@ export default function Checkout() {
       <header className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="px-4 py-3 flex items-center justify-between max-w-lg mx-auto">
           <Link to="/">
-            <img src={gtsm1Logo} alt="GTSM1" className="h-8 w-auto" />
+            <img src={gtsm1Logo} alt="GTSM1" className="h-6 w-auto" />
           </Link>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <ShieldCheck className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Lock className="h-4 w-4 text-primary" />
             <span className="text-xs font-medium">Ambiente Seguro</span>
           </div>
         </div>
