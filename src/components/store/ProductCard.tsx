@@ -1,4 +1,4 @@
-import { ShoppingCart, Star, Truck } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Product, formatPrice, calculateDiscount } from "@/lib/products";
 
@@ -11,92 +11,83 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <article className="card-product flex flex-col bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      {/* Image Container */}
-      <Link 
-        to={`/produto/${product.id}`}
-        className="relative w-full aspect-square overflow-hidden bg-secondary/30"
-      >
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-contain p-2"
-          loading="lazy"
-        />
-        
-        {/* Discount Badge - Top Left */}
-        {discount > 0 && (
-          <span className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded">
-            -{discount}%
-          </span>
-        )}
-
-        {/* Free Shipping Badge - Top Right */}
-        {product.freeShipping && (
-          <span className="absolute top-2 right-2 bg-primary text-primary-foreground text-[10px] font-semibold px-2 py-1 rounded flex items-center gap-1">
-            <Truck className="h-3 w-3" />
-            FRETE GRÁTIS
-          </span>
-        )}
-      </Link>
-
-      {/* Content */}
-      <div className="flex flex-col p-3 flex-1">
-        {/* Title */}
-        <Link to={`/produto/${product.id}`}>
-          <h3 className="font-medium text-foreground line-clamp-2 text-sm leading-tight mb-2 min-h-[2.5rem]">
-            {product.name}
-          </h3>
+      {/* Main Content - Horizontal Layout */}
+      <div className="flex p-3 gap-3">
+        {/* Image Container - Left Side */}
+        <Link 
+          to={`/produto/${product.id}`}
+          className="relative flex-shrink-0 w-[140px] h-[140px] overflow-hidden bg-secondary/30 rounded-lg"
+        >
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-contain p-1"
+            loading="lazy"
+          />
+          
+          {/* Discount Badge - Bottom Left of Image */}
+          {discount > 0 && (
+            <span className="absolute bottom-2 left-2 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
+              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+              {discount}%
+            </span>
+          )}
         </Link>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1 mb-2">
-          <div className="flex items-center">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star 
-                key={star}
-                className={`h-3 w-3 ${
-                  star <= Math.round(product.rating) 
-                    ? 'fill-amber-400 text-amber-400' 
-                    : 'fill-muted text-muted'
-                }`}
-              />
-            ))}
-          </div>
-          <span className="text-[11px] text-muted-foreground">
-            ({product.reviews})
-          </span>
-        </div>
+        {/* Info Container - Right Side */}
+        <div className="flex flex-col flex-1 min-w-0">
+          {/* Title */}
+          <Link to={`/produto/${product.id}`}>
+            <h3 className="font-semibold text-foreground line-clamp-3 text-sm leading-tight mb-2">
+              {product.name}
+            </h3>
+          </Link>
 
-        {/* Price Section */}
-        <div className="mt-auto space-y-1">
-          {product.originalPrice && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground line-through">
-                {formatPrice(product.originalPrice)}
+          {/* Price Section */}
+          <div className="mt-auto space-y-0.5">
+            {product.originalPrice && (
+              <span className="text-xs text-muted-foreground line-through block">
+                R$ {product.originalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </span>
-            </div>
-          )}
-          
-          <p className="text-xl font-bold text-primary">
-            {formatPrice(product.price)}
-          </p>
-          
-          <p className="text-[11px] text-muted-foreground">
-            ou 12x de <span className="font-medium">{formatPrice(product.price / 12)}</span>
-          </p>
+            )}
+            
+            <p className="text-xl font-bold text-primary">
+              {formatPrice(product.price)}
+            </p>
+            
+            <p className="text-xs text-muted-foreground">
+              À vista no PIX
+            </p>
+            
+            <p className="text-xs text-muted-foreground">
+              ou <span className="text-primary font-medium">12x</span> de <span className="font-medium text-foreground">{formatPrice(product.price / 12)}</span>
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* CTA Button */}
-      <button 
-        className="w-full bg-primary text-primary-foreground font-bold text-sm py-3
-                 flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all"
-        disabled={!product.inStock}
-        aria-label={product.inStock ? 'Adicionar ao carrinho' : 'Produto indisponível'}
-      >
-        <ShoppingCart className="h-4 w-4" />
-        {product.inStock ? 'COMPRAR' : 'ESGOTADO'}
-      </button>
+      {/* CTA Button - Full Width */}
+      <div className="px-3 pb-3">
+        <button 
+          className="w-full bg-[#22c55e] hover:bg-[#16a34a] text-white font-bold text-sm py-3 rounded-lg
+                   flex items-center justify-center gap-2 transition-colors"
+          disabled={!product.inStock}
+          aria-label={product.inStock ? 'Adicionar ao carrinho' : 'Produto indisponível'}
+        >
+          <ShoppingCart className="h-4 w-4" />
+          {product.inStock ? 'COMPRAR' : 'ESGOTADO'}
+        </button>
+      </div>
+
+      {/* Compare Option */}
+      <div className="px-3 pb-3 pt-0">
+        <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+          <input type="checkbox" className="w-4 h-4 rounded border-border" />
+          Comparar produto
+        </label>
+      </div>
     </article>
   );
 }
