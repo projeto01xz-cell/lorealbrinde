@@ -694,6 +694,18 @@ export default function Checkout() {
           </Button>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-muted/50 border-t border-border py-4 px-4">
+        <div className="max-w-lg mx-auto text-center">
+          <p className="text-xs text-muted-foreground">
+            GTSM1 Comércio de Bicicletas Ltda
+          </p>
+          <p className="text-xs text-muted-foreground">
+            CNPJ: 45.678.901/0001-23
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
