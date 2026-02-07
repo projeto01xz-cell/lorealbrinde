@@ -90,6 +90,29 @@ export default function Footer() {
         </ul>
       </div>
 
+      {/* Legal Info */}
+      <div className="px-4 py-4 border-t border-border text-center space-y-2">
+        <p className="text-xs text-muted-foreground">
+          © {new Date().getFullYear()} GTSM1 - Todos os direitos reservados.
+        </p>
+        <p className="text-xs text-muted-foreground">
+          CNPJ: 00.000.000/0001-00 | Razão Social: GTSM1 Comércio Ltda.
+        </p>
+        <div className="flex justify-center gap-3 text-xs text-muted-foreground">
+          <Link to="#" className="hover:text-primary transition-colors underline">
+            Política de Privacidade
+          </Link>
+          <span>|</span>
+          <Link to="#" className="hover:text-primary transition-colors underline">
+            Termos de Uso
+          </Link>
+          <span>|</span>
+          <Link to="#" className="hover:text-primary transition-colors underline">
+            Trocas e Devoluções
+          </Link>
+        </div>
+      </div>
+
       {/* Copyright Bar */}
       <div className="bg-foreground px-4 py-3 flex items-center justify-center">
         <p className="text-xs text-background">
