@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="bg-card mt-4">
       {/* Logo */}
       <div className="flex justify-center py-5 border-b border-border">
-        <img src={gtsm1Logo} alt="GTSM1" className="h-10 w-auto" />
+        <img src={gtsm1Logo} alt="GTSM1" className="h-7 w-auto" />
       </div>
 
       {/* Contate-nos */}
