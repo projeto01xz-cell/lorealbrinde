@@ -63,21 +63,21 @@ export default function Navbar() {
         </div>
 
         {/* Search Bar */}
-        <div className="pb-3">
-          <div className="relative flex items-center bg-secondary rounded-md border border-border">
-            <button className="p-3 text-muted-foreground" aria-label="Busca por voz">
-              <Mic className="h-5 w-5" />
+        <div className="pb-3 px-2">
+          <div className="relative flex items-center bg-card rounded-md border border-border">
+            <button className="p-2.5 text-muted-foreground" aria-label="Busca por voz">
+              <Mic className="h-4 w-4" />
             </button>
             <input
               type="text"
               placeholder="Busque aqui"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent py-3 pr-3 text-foreground placeholder:text-muted-foreground 
+              className="flex-1 bg-transparent py-2.5 pr-2 text-foreground placeholder:text-muted-foreground 
                        focus:outline-none text-sm"
             />
-            <button className="p-3 text-muted-foreground" aria-label="Buscar">
-              <Search className="h-5 w-5" />
+            <button className="p-2.5 text-muted-foreground" aria-label="Buscar">
+              <Search className="h-4 w-4" />
             </button>
           </div>
         </div>
