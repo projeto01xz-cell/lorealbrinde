@@ -24,6 +24,10 @@ import scooterPro01 from '@/assets/products/scooter-pro-01.png';
 import scooterPro02 from '@/assets/products/scooter-pro-02.png';
 import scooterPro03 from '@/assets/products/scooter-pro-03.png';
 import scooterPro04 from '@/assets/products/scooter-pro-04.png';
+import capaceteSmart01 from '@/assets/products/capacete-smart-01.png';
+import capaceteSmart02 from '@/assets/products/capacete-smart-02.png';
+import capaceteSmart03 from '@/assets/products/capacete-smart-03.png';
+import capaceteSmart04 from '@/assets/products/capacete-smart-04.png';
 
 export interface Product {
   id: string;
@@ -448,11 +452,12 @@ Recomendamos sempre o uso de equipamentos de segurança (capacete e itens de pro
   // Acessórios
   {
     id: '12',
-    name: 'Capacete Smart com LED',
+    name: 'Capacete Inteligente LED Bluetooth',
     description: 'Capacete inteligente com luz LED integrada, seta direcional e conectividade Bluetooth.',
     price: 387.00,
     originalPrice: 499,
-    image: produto06,
+    image: capaceteSmart01,
+    images: [capaceteSmart01, capaceteSmart02, capaceteSmart03, capaceteSmart04],
     category: 'accessories',
     rating: 4.5,
     reviews: 267,
