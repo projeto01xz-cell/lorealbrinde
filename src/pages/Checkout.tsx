@@ -300,31 +300,6 @@ export default function Checkout() {
       <main className="flex-1 pb-8">
 
         <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
-          {/* Product Summary */}
-          <div className="bg-card rounded-xl p-4 border border-border">
-            <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-              <Package className="h-4 w-4 text-primary" />
-              Resumo do Pedido
-            </h2>
-            <div className="flex gap-3">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-20 h-20 object-contain bg-secondary/30 rounded-lg"
-              />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-medium text-foreground line-clamp-2">
-                  {product.name}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Quantidade: {quantity}
-                </p>
-                <p className="text-base font-bold text-primary mt-1">
-                  {formatPrice(subtotal)}
-                </p>
-              </div>
-            </div>
-          </div>
 
           {/* Personal Data */}
           <div className="bg-card rounded-xl p-4 border border-border">
