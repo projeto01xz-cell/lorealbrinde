@@ -3,14 +3,19 @@ import Navbar from "@/components/store/Navbar";
 import Footer from "@/components/store/Footer";
 import ProductCard from "@/components/store/ProductCard";
 import CategoryFilter from "@/components/store/CategoryFilter";
-import { getProductsByCategory } from "@/lib/products";
+import { products } from "@/lib/products";
 
 export default function Produtos() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("relevance");
 
+  // Apenas os 6 primeiros produtos (mesmos do home)
+  const allProducts = products.slice(0, 6);
+  
   const filteredProducts = useMemo(() => {
-    let result = getProductsByCategory(selectedCategory);
+    let result = selectedCategory === "all" 
+      ? allProducts 
+      : allProducts.filter(p => p.category === selectedCategory);
 
     if (sortBy === "price-asc") {
       result = [...result].sort((a, b) => a.price - b.price);
@@ -21,7 +26,7 @@ export default function Produtos() {
     }
 
     return result;
-  }, [selectedCategory, sortBy]);
+  }, [selectedCategory, sortBy, allProducts]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
