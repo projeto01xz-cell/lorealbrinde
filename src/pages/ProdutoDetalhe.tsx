@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { 
+import { useParams, Link, useNavigate } from "react-router-dom";
+import {
   Star, 
   ShoppingCart, 
   Truck, 
@@ -24,10 +24,17 @@ import { motion } from "framer-motion";
 
 export default function ProdutoDetalhe() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const product = id ? getProductById(id) : undefined;
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const relatedProducts = getFeaturedProducts().filter(p => p.id !== id).slice(0, 4);
+
+  const handleBuyNow = () => {
+    if (product && product.inStock) {
+      navigate(`/checkout?produto=${product.id}&quantidade=${quantity}`);
+    }
+  };
 
   if (!product) {
     return (
@@ -267,6 +274,7 @@ export default function ProdutoDetalhe() {
             {/* CTA Buttons */}
             <div className="space-y-3 pt-2">
               <button 
+                onClick={handleBuyNow}
                 className="btn-cart text-base py-4 rounded-xl shadow-lg shadow-primary/20"
                 disabled={!product.inStock}
               >

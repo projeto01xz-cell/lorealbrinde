@@ -1,5 +1,5 @@
 import { ShoppingCart } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Product, formatPrice, calculateDiscount } from "@/lib/products";
 
 interface ProductCardProps {
@@ -7,7 +7,14 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const navigate = useNavigate();
   const discount = calculateDiscount(product.price, product.originalPrice);
+
+  const handleBuy = () => {
+    if (product.inStock) {
+      navigate(`/checkout?produto=${product.id}&quantidade=1`);
+    }
+  };
 
   return (
     <article className="card-product flex flex-col bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
@@ -71,10 +78,11 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* CTA Button - Full Width */}
       <div className="px-3 pb-3">
         <button 
+          onClick={handleBuy}
           className="w-full bg-[#22c55e] hover:bg-[#16a34a] text-white font-bold text-sm py-3 rounded-lg
                    flex items-center justify-center gap-2 transition-colors"
           disabled={!product.inStock}
-          aria-label={product.inStock ? 'Adicionar ao carrinho' : 'Produto indisponível'}
+          aria-label={product.inStock ? 'Comprar produto' : 'Produto indisponível'}
         >
           <ShoppingCart className="h-4 w-4" />
           {product.inStock ? 'COMPRAR' : 'ESGOTADO'}
