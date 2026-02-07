@@ -9,6 +9,9 @@ import scooterDemarche02 from '@/assets/products/scooter-demarche-02.png';
 import scooterDemarche03 from '@/assets/products/scooter-demarche-03.png';
 import scooterDemarche04 from '@/assets/products/scooter-demarche-04.png';
 import ebikeKonnan01 from '@/assets/products/ebike-konnan-01.png';
+import ebikeKonnan02 from '@/assets/products/ebike-konnan-02.png';
+import ebikeKonnan03 from '@/assets/products/ebike-konnan-03.png';
+import ebikeKonnan04 from '@/assets/products/ebike-konnan-04.png';
 
 export interface Product {
   id: string;
@@ -179,7 +182,7 @@ Recomendamos sempre o uso de equipamentos de segurança (capacete e itens de pro
     price: 387.00,
     originalPrice: 11190,
     image: ebikeKonnan01,
-    images: [ebikeKonnan01],
+    images: [ebikeKonnan01, ebikeKonnan02, ebikeKonnan03, ebikeKonnan04],
     category: 'ebikes',
     rating: 4.9,
     reviews: 312,
