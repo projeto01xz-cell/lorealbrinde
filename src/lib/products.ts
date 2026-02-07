@@ -16,6 +16,10 @@ import scooterGts01 from '@/assets/products/scooter-gts-01.png';
 import scooterGts02 from '@/assets/products/scooter-gts-02.png';
 import scooterGts03 from '@/assets/products/scooter-gts-03.png';
 import scooterGts04 from '@/assets/products/scooter-gts-04.png';
+import ebikeMountain01 from '@/assets/products/ebike-mountain-01.png';
+import ebikeMountain02 from '@/assets/products/ebike-mountain-02.png';
+import ebikeMountain03 from '@/assets/products/ebike-mountain-03.png';
+import ebikeMountain04 from '@/assets/products/ebike-mountain-04.png';
 
 export interface Product {
   id: string;
@@ -251,7 +255,8 @@ Recomendamos sempre o uso de equipamentos de segurança (capacete e itens de pro
     description: 'Bicicleta elétrica para trilhas com motor 500W, suspensão dianteira e pneus off-road.',
     price: 387.00,
     originalPrice: 8499,
-    image: produto05,
+    image: ebikeMountain01,
+    images: [ebikeMountain01, ebikeMountain02, ebikeMountain03, ebikeMountain04],
     category: 'ebikes',
     rating: 4.9,
     reviews: 156,
