@@ -11,9 +11,9 @@ export default function Navbar() {
   const favoritesCount = 0; // Visual only
 
   return (
-    <header className="sticky top-0 z-50 bg-card">
+    <header className="sticky top-0 left-0 right-0 z-50 bg-card w-full">
       {/* Main Header */}
-      <div className="px-4">
+      <div className="w-full px-4">
         <div className="flex items-center justify-between h-14">
           {/* Menu Button */}
           <button
