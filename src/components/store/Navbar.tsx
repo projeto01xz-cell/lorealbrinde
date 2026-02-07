@@ -1,16 +1,16 @@
-import { Search, ShoppingCart, Menu, X, ChevronRight } from "lucide-react";
+import { Search, ShoppingCart, Menu, X, ChevronRight, Heart, Mic } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const location = useLocation();
 
   const cartCount = 0; // Visual only
+  const favoritesCount = 0; // Visual only
 
   return (
-    <header className="sticky top-0 z-50 bg-card shadow-sm">
+    <header className="sticky top-0 z-50 bg-card">
       {/* Main Header */}
       <div className="px-4">
         <div className="flex items-center justify-between h-14">
@@ -27,62 +27,60 @@ export default function Navbar() {
             )}
           </button>
 
-          {/* Logo */}
+          {/* Logo - Stylized GTSM1 */}
           <Link to="/" className="flex-shrink-0">
-            <h1 className="text-xl font-black text-foreground tracking-tight">
-              GTSM<span className="text-primary">1</span>
+            <h1 className="text-2xl font-black text-foreground tracking-tight italic" style={{ fontFamily: 'Arial Black, sans-serif' }}>
+              <span className="inline-block transform -skew-x-6">GTSM</span>
+              <span className="text-destructive inline-block transform -skew-x-6">1</span>
             </h1>
           </Link>
 
-          {/* Cart */}
-          <button className="relative p-2 -mr-2 touch-target" aria-label="Carrinho">
-            <ShoppingCart className="h-6 w-6 text-foreground" />
-            {cartCount > 0 && (
-              <span className="absolute top-0 right-0 h-5 w-5 bg-destructive text-destructive-foreground 
-                             text-xs font-bold rounded-full flex items-center justify-center">
-                {cartCount}
+          {/* Right Icons */}
+          <div className="flex items-center gap-1">
+            {/* Favorites */}
+            <button className="relative p-2 touch-target" aria-label="Favoritos">
+              <Heart className="h-6 w-6 text-foreground" strokeWidth={1.5} />
+              <span className="absolute -top-0.5 -right-0.5 h-5 w-5 bg-destructive text-destructive-foreground 
+                             text-[10px] font-bold rounded-full flex items-center justify-center">
+                {favoritesCount}
               </span>
-            )}
-          </button>
+            </button>
+
+            {/* Cart */}
+            <button className="relative p-2 -mr-2 touch-target" aria-label="Carrinho">
+              <ShoppingCart className="h-6 w-6 text-foreground" strokeWidth={1.5} />
+              <span className="absolute -top-0.5 -right-0.5 h-5 w-5 bg-primary text-primary-foreground 
+                             text-[10px] font-bold rounded-full flex items-center justify-center">
+                {cartCount.toString().padStart(2, '0')}
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Search Bar */}
         <div className="pb-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <div className="relative flex items-center bg-secondary rounded-full border border-border">
+            <button className="p-3 text-muted-foreground" aria-label="Busca por voz">
+              <Mic className="h-5 w-5" />
+            </button>
             <input
               type="text"
-              placeholder="Buscar produtos..."
+              placeholder="Busque aqui"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="input-field pl-11"
+              className="flex-1 bg-transparent py-3 pr-3 text-foreground placeholder:text-muted-foreground 
+                       focus:outline-none text-sm"
             />
+            <button className="p-3 text-muted-foreground" aria-label="Buscar">
+              <Search className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Breadcrumb Navigation */}
-      <div className="bg-secondary/50 border-t border-border px-4 py-2">
-        <nav className="flex items-center gap-1 text-sm">
-          <Link to="/" className="text-muted-foreground hover:text-foreground">
-            Home
-          </Link>
-          {location.pathname !== "/" && (
-            <>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              <span className="text-foreground font-medium">
-                {location.pathname === "/produtos" && "Elétricos"}
-                {location.pathname === "/sobre" && "Sobre"}
-                {location.pathname.startsWith("/produto/") && "Produto"}
-              </span>
-            </>
-          )}
-        </nav>
-      </div>
-
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="fixed inset-0 top-[104px] bg-background z-40">
+        <div className="fixed inset-0 top-[112px] bg-background z-40">
           <nav className="flex flex-col p-4">
             <Link
               to="/"
