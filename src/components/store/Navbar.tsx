@@ -11,9 +11,16 @@ export default function Navbar() {
   const favoritesCount = 0; // Visual only
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 bg-card w-full">
+    <header className="sticky top-0 left-0 right-0 z-50 w-full">
+      {/* Announcement Bar */}
+      <div className="bg-foreground text-card text-center py-1.5 px-4">
+        <p className="text-[11px] font-medium tracking-wide">
+          🚚 FRETE GRÁTIS para todo Brasil | Parcele em até 12x sem juros
+        </p>
+      </div>
+
       {/* Main Header */}
-      <div className="w-full px-4">
+      <div className="w-full px-4 bg-card">
         <div className="flex items-center justify-between h-14">
           {/* Menu Button */}
           <button
@@ -82,7 +89,7 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="fixed inset-0 top-[112px] bg-background z-40">
+        <div className="fixed inset-0 top-[140px] bg-background z-40">
           <nav className="flex flex-col p-4">
             <Link
               to="/"
