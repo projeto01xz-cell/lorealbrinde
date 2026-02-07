@@ -12,6 +12,10 @@ import ebikeKonnan01 from '@/assets/products/ebike-konnan-01.png';
 import ebikeKonnan02 from '@/assets/products/ebike-konnan-02.png';
 import ebikeKonnan03 from '@/assets/products/ebike-konnan-03.png';
 import ebikeKonnan04 from '@/assets/products/ebike-konnan-04.png';
+import scooterGts01 from '@/assets/products/scooter-gts-01.png';
+import scooterGts02 from '@/assets/products/scooter-gts-02.png';
+import scooterGts03 from '@/assets/products/scooter-gts-03.png';
+import scooterGts04 from '@/assets/products/scooter-gts-04.png';
 
 export interface Product {
   id: string;
@@ -206,7 +210,8 @@ Recomendamos sempre o uso de equipamentos de segurança (capacete e itens de pro
     description: 'Scooter elétrica retrô com design elegante, banco confortável e excelente autonomia. Não precisa de CNH.',
     price: 387.00,
     originalPrice: 8300,
-    image: produto03,
+    image: scooterGts01,
+    images: [scooterGts01, scooterGts02, scooterGts03, scooterGts04],
     category: 'scooters',
     rating: 4.8,
     reviews: 245,
