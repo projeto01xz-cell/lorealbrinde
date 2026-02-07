@@ -20,6 +20,10 @@ import ebikeMountain01 from '@/assets/products/ebike-mountain-01.png';
 import ebikeMountain02 from '@/assets/products/ebike-mountain-02.png';
 import ebikeMountain03 from '@/assets/products/ebike-mountain-03.png';
 import ebikeMountain04 from '@/assets/products/ebike-mountain-04.png';
+import scooterPro01 from '@/assets/products/scooter-pro-01.png';
+import scooterPro02 from '@/assets/products/scooter-pro-02.png';
+import scooterPro03 from '@/assets/products/scooter-pro-03.png';
+import scooterPro04 from '@/assets/products/scooter-pro-04.png';
 
 export interface Product {
   id: string;
@@ -315,7 +319,8 @@ Recomendamos sempre o uso de equipamentos de segurança (capacete e itens de pro
     description: 'Scooter elétrica de alta performance com motor 800W, freio a disco e autonomia de 45km.',
     price: 387.00,
     originalPrice: 3999,
-    image: produto04,
+    image: scooterPro01,
+    images: [scooterPro01, scooterPro02, scooterPro03, scooterPro04],
     category: 'scooters',
     rating: 4.7,
     reviews: 312,
