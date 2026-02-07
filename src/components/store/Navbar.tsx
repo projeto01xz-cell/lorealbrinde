@@ -13,11 +13,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 left-0 right-0 z-50 w-full">
       {/* Announcement Bar */}
-      <div className="bg-foreground text-card text-center py-1.5 px-4">
-        <p className="text-[11px] font-medium tracking-wide">
-          🚚 FRETE GRÁTIS para todo Brasil | Parcele em até 12x sem juros
-        </p>
-      </div>
+      <div className="bg-foreground h-2 w-full"></div>
 
       {/* Main Header */}
       <div className="w-full px-4 bg-card">
