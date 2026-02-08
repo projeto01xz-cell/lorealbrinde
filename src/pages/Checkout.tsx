@@ -10,6 +10,31 @@ import { toast } from "sonner";
 import { getProductById, formatPrice, Product } from "@/lib/products";
 import gtsm1Logo from "@/assets/gtsm1-logo.png";
 
+// Card masks
+const maskCardNumber = (value: string) => {
+  return value.replace(/\D/g, "").replace(/(\d{4})(\d)/, "$1 $2").replace(/(\d{4}) (\d{4})(\d)/, "$1 $2 $3").replace(/(\d{4}) (\d{4}) (\d{4})(\d)/, "$1 $2 $3 $4").replace(/(\d{4} \d{4} \d{4} \d{4})\d+?$/, "$1");
+};
+const maskExpiry = (value: string) => {
+  return value.replace(/\D/g, "").replace(/(\d{2})(\d)/, "$1/$2").replace(/(\/\d{2})\d+?$/, "$1");
+};
+
+// Card validations
+const validateCardNumber = (cardNumber: string): boolean => {
+  const cleanNumber = cardNumber.replace(/\D/g, "");
+  return cleanNumber.length >= 13 && cleanNumber.length <= 19;
+};
+const validateExpiry = (expiry: string): boolean => {
+  const parts = expiry.split("/");
+  if (parts.length !== 2) return false;
+  const month = parseInt(parts[0], 10);
+  const year = parseInt(parts[1], 10);
+  if (month < 1 || month > 12) return false;
+  const currentYear = new Date().getFullYear() % 100;
+  const currentMonth = new Date().getMonth() + 1;
+  if (year < currentYear || (year === currentYear && month < currentMonth)) return false;
+  return true;
+};
+
 // Máscaras
 const maskCPF = (value: string) => {
   return value
@@ -116,6 +141,13 @@ export default function Checkout() {
   const [loadingCep, setLoadingCep] = useState(false);
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [installments, setInstallments] = useState(1);
+  const [cardData, setCardData] = useState({
+    number: "",
+    holderName: "",
+    expiry: "",
+    cvv: "",
+  });
 
   useEffect(() => {
     if (productId) {
@@ -204,6 +236,59 @@ export default function Checkout() {
     setFormData((prev) => ({ ...prev, [name]: maskedValue }));
   };
 
+  const handleCardInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    let maskedValue = value;
+
+    if (name === "number") {
+      maskedValue = maskCardNumber(value);
+      if (maskedValue.replace(/\D/g, "").length >= 13) {
+        if (!validateCardNumber(maskedValue)) {
+          setErrors((prev) => ({ ...prev, cardNumber: "Número do cartão inválido" }));
+        } else {
+          setErrors((prev) => ({ ...prev, cardNumber: "" }));
+        }
+      } else {
+        setErrors((prev) => ({ ...prev, cardNumber: "" }));
+      }
+    } else if (name === "expiry") {
+      maskedValue = maskExpiry(value);
+      if (maskedValue.length === 5) {
+        if (!validateExpiry(maskedValue)) {
+          setErrors((prev) => ({ ...prev, cardExpiry: "Data inválida" }));
+        } else {
+          setErrors((prev) => ({ ...prev, cardExpiry: "" }));
+        }
+      } else {
+        setErrors((prev) => ({ ...prev, cardExpiry: "" }));
+      }
+    } else if (name === "cvv") {
+      maskedValue = value.replace(/\D/g, "").substring(0, 4);
+    }
+
+    setCardData((prev) => ({ ...prev, [name]: maskedValue }));
+  };
+
+  const validateCardForm = (): boolean => {
+    const cardErrors: Record<string, string> = {};
+    
+    if (!validateCardNumber(cardData.number)) {
+      cardErrors.cardNumber = "Número do cartão inválido";
+    }
+    if (!cardData.holderName || cardData.holderName.trim().length < 2) {
+      cardErrors.cardHolder = "Nome do titular é obrigatório";
+    }
+    if (!validateExpiry(cardData.expiry)) {
+      cardErrors.cardExpiry = "Data de validade inválida";
+    }
+    if (cardData.cvv.length < 3) {
+      cardErrors.cardCvv = "CVV inválido";
+    }
+
+    setErrors((prev) => ({ ...prev, ...cardErrors }));
+    return Object.keys(cardErrors).length === 0;
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     
@@ -249,6 +334,12 @@ export default function Checkout() {
       toast.error("Por favor, preencha todos os campos corretamente");
       return;
     }
+
+    // Validate card form for credit card payment
+    if (selectedPaymentMethod === "credit" && !validateCardForm()) {
+      toast.error("Por favor, verifique os dados do cartão");
+      return;
+    }
     
     setLoadingPayment(true);
     
@@ -259,26 +350,54 @@ export default function Checkout() {
       
       // Apply 5% PIX discount when payment method is PIX
       const pixDiscount = selectedPaymentMethod === "pix" ? 0.05 : 0;
-      const totalWithDiscount = (productTotal + shippingCost) * (1 - pixDiscount);
+      let totalWithDiscount = (productTotal + shippingCost) * (1 - pixDiscount);
+
+      // For credit card, apply interest for installments > 1
+      const INTEREST_RATE = 0.0299; // 2.99% per month
+      if (selectedPaymentMethod === "credit" && installments > 1) {
+        totalWithDiscount = (productTotal + shippingCost) * Math.pow(1 + INTEREST_RATE, installments);
+      }
+
       const amountInCents = Math.round(totalWithDiscount * 100);
       
-      const paymentData = {
+      const paymentData: Record<string, unknown> = {
         amount: amountInCents,
+        paymentMethod: selectedPaymentMethod === "pix" ? "pix" : "credit_card",
         customer: {
           name: formData.fullName.trim(),
           email: formData.email.trim(),
           document: formData.cpf.replace(/\D/g, ""),
           phone: formData.phone.replace(/\D/g, ""),
+          streetName: formData.street,
+          number: formData.number,
+          complement: formData.complement,
+          neighborhood: formData.neighborhood,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.cep.replace(/\D/g, ""),
         },
         items: [
           {
             title: `teste ${quantity}`, // Masked product name for privacy
             quantity: quantity,
             unitPrice: Math.round(product.price * (1 - pixDiscount) * 100),
+            operationType: 1,
           },
         ],
-        expiresInMinutes: 30,
       };
+
+      // Add card data for credit card payment
+      if (selectedPaymentMethod === "credit") {
+        const expiryParts = cardData.expiry.split("/");
+        paymentData.card = {
+          number: cardData.number.replace(/\s/g, ""),
+          holderName: cardData.holderName,
+          expMonth: parseInt(expiryParts[0], 10),
+          expYear: 2000 + parseInt(expiryParts[1], 10),
+          cvv: cardData.cvv,
+        };
+        paymentData.installments = installments;
+      }
       
       // Store order data in sessionStorage for PixPaymentPage
       const orderData = {
@@ -320,27 +439,43 @@ export default function Checkout() {
       
       if (error) {
         console.error("Payment error:", error);
-        toast.error("Erro ao gerar pagamento PIX. Tente novamente.");
+        toast.error("Erro ao processar pagamento. Tente novamente.");
         return;
       }
-      
-      if (!data || !data.pix?.payload) {
-        console.error("Invalid payment response:", data);
-        toast.error("Resposta inválida do gateway de pagamento.");
+
+      if (data.error) {
+        console.error("Payment API error:", data);
+        toast.error(data.error || "Erro ao processar pagamento");
         return;
       }
-      
-      // Store PIX data in sessionStorage
-      sessionStorage.setItem("pixPayment", JSON.stringify({
-        id: data.id,
-        payload: data.pix.payload,
-        qrCodeUrl: data.pix.qrCodeUrl,
-        expiresAt: data.pix.expiresAt,
-        amount: data.amount,
-      }));
-      
-      // Navigate to PIX payment page
-      navigate("/pagamento-pix");
+
+      if (selectedPaymentMethod === "pix") {
+        if (!data || !data.pix?.payload) {
+          console.error("Invalid payment response:", data);
+          toast.error("Resposta inválida do gateway de pagamento.");
+          return;
+        }
+        
+        // Store PIX data in sessionStorage
+        sessionStorage.setItem("pixPayment", JSON.stringify({
+          id: data.id,
+          payload: data.pix.payload,
+          qrCodeUrl: data.pix.qrCodeUrl,
+          expiresAt: data.pix.expiresAt,
+          amount: data.amount,
+        }));
+        
+        // Navigate to PIX payment page
+        navigate("/pagamento-pix");
+      } else {
+        // Credit card payment
+        if (data.status === "paid" || data.status === "approved") {
+          toast.success("Pagamento aprovado! Seu pedido foi confirmado.");
+          // Could redirect to success page here
+        } else {
+          toast.error("Pagamento não aprovado. Por favor, tente novamente.");
+        }
+      }
       
     } catch (error) {
       console.error("Payment error:", error);
@@ -362,6 +497,31 @@ export default function Checkout() {
   const shippingPrice = selectedShippingOption?.price || 0;
   const subtotal = product.price * quantity;
   const total = subtotal + shippingPrice;
+
+  // Generate installment options with interest
+  const INTEREST_RATE = 0.0299; // 2.99% per month
+  const installmentOptions = [];
+  for (let i = 1; i <= 12; i++) {
+    let totalWithInterest = total;
+    let installmentValue = total / i;
+    let interestLabel = "";
+
+    if (i === 1) {
+      interestLabel = "(sem juros)";
+    } else {
+      totalWithInterest = total * Math.pow(1 + INTEREST_RATE, i);
+      installmentValue = totalWithInterest / i;
+      interestLabel = `(total R$ ${totalWithInterest.toFixed(2).replace(".", ",")})`;
+    }
+
+    if (installmentValue >= 5) {
+      installmentOptions.push({
+        value: i,
+        totalAmount: totalWithInterest,
+        label: `${i}x de R$ ${installmentValue.toFixed(2).replace(".", ",")} ${interestLabel}`,
+      });
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -716,10 +876,102 @@ export default function Checkout() {
                 <CreditCard className="h-5 w-5 text-muted-foreground" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">Cartão de Crédito</p>
-                  <p className="text-xs text-muted-foreground">Até 12x sem juros</p>
+                  <p className="text-xs text-muted-foreground">Até 12x com juros</p>
                 </div>
               </label>
             </RadioGroup>
+
+            {/* Credit Card Form */}
+            {selectedPaymentMethod === "credit" && (
+              <div className="mt-4 pt-4 border-t border-border space-y-4">
+                <div>
+                  <Label htmlFor="cardNumber" className="text-xs font-medium text-muted-foreground">
+                    Número do Cartão *
+                  </Label>
+                  <Input
+                    id="cardNumber"
+                    name="number"
+                    value={cardData.number}
+                    onChange={handleCardInputChange}
+                    placeholder="0000 0000 0000 0000"
+                    maxLength={19}
+                    className={errors.cardNumber ? "border-destructive" : ""}
+                  />
+                  {errors.cardNumber && (
+                    <p className="text-xs text-destructive mt-1">{errors.cardNumber}</p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="holderName" className="text-xs font-medium text-muted-foreground">
+                    Nome no Cartão *
+                  </Label>
+                  <Input
+                    id="holderName"
+                    name="holderName"
+                    value={cardData.holderName}
+                    onChange={handleCardInputChange}
+                    placeholder="NOME COMO ESTÁ NO CARTÃO"
+                    className={`uppercase ${errors.cardHolder ? "border-destructive" : ""}`}
+                  />
+                  {errors.cardHolder && (
+                    <p className="text-xs text-destructive mt-1">{errors.cardHolder}</p>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="expiry" className="text-xs font-medium text-muted-foreground">
+                      Validade *
+                    </Label>
+                    <Input
+                      id="expiry"
+                      name="expiry"
+                      value={cardData.expiry}
+                      onChange={handleCardInputChange}
+                      placeholder="MM/AA"
+                      maxLength={5}
+                      className={errors.cardExpiry ? "border-destructive" : ""}
+                    />
+                    {errors.cardExpiry && (
+                      <p className="text-xs text-destructive mt-1">{errors.cardExpiry}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="cvv" className="text-xs font-medium text-muted-foreground">
+                      CVV *
+                    </Label>
+                    <Input
+                      id="cvv"
+                      name="cvv"
+                      value={cardData.cvv}
+                      onChange={handleCardInputChange}
+                      placeholder="123"
+                      maxLength={4}
+                      className={errors.cardCvv ? "border-destructive" : ""}
+                    />
+                    {errors.cardCvv && (
+                      <p className="text-xs text-destructive mt-1">{errors.cardCvv}</p>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="installments" className="text-xs font-medium text-muted-foreground">
+                    Parcelas
+                  </Label>
+                  <select
+                    id="installments"
+                    value={installments}
+                    onChange={(e) => setInstallments(parseInt(e.target.value, 10))}
+                    className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    {installmentOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Order Summary */}
@@ -742,16 +994,27 @@ export default function Checkout() {
                   <span className="text-primary font-medium">-{formatPrice(subtotal * 0.05)}</span>
                 </div>
               )}
+              {selectedPaymentMethod === "credit" && installments > 1 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Juros ({installments}x)</span>
+                  <span className="text-muted-foreground">
+                    +{formatPrice((installmentOptions.find(o => o.value === installments)?.totalAmount || total) - total)}
+                  </span>
+                </div>
+              )}
               <div className="border-t border-border pt-2 mt-2">
                 <div className="flex justify-between">
                   <span className="text-base font-bold text-foreground">Total</span>
                   <span className="text-xl font-bold text-primary">
-                    {formatPrice(selectedPaymentMethod === "pix" ? total * 0.95 : total)}
+                    {selectedPaymentMethod === "pix" 
+                      ? formatPrice(total * 0.95) 
+                      : formatPrice(installmentOptions.find(o => o.value === installments)?.totalAmount || total)}
                   </span>
                 </div>
                 {selectedPaymentMethod === "credit" && (
                   <p className="text-xs text-muted-foreground text-right mt-1">
-                    ou 12x de {formatPrice(total / 12)} sem juros
+                    {installments}x de {formatPrice((installmentOptions.find(o => o.value === installments)?.totalAmount || total) / installments)}
+                    {installments === 1 ? " (sem juros)" : ""}
                   </p>
                 )}
               </div>
