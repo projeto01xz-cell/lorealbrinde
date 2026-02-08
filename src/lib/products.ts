@@ -56,6 +56,65 @@ export const categories = [
 ];
 
 export const products: Product[] = [
+  // Scooter X13 - Produto em destaque
+  {
+    id: '19',
+    name: 'Moto Scooter X13 Elétrica 1000w 32km/h Sem Cnh Autopropelido',
+    description: `🛵 Moto Scooter X13 Elétrica 1000W — Potência e Liberdade Sem CNH
+
+A Moto Scooter X13 Elétrica combina design arrojado com alta performance, ideal para quem busca mobilidade urbana prática e econômica. Com motor de 1000W e velocidade máxima de 32 km/h, é classificada como veículo autopropelido, dispensando a necessidade de CNH.
+
+⚡ Sistema Elétrico de Alta Performance
+• Motor: 1000W Brushless de alta eficiência
+• Velocidade máxima: Até 32 km/h
+• Bateria: 60V 20Ah removível
+• Autonomia: Até 50 km (variável conforme peso e terreno)
+• Tempo de recarga: 4 a 6 horas
+
+🛡️ Segurança e Conforto
+• Freios a disco dianteiro e traseiro
+• Suspensão dianteira e traseira
+• Iluminação LED dianteira e traseira
+• Painel digital com velocímetro e indicador de bateria
+• Sistema antifurto com alarme
+• Banco confortável para até 2 pessoas
+
+📋 Especificações Técnicas
+• Estrutura: Chassi em aço carbono reforçado
+• Rodas: Aro 14" com pneus largos
+• Capacidade de carga: Até 180 kg
+• Peso aproximado: 65 kg (sem bateria)
+• Porta USB para carregar celular
+• Porta-malas espaçoso
+
+✅ Vantagens
+• Não precisa de CNH (veículo autopropelido)
+• Economia de combustível
+• Manutenção reduzida
+• Zero emissão de poluentes
+• Silenciosa e confortável
+
+⚠️ Aviso Importante
+*A autonomia pode variar conforme peso do condutor, tipo de terreno e uso em subidas. Recomendamos sempre o uso de capacete e equipamentos de segurança.`,
+    price: 369.00,
+    originalPrice: 3890,
+    image: scooterX1301,
+    images: [scooterX1301],
+    category: 'scooters',
+    rating: 4.8,
+    reviews: 127,
+    inStock: true,
+    featured: true,
+    freeShipping: true,
+    specs: {
+      'Motor': '1000W Brushless',
+      'Bateria': '60V 20Ah',
+      'Autonomia': 'Até 50km',
+      'Velocidade': '32 km/h',
+      'Freios': 'Disco dianteiro e traseiro',
+      'Capacidade': 'Até 180kg',
+    },
+  },
   // Produtos em destaque da imagem
   {
     id: '16',
@@ -544,65 +603,6 @@ Recomendamos sempre o uso de equipamentos de segurança. Respeite as leis de tr�
       'Potência': '240W',
       'Tempo': '2h para 80%',
       'Proteções': 'Curto, Sobre',
-    },
-  },
-  // Scooter X13 - Novo produto
-  {
-    id: '19',
-    name: 'Moto Scooter X13 Elétrica 1000w 32km/h Sem Cnh Autopropelido',
-    description: `🛵 Moto Scooter X13 Elétrica 1000W — Potência e Liberdade Sem CNH
-
-A Moto Scooter X13 Elétrica combina design arrojado com alta performance, ideal para quem busca mobilidade urbana prática e econômica. Com motor de 1000W e velocidade máxima de 32 km/h, é classificada como veículo autopropelido, dispensando a necessidade de CNH.
-
-⚡ Sistema Elétrico de Alta Performance
-• Motor: 1000W Brushless de alta eficiência
-• Velocidade máxima: Até 32 km/h
-• Bateria: 60V 20Ah removível
-• Autonomia: Até 50 km (variável conforme peso e terreno)
-• Tempo de recarga: 4 a 6 horas
-
-🛡️ Segurança e Conforto
-• Freios a disco dianteiro e traseiro
-• Suspensão dianteira e traseira
-• Iluminação LED dianteira e traseira
-• Painel digital com velocímetro e indicador de bateria
-• Sistema antifurto com alarme
-• Banco confortável para até 2 pessoas
-
-📋 Especificações Técnicas
-• Estrutura: Chassi em aço carbono reforçado
-• Rodas: Aro 14" com pneus largos
-• Capacidade de carga: Até 180 kg
-• Peso aproximado: 65 kg (sem bateria)
-• Porta USB para carregar celular
-• Porta-malas espaçoso
-
-✅ Vantagens
-• Não precisa de CNH (veículo autopropelido)
-• Economia de combustível
-• Manutenção reduzida
-• Zero emissão de poluentes
-• Silenciosa e confortável
-
-⚠️ Aviso Importante
-*A autonomia pode variar conforme peso do condutor, tipo de terreno e uso em subidas. Recomendamos sempre o uso de capacete e equipamentos de segurança.`,
-    price: 369.00,
-    originalPrice: 3890,
-    image: scooterX1301,
-    images: [scooterX1301],
-    category: 'scooters',
-    rating: 4.8,
-    reviews: 127,
-    inStock: true,
-    featured: true,
-    freeShipping: true,
-    specs: {
-      'Motor': '1000W Brushless',
-      'Bateria': '60V 20Ah',
-      'Autonomia': 'Até 50km',
-      'Velocidade': '32 km/h',
-      'Freios': 'Disco dianteiro e traseiro',
-      'Capacidade': 'Até 180kg',
     },
   },
 ];
