@@ -243,10 +243,6 @@ export default function ProdutoDetalhe() {
                 <CreditCard className="h-4 w-4" />
                 <span>ou <strong className="text-foreground">12x de {formatPrice(product.price / 12)}</strong> sem juros</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Barcode className="h-4 w-4" />
-                <span><strong className="text-primary">{formatPrice(product.price * 0.95)}</strong> no PIX (5% off)</span>
-              </div>
             </div>
 
             {/* Quantity Selector */}
