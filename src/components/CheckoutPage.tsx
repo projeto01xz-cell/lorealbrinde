@@ -631,12 +631,12 @@ const CheckoutPage = ({
     <div className="min-h-[100svh] bg-gray-50 pb-32">
       {/* Promo Banner */}
       <div className="fixed top-0 left-0 right-0 z-[60] bg-black py-2 px-4">
-        <div className="flex items-center justify-center gap-3">
-          <span className="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider">
-            Oferta Exclusiva Válida
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-[11px] sm:text-xs font-bold text-white">
+            🔥 QUEIMÃO DE ESTOQUE GTSM1
           </span>
-          <span className="bg-white text-black text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded uppercase">
-            Por Tempo Limitado
+          <span className="bg-white text-black text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded">
+            ATÉ 19/02
           </span>
         </div>
       </div>
