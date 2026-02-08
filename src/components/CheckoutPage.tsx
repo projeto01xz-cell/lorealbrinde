@@ -419,7 +419,12 @@ const CheckoutPage = ({
         });
       }
 
-      const totalCents = Math.round(total * 100);
+      // Calculate total with interest for credit card
+      const selectedInstallmentOption = installmentOptions.find(opt => opt.value === installments);
+      const finalTotal = paymentMethod === "credit_card" && selectedInstallmentOption 
+        ? selectedInstallmentOption.totalAmount 
+        : total;
+      const totalCents = Math.round(finalTotal * 100);
       const utmParams = getUtmifyParams();
 
       // Build payment request body
@@ -595,14 +600,29 @@ const CheckoutPage = ({
   const shippingPrice = selectedShippingOption ? selectedShippingOption.price : 0;
   const total = shippingPrice + bumpsTotal;
 
-  // Generate installment options
+  // Generate installment options with interest
+  const INTEREST_RATE = 0.0299; // 2.99% per month
   const installmentOptions = [];
   for (let i = 1; i <= 12; i++) {
-    const installmentValue = total / i;
+    let totalWithInterest = total;
+    let installmentValue = total / i;
+    let interestLabel = "";
+
+    if (i === 1) {
+      // 1x without interest
+      interestLabel = "(sem juros)";
+    } else {
+      // Calculate compound interest for installments > 1
+      totalWithInterest = total * Math.pow(1 + INTEREST_RATE, i);
+      installmentValue = totalWithInterest / i;
+      interestLabel = `(total R$ ${totalWithInterest.toFixed(2).replace(".", ",")})`;
+    }
+
     if (installmentValue >= 5) { // Minimum R$ 5 per installment
       installmentOptions.push({
         value: i,
-        label: i === 1 ? `1x de R$ ${total.toFixed(2).replace(".", ",")} (sem juros)` : `${i}x de R$ ${installmentValue.toFixed(2).replace(".", ",")}`,
+        totalAmount: totalWithInterest,
+        label: `${i}x de R$ ${installmentValue.toFixed(2).replace(".", ",")} ${interestLabel}`,
       });
     }
   }
