@@ -856,9 +856,6 @@ export default function Checkout() {
                   <p className="text-sm font-medium text-foreground">PIX</p>
                   <p className="text-xs text-muted-foreground">Aprovação imediata</p>
                 </div>
-                <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded">
-                  5% OFF
-                </span>
               </label>
               
               <label
@@ -985,12 +982,6 @@ export default function Checkout() {
                   {shippingPrice === 0 ? "GRÁTIS" : formatPrice(shippingPrice)}
                 </span>
               </div>
-              {selectedPaymentMethod === "pix" && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Desconto PIX (5%)</span>
-                  <span className="text-primary font-medium">-{formatPrice(subtotal * 0.05)}</span>
-                </div>
-              )}
               {selectedPaymentMethod === "credit" && installments > 1 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Juros ({installments}x)</span>
