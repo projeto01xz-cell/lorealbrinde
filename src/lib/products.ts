@@ -29,6 +29,9 @@ import capaceteSmart02 from '@/assets/products/capacete-smart-02.png';
 import capaceteSmart03 from '@/assets/products/capacete-smart-03.png';
 import capaceteSmart04 from '@/assets/products/capacete-smart-04.png';
 import scooterX1301 from '@/assets/products/scooter-x13-01.png';
+import scooterX1302 from '@/assets/products/scooter-x13-02.png';
+import scooterX1303 from '@/assets/products/scooter-x13-03.png';
+import scooterX1304 from '@/assets/products/scooter-x13-04.png';
 
 export interface Product {
   id: string;
@@ -60,46 +63,39 @@ export const products: Product[] = [
   {
     id: '19',
     name: 'Moto Scooter X13 Elétrica 1000w 32km/h Sem Cnh Autopropelido',
-    description: `🛵 Moto Scooter X13 Elétrica 1000W — Potência e Liberdade Sem CNH
+    description: `🛵 Scooter Elétrica X13 1000W — Mobilidade Urbana Sem CNH
 
-A Moto Scooter X13 Elétrica combina design arrojado com alta performance, ideal para quem busca mobilidade urbana prática e econômica. Com motor de 1000W e velocidade máxima de 32 km/h, é classificada como veículo autopropelido, dispensando a necessidade de CNH.
+Design moderno e motor potente de 1000W para deslocamentos urbanos práticos. Velocidade máxima de 32 km/h, classificada como autopropelido (dispensa CNH).
 
-⚡ Sistema Elétrico de Alta Performance
-• Motor: 1000W Brushless de alta eficiência
-• Velocidade máxima: Até 32 km/h
-• Bateria: 60V 20Ah removível
-• Autonomia: Até 50 km (variável conforme peso e terreno)
-• Tempo de recarga: 4 a 6 horas
+📋 FICHA TÉCNICA
+• Motor: 1000W Brushless
+• Bateria: 60V 20Ah (removível)
+• Velocidade: Até 32 km/h
+• Autonomia: Até 50 km*
+• Recarga: 4 a 6 horas
+• Capacidade: Até 180 kg
+• Rodas: Aro 14"
+• Peso: 65 kg (sem bateria)
 
-🛡️ Segurança e Conforto
-• Freios a disco dianteiro e traseiro
-• Suspensão dianteira e traseira
-• Iluminação LED dianteira e traseira
-• Painel digital com velocímetro e indicador de bateria
-• Sistema antifurto com alarme
-• Banco confortável para até 2 pessoas
+🛡️ SEGURANÇA
+• Freios a disco (dianteiro e traseiro)
+• Suspensão dupla
+• Iluminação LED completa
+• Alarme antifurto
+• Painel digital
 
-📋 Especificações Técnicas
-• Estrutura: Chassi em aço carbono reforçado
-• Rodas: Aro 14" com pneus largos
-• Capacidade de carga: Até 180 kg
-• Peso aproximado: 65 kg (sem bateria)
-• Porta USB para carregar celular
+✅ DIFERENCIAIS
+• Não precisa de CNH
+• Banco para 2 pessoas
+• Porta USB integrada
 • Porta-malas espaçoso
-
-✅ Vantagens
-• Não precisa de CNH (veículo autopropelido)
-• Economia de combustível
-• Manutenção reduzida
 • Zero emissão de poluentes
-• Silenciosa e confortável
 
-⚠️ Aviso Importante
-*A autonomia pode variar conforme peso do condutor, tipo de terreno e uso em subidas. Recomendamos sempre o uso de capacete e equipamentos de segurança.`,
+*Autonomia varia conforme peso e terreno.`,
     price: 369.00,
     originalPrice: 3890,
     image: scooterX1301,
-    images: [scooterX1301],
+    images: [scooterX1301, scooterX1302, scooterX1303, scooterX1304],
     category: 'scooters',
     rating: 4.8,
     reviews: 127,
