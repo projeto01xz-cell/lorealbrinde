@@ -120,10 +120,10 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Utmify Events response:", response.status, responseText);
 
     if (!response.ok) {
-      console.error("Utmify Events API error:", responseText);
+      console.error("Tracking API error:", responseText);
       return new Response(
-        JSON.stringify({ error: responseText || "Failed to track sale" }),
-        { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Tracking failed", code: "TRACKING_ERROR" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -141,10 +141,9 @@ const handler = async (req: Request): Promise<Response> => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Internal server error";
     console.error("Error tracking sale:", error);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "An unexpected error occurred", code: "INTERNAL_ERROR" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

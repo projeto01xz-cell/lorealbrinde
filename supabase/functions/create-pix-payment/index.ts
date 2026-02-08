@@ -113,9 +113,9 @@ const handler = async (req: Request): Promise<Response> => {
     const secretKey = Deno.env.get("GOATPAY_SECRET_KEY");
 
     if (!publicKey || !secretKey) {
-      console.error("Missing GoatPay API keys");
+      console.error("Missing payment gateway API keys");
       return new Response(
-        JSON.stringify({ error: "Payment service not configured" }),
+        JSON.stringify({ error: "Payment processing unavailable. Please try again later.", code: "PAYMENT_CONFIG_ERROR" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -176,10 +176,10 @@ const handler = async (req: Request): Promise<Response> => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("GoatPay API error:", data);
+      console.error("Payment gateway error:", data);
       return new Response(
-        JSON.stringify({ error: data.message || "Payment creation failed" }),
-        { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Unable to create payment. Please try again.", code: "PAYMENT_GATEWAY_ERROR" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -203,10 +203,9 @@ const handler = async (req: Request): Promise<Response> => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Internal server error";
-    console.error("Error creating PIX payment:", error);
+    console.error("Error creating payment:", error);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "An unexpected error occurred. Please try again.", code: "INTERNAL_ERROR" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -118,9 +118,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (error) {
       console.error("Error updating order:", error);
-      // Mesmo com erro, retornamos 200 para a GoatPay não reenviar
+      // Mesmo com erro, retornamos 200 para o gateway não reenviar
       return new Response(
-        JSON.stringify({ received: true, error: error.message }),
+        JSON.stringify({ received: true }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -192,10 +192,9 @@ const handler = async (req: Request): Promise<Response> => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Internal server error";
-    console.error("Webhook error:", error);
+    console.error("Webhook processing error:", error);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ received: false }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
