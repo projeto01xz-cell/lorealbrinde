@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Search, Menu, X, Truck, Package, Zap, Loader2, Gift, CheckSquare, Square, QrCode } from "lucide-react";
+import { Search, Menu, X, Truck, Package, Zap, Loader2, Gift, CheckSquare, Square, QrCode, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getUtmifyParams, saveUtmParams, getUtmifyLeadId, getClientIP } from "@/lib/utmify";
@@ -12,6 +12,7 @@ import productKitFull from "@/assets/product-kit-full.png";
 import serumOleoExtraordinario from "@/assets/serum-oleo-extraordinario.png";
 import serumLisoSonhos from "@/assets/serum-liso-sonhos.png";
 import leaveInCicatriRenov from "@/assets/leave-in-cicatri-renov.png";
+
 interface CheckoutPageProps {
   userData: {
     name: string;
@@ -24,6 +25,7 @@ interface CheckoutPageProps {
     orderId?: string;
   }, total: number) => void;
 }
+
 const shippingOptions = [{
   id: "pac",
   name: "PAC",
@@ -43,6 +45,7 @@ const shippingOptions = [{
   days: "1-2 dias úteis",
   icon: Zap
 }];
+
 const orderBumps = [{
   id: "bump1",
   name: "Sérum Óleo Extraordinário 100ml",
@@ -76,6 +79,12 @@ const maskCEP = (value: string) => {
 const maskPhone = (value: string) => {
   return value.replace(/\D/g, "").replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2").replace(/(-\d{4})\d+?$/, "$1");
 };
+const maskCardNumber = (value: string) => {
+  return value.replace(/\D/g, "").replace(/(\d{4})(\d)/, "$1 $2").replace(/(\d{4}) (\d{4})(\d)/, "$1 $2 $3").replace(/(\d{4}) (\d{4}) (\d{4})(\d)/, "$1 $2 $3 $4").replace(/(\d{4} \d{4} \d{4} \d{4})\d+?$/, "$1");
+};
+const maskExpiry = (value: string) => {
+  return value.replace(/\D/g, "").replace(/(\d{2})(\d)/, "$1/$2").replace(/(\/\d{2})\d+?$/, "$1");
+};
 
 // Validações
 const validateCPF = (cpf: string): boolean => {
@@ -102,6 +111,22 @@ const validateCEP = (cep: string): boolean => {
   const cleanCEP = cep.replace(/\D/g, "");
   return cleanCEP.length === 8;
 };
+const validateCardNumber = (cardNumber: string): boolean => {
+  const cleanNumber = cardNumber.replace(/\D/g, "");
+  return cleanNumber.length >= 13 && cleanNumber.length <= 19;
+};
+const validateExpiry = (expiry: string): boolean => {
+  const parts = expiry.split("/");
+  if (parts.length !== 2) return false;
+  const month = parseInt(parts[0], 10);
+  const year = parseInt(parts[1], 10);
+  if (month < 1 || month > 12) return false;
+  const currentYear = new Date().getFullYear() % 100;
+  const currentMonth = new Date().getMonth() + 1;
+  if (year < currentYear || (year === currentYear && month < currentMonth)) return false;
+  return true;
+};
+
 const CheckoutPage = ({
   userData,
   onPixGenerated
@@ -120,12 +145,23 @@ const CheckoutPage = ({
     city: "",
     state: ""
   });
+  const [cardData, setCardData] = useState({
+    number: "",
+    holderName: "",
+    expiry: "",
+    cvv: "",
+  });
   const [selectedShipping, setSelectedShipping] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"pix" | "credit_card">("pix");
+  const [installments, setInstallments] = useState(1);
   const [addressFilled, setAddressFilled] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
   const [errors, setErrors] = useState<{
     cpf?: string;
     cep?: string;
+    cardNumber?: string;
+    cardExpiry?: string;
+    cardCvv?: string;
   }>({});
   const [selectedBumps, setSelectedBumps] = useState<string[]>([]);
   const [loadingPayment, setLoadingPayment] = useState(false);
@@ -168,17 +204,21 @@ const CheckoutPage = ({
     
     return () => clearInterval(leadIdInterval);
   }, []);
+
   const toggleBump = (bumpId: string) => {
     setSelectedBumps(prev => prev.includes(bumpId) ? prev.filter(id => id !== bumpId) : [...prev, bumpId]);
   };
+
   const bumpsTotal = selectedBumps.reduce((acc, bumpId) => {
     const bump = orderBumps.find(b => b.id === bumpId);
     return acc + (bump?.promoPrice || 0);
   }, 0);
+
   const checkAddressFilled = (form: typeof formData) => {
     const requiredAddressFields = ["cep", "street", "number", "neighborhood", "city", "state"];
     return requiredAddressFields.every(field => form[field as keyof typeof form]?.trim() !== "");
   };
+
   const fetchAddress = async (cep: string) => {
     const cleanCEP = cep.replace(/\D/g, "");
     if (cleanCEP.length !== 8) return;
@@ -216,6 +256,7 @@ const CheckoutPage = ({
       setLoadingCep(false);
     }
   };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {
       name,
@@ -260,6 +301,63 @@ const CheckoutPage = ({
     setFormData(updatedForm);
     setAddressFilled(checkAddressFilled(updatedForm));
   };
+
+  const handleCardInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    let maskedValue = value;
+
+    if (name === "number") {
+      maskedValue = maskCardNumber(value);
+      if (maskedValue.replace(/\D/g, "").length >= 13) {
+        if (!validateCardNumber(maskedValue)) {
+          setErrors(prev => ({ ...prev, cardNumber: "Número do cartão inválido" }));
+        } else {
+          setErrors(prev => ({ ...prev, cardNumber: undefined }));
+        }
+      } else {
+        setErrors(prev => ({ ...prev, cardNumber: undefined }));
+      }
+    } else if (name === "expiry") {
+      maskedValue = maskExpiry(value);
+      if (maskedValue.length === 5) {
+        if (!validateExpiry(maskedValue)) {
+          setErrors(prev => ({ ...prev, cardExpiry: "Data inválida" }));
+        } else {
+          setErrors(prev => ({ ...prev, cardExpiry: undefined }));
+        }
+      } else {
+        setErrors(prev => ({ ...prev, cardExpiry: undefined }));
+      }
+    } else if (name === "cvv") {
+      maskedValue = value.replace(/\D/g, "").substring(0, 4);
+      if (maskedValue.length >= 3) {
+        setErrors(prev => ({ ...prev, cardCvv: undefined }));
+      }
+    }
+
+    setCardData(prev => ({ ...prev, [name]: maskedValue }));
+  };
+
+  const validateCardForm = (): boolean => {
+    const newErrors: typeof errors = {};
+    
+    if (!validateCardNumber(cardData.number)) {
+      newErrors.cardNumber = "Número do cartão inválido";
+    }
+    if (!cardData.holderName || cardData.holderName.trim().length < 2) {
+      newErrors.cardNumber = "Nome do titular é obrigatório";
+    }
+    if (!validateExpiry(cardData.expiry)) {
+      newErrors.cardExpiry = "Data de validade inválida";
+    }
+    if (cardData.cvv.length < 3) {
+      newErrors.cardCvv = "CVV inválido";
+    }
+
+    setErrors(prev => ({ ...prev, ...newErrors }));
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async () => {
     if (!selectedShipping) return;
     if (!validateCPF(formData.cpf)) {
@@ -280,13 +378,21 @@ const CheckoutPage = ({
       toast.error("Por favor, preencha o e-mail");
       return;
     }
+
+    // Validate card if credit_card payment
+    if (paymentMethod === "credit_card" && !validateCardForm()) {
+      toast.error("Por favor, verifique os dados do cartão");
+      return;
+    }
+
     setLoadingPayment(true);
     try {
       // Montar itens do pedido
       const items = [{
         title: "Kit Elseve Collagen Lifter (Brinde)",
         quantity: 1,
-        unitPrice: 0
+        unitPrice: 0,
+        operationType: 1
       }];
 
       // Adicionar order bumps selecionados
@@ -296,7 +402,8 @@ const CheckoutPage = ({
           items.push({
             title: bump.name,
             quantity: 1,
-            unitPrice: Math.round(bump.promoPrice * 100)
+            unitPrice: Math.round(bump.promoPrice * 100),
+            operationType: 2 // orderbump
           });
         }
       });
@@ -307,35 +414,66 @@ const CheckoutPage = ({
         items.push({
           title: `Frete ${shipping.name}`,
           quantity: 1,
-          unitPrice: Math.round(shipping.price * 100)
+          unitPrice: Math.round(shipping.price * 100),
+          operationType: 1
         });
       }
+
       const totalCents = Math.round(total * 100);
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke("create-pix-payment", {
-        body: {
-          amount: totalCents,
-          customer: {
-            name: formData.fullName,
-            email: formData.email,
-            document: formData.cpf,
-            phone: formData.phone
-          },
-          items,
-          expiresInMinutes: 30
-        }
+      const utmParams = getUtmifyParams();
+
+      // Build payment request body
+      const paymentBody: Record<string, unknown> = {
+        amount: totalCents,
+        paymentMethod,
+        customer: {
+          name: formData.fullName,
+          email: formData.email,
+          document: formData.cpf,
+          phone: formData.phone,
+          streetName: formData.street,
+          number: formData.number,
+          complement: formData.complement,
+          neighborhood: formData.neighborhood,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.cep,
+        },
+        items,
+        tracking: utmParams,
+      };
+
+      // Add card data for credit_card payment
+      if (paymentMethod === "credit_card") {
+        const expiryParts = cardData.expiry.split("/");
+        paymentBody.card = {
+          number: cardData.number.replace(/\s/g, ""),
+          holderName: cardData.holderName,
+          expMonth: parseInt(expiryParts[0], 10),
+          expYear: 2000 + parseInt(expiryParts[1], 10),
+          cvv: cardData.cvv,
+        };
+        paymentBody.installments = installments;
+      }
+
+      const { data, error } = await supabase.functions.invoke("create-pix-payment", {
+        body: paymentBody
       });
+
       if (error) {
         console.error("Payment error:", error);
-        toast.error("Erro ao gerar pagamento Pix");
+        toast.error("Erro ao processar pagamento");
         return;
       }
 
-      // Enviar tracking para Utmify
-      const utmParams = getUtmifyParams();
-      const orderId = data.id?.toString() || `PIX-${Date.now()}`;
+      // Check for API errors
+      if (data.error) {
+        console.error("Payment API error:", data);
+        toast.error(data.error || "Erro ao processar pagamento");
+        return;
+      }
+
+      const orderId = data.id?.toString() || `ORDER-${Date.now()}`;
 
       // Montar produtos para tracking
       const trackingProducts = [{
@@ -363,7 +501,7 @@ const CheckoutPage = ({
         customer_phone: formData.phone,
         customer_document: formData.cpf,
         total_amount: total,
-        status: "pending",
+        status: paymentMethod === "credit_card" && data.status === "paid" ? "paid" : "pending",
         pix_payload: data.pix?.payload || "",
         shipping_option: shippingOption?.name || "",
         shipping_price: shippingOption?.price || 0,
@@ -393,25 +531,10 @@ const CheckoutPage = ({
       }
 
       // Track sale async (não bloqueia o fluxo)
-      console.log("Calling track-utmify with:", {
-        orderId,
-        status: "pending",
-        customer: {
-          name: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-          document: formData.cpf
-        },
-        products: trackingProducts,
-        paymentMethod: "pix",
-        totalAmount: total,
-        utmParams
-      });
-      
       supabase.functions.invoke("track-utmify", {
         body: {
           orderId,
-          status: "pending",
+          status: paymentMethod === "credit_card" && data.status === "paid" ? "paid" : "pending",
           customer: {
             name: formData.fullName,
             email: formData.email,
@@ -420,18 +543,13 @@ const CheckoutPage = ({
             ip: clientIP
           },
           products: trackingProducts,
-          paymentMethod: "pix",
+          paymentMethod,
           totalAmount: total,
           utmParams,
           leadId: utmifyLeadId
         }
       }).then((response) => {
         console.log("Utmify tracking response:", response);
-        if (response.error) {
-          console.error("Utmify tracking error:", response.error);
-        } else {
-          console.log("Sale tracked to Utmify successfully:", response.data);
-        }
       }).catch((err) => {
         console.error("Utmify tracking network error:", err);
       });
@@ -448,12 +566,23 @@ const CheckoutPage = ({
         });
       }
 
-      // Navegar para página de pagamento Pix com orderId para upsell depois
-      onPixGenerated({
-        payload: data.pix?.payload || "",
-        expiresAt: data.pix?.expiresAt,
-        orderId: orderId
-      }, total);
+      // Handle response based on payment method
+      if (paymentMethod === "pix") {
+        // Navegar para página de pagamento Pix
+        onPixGenerated({
+          payload: data.pix?.payload || "",
+          expiresAt: data.pix?.expiresAt,
+          orderId: orderId
+        }, total);
+      } else {
+        // Credit card - show success message
+        if (data.status === "paid" || data.status === "approved") {
+          toast.success("Pagamento aprovado! Seu pedido foi confirmado.");
+          // Could redirect to a success page here
+        } else {
+          toast.error("Pagamento não aprovado. Por favor, tente novamente.");
+        }
+      }
     } catch (err) {
       console.error("Payment error:", err);
       toast.error("Erro ao processar pagamento");
@@ -461,10 +590,25 @@ const CheckoutPage = ({
       setLoadingPayment(false);
     }
   };
+
   const selectedShippingOption = shippingOptions.find(s => s.id === selectedShipping);
   const shippingPrice = selectedShippingOption ? selectedShippingOption.price : 0;
   const total = shippingPrice + bumpsTotal;
-  return <div className="min-h-[100svh] bg-gray-50 pb-32">
+
+  // Generate installment options
+  const installmentOptions = [];
+  for (let i = 1; i <= 12; i++) {
+    const installmentValue = total / i;
+    if (installmentValue >= 5) { // Minimum R$ 5 per installment
+      installmentOptions.push({
+        value: i,
+        label: i === 1 ? `1x de R$ ${total.toFixed(2).replace(".", ",")} (sem juros)` : `${i}x de R$ ${installmentValue.toFixed(2).replace(".", ",")}`,
+      });
+    }
+  }
+
+  return (
+    <div className="min-h-[100svh] bg-gray-50 pb-32">
       {/* Promo Banner */}
       <div className="fixed top-0 left-0 right-0 z-[60] bg-black py-2 px-4">
         <div className="flex items-center justify-center gap-3">
@@ -606,11 +750,13 @@ const CheckoutPage = ({
         </div>
 
         {/* Shipping Options - Only show when address is filled */}
-        {addressFilled && <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+        {addressFilled && (
+          <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
             <h2 className="font-bold text-sm text-gray-900 mb-4">Opções de Frete</h2>
             <RadioGroup value={selectedShipping} onValueChange={setSelectedShipping}>
               <div className="space-y-3">
-                {shippingOptions.map(option => <label key={option.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${selectedShipping === option.id ? "border-purple-500 bg-purple-50" : "border-gray-200 hover:border-gray-300"}`}>
+                {shippingOptions.map(option => (
+                  <label key={option.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${selectedShipping === option.id ? "border-purple-500 bg-purple-50" : "border-gray-200 hover:border-gray-300"}`}>
                     <RadioGroupItem value={option.id} id={option.id} />
                     <option.icon className="w-5 h-5 text-gray-600" />
                     <div className="flex-1">
@@ -620,13 +766,123 @@ const CheckoutPage = ({
                     <span className="text-sm font-bold text-gray-900">
                       R$ {option.price.toFixed(2).replace(".", ",")}
                     </span>
-                  </label>)}
+                  </label>
+                ))}
               </div>
             </RadioGroup>
-          </div>}
+          </div>
+        )}
+
+        {/* Payment Method Selection */}
+        {addressFilled && selectedShipping && (
+          <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <h2 className="font-bold text-sm text-gray-900 mb-4">Forma de Pagamento</h2>
+            <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "pix" | "credit_card")}>
+              <div className="space-y-3">
+                <label className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${paymentMethod === "pix" ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-gray-300"}`}>
+                  <RadioGroupItem value="pix" id="pix" />
+                  <QrCode className="w-5 h-5 text-green-600" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">PIX</p>
+                    <p className="text-xs text-gray-500">Aprovação instantânea</p>
+                  </div>
+                </label>
+                <label className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${paymentMethod === "credit_card" ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"}`}>
+                  <RadioGroupItem value="credit_card" id="credit_card" />
+                  <CreditCard className="w-5 h-5 text-blue-600" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">Cartão de Crédito</p>
+                    <p className="text-xs text-gray-500">Até 12x sem juros</p>
+                  </div>
+                </label>
+              </div>
+            </RadioGroup>
+
+            {/* Credit Card Form */}
+            {paymentMethod === "credit_card" && (
+              <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+                <div>
+                  <Label htmlFor="cardNumber" className="text-xs text-gray-600">
+                    Número do Cartão
+                  </Label>
+                  <Input
+                    id="cardNumber"
+                    name="number"
+                    value={cardData.number}
+                    onChange={handleCardInputChange}
+                    placeholder="0000 0000 0000 0000"
+                    className={`mt-1 h-11 ${errors.cardNumber ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                  />
+                  {errors.cardNumber && <p className="text-[10px] text-red-500 mt-1">{errors.cardNumber}</p>}
+                </div>
+                <div>
+                  <Label htmlFor="holderName" className="text-xs text-gray-600">
+                    Nome no Cartão
+                  </Label>
+                  <Input
+                    id="holderName"
+                    name="holderName"
+                    value={cardData.holderName}
+                    onChange={handleCardInputChange}
+                    placeholder="NOME COMO ESTÁ NO CARTÃO"
+                    className="mt-1 h-11 uppercase"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="expiry" className="text-xs text-gray-600">
+                      Validade
+                    </Label>
+                    <Input
+                      id="expiry"
+                      name="expiry"
+                      value={cardData.expiry}
+                      onChange={handleCardInputChange}
+                      placeholder="MM/AA"
+                      className={`mt-1 h-11 ${errors.cardExpiry ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                    />
+                    {errors.cardExpiry && <p className="text-[10px] text-red-500 mt-1">{errors.cardExpiry}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="cvv" className="text-xs text-gray-600">
+                      CVV
+                    </Label>
+                    <Input
+                      id="cvv"
+                      name="cvv"
+                      value={cardData.cvv}
+                      onChange={handleCardInputChange}
+                      placeholder="123"
+                      className={`mt-1 h-11 ${errors.cardCvv ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                    />
+                    {errors.cardCvv && <p className="text-[10px] text-red-500 mt-1">{errors.cardCvv}</p>}
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="installments" className="text-xs text-gray-600">
+                    Parcelas
+                  </Label>
+                  <select
+                    id="installments"
+                    value={installments}
+                    onChange={(e) => setInstallments(parseInt(e.target.value, 10))}
+                    className="mt-1 h-11 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    {installmentOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Order Total */}
-        {addressFilled && selectedShipping && <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+        {addressFilled && selectedShipping && (
+          <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">Produto</span>
               <span className="text-sm font-medium text-green-600">GRÁTIS</span>
@@ -637,25 +893,29 @@ const CheckoutPage = ({
                 R$ {shippingPrice.toFixed(2).replace(".", ",")}
               </span>
             </div>
-            {bumpsTotal > 0 && <div className="flex justify-between items-center mb-2">
+            {bumpsTotal > 0 && (
+              <div className="flex justify-between items-center mb-2">
                 <span className="text-sm text-gray-600">Ofertas adicionais</span>
                 <span className="text-sm font-medium text-purple-600">
                   R$ {bumpsTotal.toFixed(2).replace(".", ",")}
                 </span>
-              </div>}
+              </div>
+            )}
             <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
               <span className="text-base font-bold text-gray-900">Total</span>
               <span className="text-lg font-black text-gray-900">
                 R$ {total.toFixed(2).replace(".", ",")}
               </span>
             </div>
-          </div>}
+          </div>
+        )}
 
         {/* Order Bumps */}
-        {addressFilled && selectedShipping && <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl p-4 border border-purple-500 shadow-lg">
+        {addressFilled && selectedShipping && (
+          <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl p-4 border border-purple-500 shadow-lg">
             <div className="flex items-center gap-2 mb-4">
               <Gift className="w-5 h-5 text-yellow-300" />
-              <h2 className="font-bold text-sm text-white uppercase tracking-wide"> DESCONTO ESPECIAL DE LANÇAMENTO</h2>
+              <h2 className="font-bold text-sm text-white uppercase tracking-wide">DESCONTO ESPECIAL DE LANÇAMENTO</h2>
             </div>
             <p className="text-xs text-purple-200 mb-4">
               Promoção exclusiva para participantes desta campanha especial!
@@ -663,8 +923,13 @@ const CheckoutPage = ({
 
             <div className="space-y-3">
               {orderBumps.map(bump => {
-            const isSelected = selectedBumps.includes(bump.id);
-            return <button key={bump.id} onClick={() => toggleBump(bump.id)} className={`w-full flex items-start gap-3 p-3 rounded-lg border-2 transition-all text-left ${isSelected ? "border-yellow-400 bg-white/20" : "border-white/30 bg-white/10 hover:bg-white/15"}`}>
+                const isSelected = selectedBumps.includes(bump.id);
+                return (
+                  <button
+                    key={bump.id}
+                    onClick={() => toggleBump(bump.id)}
+                    className={`w-full flex items-start gap-3 p-3 rounded-lg border-2 transition-all text-left ${isSelected ? "border-yellow-400 bg-white/20" : "border-white/30 bg-white/10 hover:bg-white/15"}`}
+                  >
                     <div className="flex-shrink-0 mt-0.5">
                       {isSelected ? <CheckSquare className="w-5 h-5 text-yellow-300" /> : <Square className="w-5 h-5 text-white/60" />}
                     </div>
@@ -683,29 +948,48 @@ const CheckoutPage = ({
                         </span>
                       </div>
                     </div>
-                  </button>;
-          })}
+                  </button>
+                );
+              })}
             </div>
-          </div>}
+          </div>
+        )}
       </div>
 
       {/* Sticky CTA */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
         <div className="max-w-sm mx-auto">
-          <Button onClick={handleSubmit} disabled={!addressFilled || !selectedShipping || !!errors.cpf || !!errors.cep || loadingPayment} className="w-full h-12 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-lg">
-            {loadingPayment ? <>
+          <Button
+            onClick={handleSubmit}
+            disabled={!addressFilled || !selectedShipping || !!errors.cpf || !!errors.cep || loadingPayment}
+            className={`w-full h-12 ${paymentMethod === "pix" ? "bg-green-500 hover:bg-green-600" : "bg-blue-500 hover:bg-blue-600"} disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-lg`}
+          >
+            {loadingPayment ? (
+              <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                GERANDO PIX...
-              </> : <>
+                PROCESSANDO...
+              </>
+            ) : paymentMethod === "pix" ? (
+              <>
                 <QrCode className="w-4 h-4 mr-2" />
                 PAGAR COM PIX
-              </>}
+              </>
+            ) : (
+              <>
+                <CreditCard className="w-4 h-4 mr-2" />
+                PAGAR COM CARTÃO
+              </>
+            )}
           </Button>
-          {!addressFilled && <p className="text-[10px] text-gray-400 text-center mt-2">
+          {!addressFilled && (
+            <p className="text-[10px] text-gray-400 text-center mt-2">
               Preencha o endereço para ver as opções de frete
-            </p>}
+            </p>
+          )}
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default CheckoutPage;

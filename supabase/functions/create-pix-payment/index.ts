@@ -5,20 +5,46 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+interface CardData {
+  number: string;
+  holderName: string;
+  expMonth: number;
+  expYear: number;
+  cvv: string;
+}
+
 interface PaymentRequest {
   amount: number; // em centavos
+  paymentMethod: "pix" | "credit_card";
   customer: {
     name: string;
     email: string;
-    document: string; // CPF
+    document: string;
     phone: string;
+    streetName?: string;
+    number?: string;
+    complement?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
   };
   items: Array<{
     title: string;
     quantity: number;
-    unitPrice: number; // em centavos
+    unitPrice: number;
+    operationType?: number; // 1- venda principal / 2- orderbump / 3- upsell
   }>;
-  expiresInMinutes?: number;
+  card?: CardData;
+  installments?: number;
+  tracking?: {
+    src?: string;
+    utm_source?: string;
+    utm_medium?: string;
+    utm_campaign?: string;
+    utm_term?: string;
+    utm_content?: string;
+  };
 }
 
 // Input validation helper
@@ -30,8 +56,14 @@ const validatePaymentRequest = (data: unknown): { valid: boolean; error?: string
   const req = data as Record<string, unknown>;
   
   // Validate amount
-  if (typeof req.amount !== 'number' || req.amount <= 0 || req.amount > 1000000) {
-    return { valid: false, error: "Invalid amount: must be between 1 and 1000000 cents" };
+  if (typeof req.amount !== 'number' || req.amount <= 0 || req.amount > 100000000) {
+    return { valid: false, error: "Invalid amount: must be between 1 and 100000000 cents" };
+  }
+
+  // Validate payment method
+  const validMethods = ["pix", "credit_card"];
+  if (!req.paymentMethod || !validMethods.includes(req.paymentMethod as string)) {
+    return { valid: false, error: "Invalid payment method: must be 'pix' or 'credit_card'" };
   }
 
   // Validate customer
@@ -77,29 +109,91 @@ const validatePaymentRequest = (data: unknown): { valid: boolean; error?: string
     if (typeof i.quantity !== 'number' || i.quantity < 1 || i.quantity > 1000) {
       return { valid: false, error: "Each item must have a valid quantity (1-1000)" };
     }
-    if (typeof i.unitPrice !== 'number' || !Number.isFinite(i.unitPrice) || i.unitPrice < 1) {
+    if (typeof i.unitPrice !== 'number' || !Number.isFinite(i.unitPrice) || i.unitPrice < 0) {
       return { valid: false, error: `Each item must have a valid unitPrice (got: ${i.unitPrice})` };
     }
   }
 
-  return {
-    valid: true,
-    data: {
-      amount: req.amount as number,
-      customer: {
-        name: (customer.name as string).trim().substring(0, 200),
-        email: (customer.email as string).trim().toLowerCase().substring(0, 255),
-        document: cleanDoc,
-        phone: cleanPhone,
-      },
-      items: (req.items as Array<{ title: string; quantity: number; unitPrice: number }>).map(i => ({
-        title: i.title.substring(0, 200),
-        quantity: Math.min(Math.floor(i.quantity), 1000),
-        unitPrice: Math.floor(i.unitPrice),
-      })),
-      expiresInMinutes: typeof req.expiresInMinutes === 'number' ? Math.min(Math.max(req.expiresInMinutes, 5), 60) : 30,
+  // Validate card if credit_card payment
+  if (req.paymentMethod === "credit_card") {
+    const card = req.card as Record<string, unknown>;
+    if (!card || typeof card !== 'object') {
+      return { valid: false, error: "Card data is required for credit card payment" };
     }
+
+    if (typeof card.number !== 'string' || card.number.replace(/\D/g, '').length < 13) {
+      return { valid: false, error: "Invalid card number" };
+    }
+    if (typeof card.holderName !== 'string' || card.holderName.trim().length < 2) {
+      return { valid: false, error: "Card holder name is required" };
+    }
+    if (typeof card.expMonth !== 'number' || card.expMonth < 1 || card.expMonth > 12) {
+      return { valid: false, error: "Invalid expiration month" };
+    }
+    if (typeof card.expYear !== 'number' || card.expYear < 2024 || card.expYear > 2050) {
+      return { valid: false, error: "Invalid expiration year" };
+    }
+    if (typeof card.cvv !== 'string' || card.cvv.length < 3 || card.cvv.length > 4) {
+      return { valid: false, error: "Invalid CVV" };
+    }
+  }
+
+  // Build validated data
+  const validatedCustomer: PaymentRequest["customer"] = {
+    name: (customer.name as string).trim().substring(0, 200),
+    email: (customer.email as string).trim().toLowerCase().substring(0, 255),
+    document: cleanDoc,
+    phone: cleanPhone,
   };
+
+  // Add address fields if present
+  if (typeof customer.streetName === 'string') validatedCustomer.streetName = customer.streetName.substring(0, 200);
+  if (typeof customer.number === 'string') validatedCustomer.number = customer.number.substring(0, 20);
+  if (typeof customer.complement === 'string') validatedCustomer.complement = customer.complement.substring(0, 100);
+  if (typeof customer.neighborhood === 'string') validatedCustomer.neighborhood = customer.neighborhood.substring(0, 100);
+  if (typeof customer.city === 'string') validatedCustomer.city = customer.city.substring(0, 100);
+  if (typeof customer.state === 'string') validatedCustomer.state = customer.state.substring(0, 2);
+  if (typeof customer.zipCode === 'string') validatedCustomer.zipCode = customer.zipCode.replace(/\D/g, '').substring(0, 8);
+
+  const result: PaymentRequest = {
+    amount: req.amount as number,
+    paymentMethod: req.paymentMethod as "pix" | "credit_card",
+    customer: validatedCustomer,
+    items: (req.items as Array<{ title: string; quantity: number; unitPrice: number; operationType?: number }>).map(i => ({
+      title: i.title.substring(0, 200),
+      quantity: Math.min(Math.floor(i.quantity), 1000),
+      unitPrice: Math.floor(i.unitPrice),
+      operationType: i.operationType || 1,
+    })),
+  };
+
+  // Add card if credit_card
+  if (req.paymentMethod === "credit_card") {
+    const card = req.card as Record<string, unknown>;
+    result.card = {
+      number: (card.number as string).replace(/\D/g, ''),
+      holderName: (card.holderName as string).trim(),
+      expMonth: card.expMonth as number,
+      expYear: card.expYear as number,
+      cvv: (card.cvv as string).replace(/\D/g, ''),
+    };
+    result.installments = typeof req.installments === 'number' ? Math.min(Math.max(req.installments, 1), 12) : 1;
+  }
+
+  // Add tracking if present
+  if (req.tracking && typeof req.tracking === 'object') {
+    const t = req.tracking as Record<string, unknown>;
+    result.tracking = {
+      src: typeof t.src === 'string' ? t.src.substring(0, 200) : '',
+      utm_source: typeof t.utm_source === 'string' ? t.utm_source.substring(0, 200) : '',
+      utm_medium: typeof t.utm_medium === 'string' ? t.utm_medium.substring(0, 200) : '',
+      utm_campaign: typeof t.utm_campaign === 'string' ? t.utm_campaign.substring(0, 200) : '',
+      utm_term: typeof t.utm_term === 'string' ? t.utm_term.substring(0, 200) : '',
+      utm_content: typeof t.utm_content === 'string' ? t.utm_content.substring(0, 200) : '',
+    };
+  }
+
+  return { valid: true, data: result };
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -140,25 +234,62 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const { amount, customer, items } = validation.data;
+    const { amount, paymentMethod, customer, items, card, installments, tracking } = validation.data;
 
-    console.log("Creating PIX payment via SharkPayments:", { amount, customerEmail: customer.email.substring(0, 3) + "***", itemsCount: items.length });
+    console.log("Creating payment via SharkPayments:", { 
+      amount, 
+      paymentMethod,
+      customerEmail: customer.email.substring(0, 3) + "***", 
+      itemsCount: items.length 
+    });
 
-    // SharkPayments API payload
-    const payload = {
+    // Build SharkPayments API payload with correct structure
+    const payload: Record<string, unknown> = {
+      amount,
       offer_hash: offerHash,
-      name: customer.name,
-      email: customer.email,
-      phone_number: customer.phone,
-      doc: customer.document,
-      products_cart: items.map((item, index) => ({
+      payment_method: paymentMethod,
+      customer: {
+        name: customer.name,
+        email: customer.email,
+        phone_number: customer.phone,
+        document: customer.document,
+        street_name: customer.streetName || "",
+        number: customer.number || "sn",
+        complement: customer.complement || "",
+        neighborhood: customer.neighborhood || "",
+        city: customer.city || "",
+        state: customer.state || "",
+        zip_code: customer.zipCode || "",
+      },
+      cart: items.map((item, index) => ({
         product_hash: productHash,
-        title: `teste ${index + 1}`, // Masked for privacy as per existing GoatPay behavior
+        title: `teste ${index + 1}`, // Masked for privacy
+        cover: null,
+        price: item.unitPrice,
         quantity: item.quantity,
-        price_in_cents: item.unitPrice,
+        operation_type: item.operationType || 1,
+        tangible: true,
       })),
-      payment_method: "pix",
+      expire_in_days: 1,
+      transaction_origin: "api",
     };
+
+    // Add card data for credit_card payments
+    if (paymentMethod === "credit_card" && card) {
+      payload.card = {
+        number: card.number,
+        holder_name: card.holderName,
+        exp_month: card.expMonth,
+        exp_year: card.expYear,
+        cvv: card.cvv,
+      };
+      payload.installments = installments || 1;
+    }
+
+    // Add tracking data
+    if (tracking) {
+      payload.tracking = tracking;
+    }
 
     console.log("Sending request to SharkPayments API...");
 
@@ -176,25 +307,47 @@ const handler = async (req: Request): Promise<Response> => {
     if (!response.ok) {
       console.error("SharkPayments API error:", data);
       return new Response(
-        JSON.stringify({ error: "Unable to create payment. Please try again.", code: "PAYMENT_GATEWAY_ERROR", details: data }),
+        JSON.stringify({ 
+          error: data.message || "Unable to create payment. Please try again.", 
+          code: "PAYMENT_GATEWAY_ERROR", 
+          details: data 
+        }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("PIX payment created successfully via SharkPayments:", { id: data.id || data.transaction_id, status: data.status });
+    console.log("Payment created successfully via SharkPayments:", { 
+      id: data.hash || data.id || data.transaction_id, 
+      status: data.status 
+    });
 
     // Map SharkPayments response to our standard format
+    const responseData: Record<string, unknown> = {
+      id: data.hash || data.id || data.transaction_id || data.external_id,
+      status: data.status || "pending",
+      amount: data.amount || amount,
+      paymentMethod,
+    };
+
+    // Add PIX data if applicable
+    if (paymentMethod === "pix") {
+      responseData.pix = {
+        payload: data.pix_code || data.pix?.payload || data.pix?.qr_code || data.qr_code || data.pix_qrcode,
+        qrCodeUrl: data.pix_qrcode_url || data.pix?.qr_code_url || data.qrcode_url,
+        expiresAt: data.pix_expires_at || data.pix?.expires_at || data.expires_at,
+      };
+    }
+
+    // Add card data if applicable
+    if (paymentMethod === "credit_card") {
+      responseData.card = {
+        lastDigits: card?.number.slice(-4),
+        brand: data.card_brand || data.brand,
+      };
+    }
+
     return new Response(
-      JSON.stringify({
-        id: data.id || data.transaction_id || data.external_id,
-        status: data.status || "pending",
-        pix: {
-          payload: data.pix_code || data.pix?.payload || data.pix?.qr_code || data.qr_code,
-          qrCodeUrl: data.pix_qrcode_url || data.pix?.qr_code_url || data.qrcode_url,
-          expiresAt: data.pix_expires_at || data.pix?.expires_at || data.expires_at,
-        },
-        amount: data.amount || amount,
-      }),
+      JSON.stringify(responseData),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
