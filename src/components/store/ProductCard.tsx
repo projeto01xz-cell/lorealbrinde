@@ -1,4 +1,4 @@
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Truck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Product, formatPrice, calculateDiscount } from "@/lib/products";
 
@@ -32,15 +32,26 @@ export default function ProductCard({ product }: ProductCardProps) {
             loading="lazy"
           />
           
-          {/* Discount Badge - Bottom Left of Image */}
-          {discount > 0 && (
-            <span className="absolute bottom-2 left-2 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
-              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-              {discount}%
-            </span>
-          )}
+          {/* Badges Container - Top of Image */}
+          <div className="absolute top-1.5 left-1.5 right-1.5 flex flex-col gap-1">
+            {/* Discount Badge */}
+            {discount > 0 && (
+              <span className="self-start bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
+                <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+                {discount}% OFF
+              </span>
+            )}
+            
+            {/* Free Shipping Badge */}
+            {product.freeShipping && (
+              <span className="self-start bg-primary text-primary-foreground text-[10px] font-bold px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
+                <Truck className="h-2.5 w-2.5" />
+                FRETE GRÁTIS
+              </span>
+            )}
+          </div>
         </Link>
 
         {/* Info Container - Right Side */}
