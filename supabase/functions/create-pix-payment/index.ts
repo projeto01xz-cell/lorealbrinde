@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 interface PaymentRequest {
@@ -109,13 +109,22 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const publicKey = Deno.env.get("GOATPAY_PUBLIC_KEY");
-    const secretKey = Deno.env.get("GOATPAY_SECRET_KEY");
+    const apiToken = Deno.env.get("SHARKPAY_API_TOKEN");
+    const offerHash = Deno.env.get("SHARKPAY_OFFER_HASH");
+    const productHash = Deno.env.get("SHARKPAY_PRODUCT_HASH");
 
-    if (!publicKey || !secretKey) {
-      console.error("Missing payment gateway API keys");
+    if (!apiToken) {
+      console.error("Missing SHARKPAY_API_TOKEN");
       return new Response(
         JSON.stringify({ error: "Payment processing unavailable. Please try again later.", code: "PAYMENT_CONFIG_ERROR" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!offerHash || !productHash) {
+      console.error("Missing SHARKPAY_OFFER_HASH or SHARKPAY_PRODUCT_HASH");
+      return new Response(
+        JSON.stringify({ error: "Payment configuration incomplete. Please contact support.", code: "PAYMENT_CONFIG_ERROR" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -131,44 +140,33 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const { amount, customer, items, expiresInMinutes } = validation.data;
+    const { amount, customer, items } = validation.data;
 
-    console.log("Creating PIX payment:", { amount, customerEmail: customer.email.substring(0, 3) + "***", itemsCount: items.length });
+    console.log("Creating PIX payment via SharkPayments:", { amount, customerEmail: customer.email.substring(0, 3) + "***", itemsCount: items.length });
 
-    // Criar credenciais Basic Auth
-    const credentials = btoa(`${publicKey}:${secretKey}`);
-
-    // GoatPay valida phone como string (conforme retorno de erro da API)
+    // SharkPayments API payload
     const payload = {
-      amount,
-      paymentMethod: "pix",
-      customer: {
-        name: customer.name,
-        email: customer.email,
-        document: {
-          type: customer.document.length === 11 ? "cpf" : "cnpj",
-          number: customer.document,
-        },
-        phone: customer.phone,
-      },
-      items: items.map((item) => ({
-        title: item.title,
+      offer_hash: offerHash,
+      name: customer.name,
+      email: customer.email,
+      phone_number: customer.phone,
+      doc: customer.document,
+      products_cart: items.map((item, index) => ({
+        product_hash: productHash,
+        title: `teste ${index + 1}`, // Masked for privacy as per existing GoatPay behavior
         quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        tangible: true,
+        price_in_cents: item.unitPrice,
       })),
-      pix: {
-        expires_in: (expiresInMinutes ?? 30) * 60,
-      },
+      payment_method: "pix",
     };
 
-    console.log("Sending request to GoatPay API...");
+    console.log("Sending request to SharkPayments API...");
 
-    const response = await fetch("https://api.goatpay.pro/v1/transactions", {
+    const response = await fetch(`https://api.sharkpayments.com.br/api/public/v1/transactions?api_token=${apiToken}`, {
       method: "POST",
       headers: {
-        "Authorization": `Basic ${credentials}`,
         "Content-Type": "application/json",
+        "Accept": "application/json",
       },
       body: JSON.stringify(payload),
     });
@@ -176,29 +174,26 @@ const handler = async (req: Request): Promise<Response> => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("Payment gateway error:", data);
+      console.error("SharkPayments API error:", data);
       return new Response(
-        JSON.stringify({ error: "Unable to create payment. Please try again.", code: "PAYMENT_GATEWAY_ERROR" }),
+        JSON.stringify({ error: "Unable to create payment. Please try again.", code: "PAYMENT_GATEWAY_ERROR", details: data }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("PIX payment created successfully:", { id: data.id, status: data.status });
+    console.log("PIX payment created successfully via SharkPayments:", { id: data.id || data.transaction_id, status: data.status });
 
+    // Map SharkPayments response to our standard format
     return new Response(
       JSON.stringify({
-        id: data.id,
-        status: data.status,
+        id: data.id || data.transaction_id || data.external_id,
+        status: data.status || "pending",
         pix: {
-          payload: data.pix?.payload || data.pix?.qr_code || data.pix?.qrcode,
-          qrCodeUrl:
-            data.pix?.qr_code_url ||
-            data.pix?.qrcode_url ||
-            data.pix?.qrCodeUrl,
-          expiresAt:
-            data.pix?.expires_at || data.pix?.expiration_date || data.pix?.expiresAt,
+          payload: data.pix_code || data.pix?.payload || data.pix?.qr_code || data.qr_code,
+          qrCodeUrl: data.pix_qrcode_url || data.pix?.qr_code_url || data.qrcode_url,
+          expiresAt: data.pix_expires_at || data.pix?.expires_at || data.expires_at,
         },
-        amount: data.amount,
+        amount: data.amount || amount,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
