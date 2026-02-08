@@ -348,10 +348,8 @@ export default function Checkout() {
       const shippingCost = shippingOption?.price || 0;
       const productTotal = product.price * quantity;
       
-      // Apply 5% PIX discount when payment method is PIX
-      const pixDiscount = selectedPaymentMethod === "pix" ? 0.05 : 0;
-      let totalWithDiscount = (productTotal + shippingCost) * (1 - pixDiscount);
-
+      // No PIX discount
+      let totalWithDiscount = productTotal + shippingCost;
       // For credit card, apply interest for installments > 1
       const INTEREST_RATE = 0.0299; // 2.99% per month
       if (selectedPaymentMethod === "credit" && installments > 1) {
@@ -380,7 +378,7 @@ export default function Checkout() {
           {
             title: `teste ${quantity}`, // Masked product name for privacy
             quantity: quantity,
-            unitPrice: Math.round(product.price * (1 - pixDiscount) * 100),
+            unitPrice: Math.round(product.price * 100),
             operationType: 1,
           },
         ],
@@ -540,11 +538,10 @@ export default function Checkout() {
       
       <main className="flex-1 pb-8">
 
-        {/* PIX Discount Banner - Full Width */}
+        {/* Promo Banner - Full Width */}
         <div className="bg-black py-3 text-center">
           <p className="text-white text-xs font-medium px-4 max-w-lg mx-auto">
-            ⚡ O preço promocional é <span className="font-bold">EXCLUSIVO</span> para pagamento via PIX.
-            No cartão de crédito, será cobrado o valor integral.
+            🔥 <span className="font-bold">QUEIMÃO DE ESTOQUE GTSM1</span> — Promoção válida até 19/02!
           </p>
         </div>
 
