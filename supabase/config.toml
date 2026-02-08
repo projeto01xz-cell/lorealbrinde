@@ -9,6 +9,9 @@ verify_jwt = false
 [functions.goatpay-webhook]
 verify_jwt = false
 
+[functions.sharkpay-webhook]
+verify_jwt = false
+
 [functions.get-order-status]
 verify_jwt = false
 
