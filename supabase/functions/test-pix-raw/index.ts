@@ -12,7 +12,7 @@ serve(async (req) => {
 
   const apiToken = Deno.env.get("SHARKPAY_API_TOKEN");
 
-  // Payload exatamente como a documentação da API
+  // Payload exatamente como a documentação da API (incluindo product_id, offer_id e installments)
   const payload = {
     amount: 15000,
     offer_hash: "v3mkew0tf5",
@@ -41,23 +41,25 @@ serve(async (req) => {
         tangible: false,
       },
     ],
+    installments: 1,
     expire_in_days: 1,
     transaction_origin: "api",
   };
 
   console.log("Sending raw test payload:", JSON.stringify(payload, null, 2));
 
-  const response = await fetch(
-    `https://api.sharkpayments.com.br/api/public/v1/transactions?api_token=${apiToken}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      body: JSON.stringify(payload),
-    }
-  );
+  // Try the documented endpoint
+  const url = `https://api.sharkpayments.com.br/api/public/v1/transactions?api_token=${apiToken}`;
+  console.log("URL:", url);
+  
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
 
   const data = await response.json();
   console.log("Response status:", response.status);
