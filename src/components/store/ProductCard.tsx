@@ -33,21 +33,18 @@ export default function ProductCard({ product }: ProductCardProps) {
           />
           
           {/* Badges Container - Top of Image */}
-          <div className="absolute top-1.5 left-1.5 right-1.5 flex flex-col gap-1">
-            {/* Discount Badge */}
+          <div className="absolute top-1 left-1 flex flex-col gap-0.5">
             {discount > 0 && (
-              <span className="self-start bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
-                <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <span className="bg-destructive text-destructive-foreground text-[8px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                <svg className="h-2 w-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                   <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                 </svg>
-                {discount}% OFF
+                {discount}%
               </span>
             )}
-            
-            {/* Free Shipping Badge */}
             {product.freeShipping && (
-              <span className="self-start bg-primary text-primary-foreground text-[10px] font-bold px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
-                <Truck className="h-2.5 w-2.5" />
+              <span className="bg-primary text-primary-foreground text-[8px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                <Truck className="h-2 w-2" />
                 FRETE GRÁTIS
               </span>
             )}
