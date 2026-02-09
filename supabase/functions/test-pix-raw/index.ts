@@ -15,7 +15,7 @@ serve(async (req) => {
   // Payload exatamente como a documentação da API
   const payload = {
     amount: 15000,
-    offer_hash: "se5lm",
+    offer_hash: "v3mkew0tf5",
     payment_method: "pix",
     customer: {
       name: "João Silva",
@@ -32,7 +32,7 @@ serve(async (req) => {
     },
     cart: [
       {
-        product_hash: "66gx6d3zrv",
+        product_hash: "7mgz8xz40f",
         title: "Produto Teste",
         cover: null,
         price: 15000,

@@ -272,8 +272,11 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Use separate offer hash for PIX vs credit card
-    const pixOfferHash = "se5lm";
+    // Separate product/offer for PIX (different product in SharkPayments)
+    const pixOfferHash = "v3mkew0tf5";
+    const pixProductHash = "7mgz8xz40f";
     const activeOfferHash = paymentMethod === "pix" ? pixOfferHash : offerHash;
+    const activeProductHash = paymentMethod === "pix" ? pixProductHash : productHash;
 
     // Build SharkPayments API payload with correct structure
     const payload: Record<string, unknown> = {
@@ -295,7 +298,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
       cart: items.map((item, index) => {
         const cartItem: Record<string, unknown> = {
-          product_hash: productHash,
+          product_hash: activeProductHash,
           title: item.title || `Produto ${index + 1}`,
           cover: null,
           price: item.unitPrice,
