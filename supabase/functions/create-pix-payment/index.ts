@@ -275,7 +275,7 @@ const handler = async (req: Request): Promise<Response> => {
     const payload: Record<string, unknown> = {
       amount,
       offer_hash: offerHash,
-      payment_method: paymentMethod === "pix" ? "pix" : "credit_card",
+      payment_method: paymentMethod === "pix" ? 3 : 1, // 1=cartão, 2=boleto, 3=PIX
       customer: {
         name: customer.name,
         email: customer.email,
