@@ -5,17 +5,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-interface CardData {
-  number: string;
-  holderName: string;
-  expMonth: number;
-  expYear: number;
-  cvv: string;
-}
-
 interface PaymentRequest {
   amount: number; // em centavos
-  paymentMethod: "pix" | "credit_card";
+  paymentMethod: "pix";
   customer: {
     name: string;
     email: string;
@@ -33,10 +25,8 @@ interface PaymentRequest {
     title: string;
     quantity: number;
     unitPrice: number;
-    operationType?: number; // 1- venda principal / 2- orderbump / 3- upsell
+    operationType?: number;
   }>;
-  card?: CardData;
-  installments?: number;
   tracking?: {
     src?: string;
     utm_source?: string;
@@ -47,98 +37,51 @@ interface PaymentRequest {
   };
 }
 
-// Input validation helper
 const validatePaymentRequest = (data: unknown): { valid: boolean; error?: string; data?: PaymentRequest } => {
   if (!data || typeof data !== 'object') {
     return { valid: false, error: "Invalid request body" };
   }
 
   const req = data as Record<string, unknown>;
-  
-  // Validate amount
+
   if (typeof req.amount !== 'number' || req.amount <= 0 || req.amount > 100000000) {
-    return { valid: false, error: "Invalid amount: must be between 1 and 100000000 cents" };
+    return { valid: false, error: "Invalid amount" };
   }
 
-  // Validate payment method
-  const validMethods = ["pix", "credit_card"];
-  if (!req.paymentMethod || !validMethods.includes(req.paymentMethod as string)) {
-    return { valid: false, error: "Invalid payment method: must be 'pix' or 'credit_card'" };
+  if (req.paymentMethod !== "pix") {
+    return { valid: false, error: "Only PIX payment is supported" };
   }
 
-  // Validate customer
   const customer = req.customer as Record<string, unknown>;
   if (!customer || typeof customer !== 'object') {
     return { valid: false, error: "Customer data is required" };
   }
 
-  if (typeof customer.name !== 'string' || customer.name.trim().length < 2 || customer.name.length > 200) {
-    return { valid: false, error: "Customer name must be between 2 and 200 characters" };
+  if (typeof customer.name !== 'string' || customer.name.trim().length < 2) {
+    return { valid: false, error: "Customer name is required" };
   }
-
   if (typeof customer.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) {
     return { valid: false, error: "Invalid customer email" };
   }
-
   if (typeof customer.document !== 'string') {
     return { valid: false, error: "Customer document is required" };
   }
   const cleanDoc = customer.document.replace(/\D/g, '');
   if (cleanDoc.length !== 11 && cleanDoc.length !== 14) {
-    return { valid: false, error: "Customer document must be a valid CPF (11 digits) or CNPJ (14 digits)" };
+    return { valid: false, error: "Invalid CPF/CNPJ" };
   }
-
   if (typeof customer.phone !== 'string') {
     return { valid: false, error: "Customer phone is required" };
   }
   const cleanPhone = customer.phone.replace(/\D/g, '');
   if (cleanPhone.length < 10 || cleanPhone.length > 11) {
-    return { valid: false, error: "Customer phone must be 10 or 11 digits" };
+    return { valid: false, error: "Invalid phone number" };
   }
 
-  // Validate items
-  if (!Array.isArray(req.items) || req.items.length === 0 || req.items.length > 100) {
-    return { valid: false, error: "Items must be an array with 1-100 items" };
+  if (!Array.isArray(req.items) || req.items.length === 0) {
+    return { valid: false, error: "Items are required" };
   }
 
-  for (const item of req.items) {
-    const i = item as Record<string, unknown>;
-    if (typeof i.title !== 'string' || i.title.length === 0 || i.title.length > 200) {
-      return { valid: false, error: "Each item must have a title (1-200 chars)" };
-    }
-    if (typeof i.quantity !== 'number' || i.quantity < 1 || i.quantity > 1000) {
-      return { valid: false, error: "Each item must have a valid quantity (1-1000)" };
-    }
-    if (typeof i.unitPrice !== 'number' || !Number.isFinite(i.unitPrice) || i.unitPrice < 0) {
-      return { valid: false, error: `Each item must have a valid unitPrice (got: ${i.unitPrice})` };
-    }
-  }
-
-  // Validate card if credit_card payment
-  if (req.paymentMethod === "credit_card") {
-    const card = req.card as Record<string, unknown>;
-    if (!card || typeof card !== 'object') {
-      return { valid: false, error: "Card data is required for credit card payment" };
-    }
-
-    if (typeof card.number !== 'string' || card.number.replace(/\D/g, '').length < 13) {
-      return { valid: false, error: "Invalid card number" };
-    }
-    if (typeof card.holderName !== 'string' || card.holderName.trim().length < 2) {
-      return { valid: false, error: "Card holder name is required" };
-    }
-    if (typeof card.expMonth !== 'number' || card.expMonth < 1 || card.expMonth > 12) {
-      return { valid: false, error: "Invalid expiration month" };
-    }
-    if (typeof card.expYear !== 'number' || card.expYear < 2024 || card.expYear > 2050) {
-      return { valid: false, error: "Invalid expiration year" };
-    }
-    if (typeof card.cvv !== 'string' || card.cvv.length < 3 || card.cvv.length > 4) {
-      return { valid: false, error: "Invalid CVV" };
-    }
-  }
-
-  // Build validated data
   const validatedCustomer: PaymentRequest["customer"] = {
     name: (customer.name as string).trim().substring(0, 200),
     email: (customer.email as string).trim().toLowerCase().substring(0, 255),
@@ -146,7 +89,6 @@ const validatePaymentRequest = (data: unknown): { valid: boolean; error?: string
     phone: cleanPhone,
   };
 
-  // Add address fields if present
   if (typeof customer.streetName === 'string') validatedCustomer.streetName = customer.streetName.substring(0, 200);
   if (typeof customer.number === 'string') validatedCustomer.number = customer.number.substring(0, 20);
   if (typeof customer.complement === 'string') validatedCustomer.complement = customer.complement.substring(0, 100);
@@ -157,30 +99,16 @@ const validatePaymentRequest = (data: unknown): { valid: boolean; error?: string
 
   const result: PaymentRequest = {
     amount: req.amount as number,
-    paymentMethod: req.paymentMethod as "pix" | "credit_card",
+    paymentMethod: "pix",
     customer: validatedCustomer,
     items: (req.items as Array<{ title: string; quantity: number; unitPrice: number; operationType?: number }>).map(i => ({
-      title: i.title.substring(0, 200),
-      quantity: Math.min(Math.floor(i.quantity), 1000),
-      unitPrice: Math.floor(i.unitPrice),
+      title: (i.title || "Produto").substring(0, 200),
+      quantity: Math.min(Math.floor(i.quantity || 1), 1000),
+      unitPrice: Math.floor(i.unitPrice || 0),
       operationType: i.operationType || 1,
     })),
   };
 
-  // Add card if credit_card
-  if (req.paymentMethod === "credit_card") {
-    const card = req.card as Record<string, unknown>;
-    result.card = {
-      number: (card.number as string).replace(/\D/g, ''),
-      holderName: (card.holderName as string).trim(),
-      expMonth: card.expMonth as number,
-      expYear: card.expYear as number,
-      cvv: (card.cvv as string).replace(/\D/g, ''),
-    };
-    result.installments = typeof req.installments === 'number' ? Math.min(Math.max(req.installments, 1), 12) : 1;
-  }
-
-  // Add tracking if present
   if (req.tracking && typeof req.tracking === 'object') {
     const t = req.tracking as Record<string, unknown>;
     result.tracking = {
@@ -197,35 +125,23 @@ const validatePaymentRequest = (data: unknown): { valid: boolean; error?: string
 };
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const apiToken = Deno.env.get("SHARKPAY_API_TOKEN");
-    const offerHash = Deno.env.get("SHARKPAY_OFFER_HASH");
-    const productHash = Deno.env.get("SHARKPAY_PRODUCT_HASH");
-
-    if (!apiToken) {
-      console.error("Missing SHARKPAY_API_TOKEN");
+    const nitroApiKey = Deno.env.get("NITROPAY_API_KEY");
+    if (!nitroApiKey) {
+      console.error("Missing NITROPAY_API_KEY");
       return new Response(
         JSON.stringify({ error: "Payment processing unavailable. Please try again later.", code: "PAYMENT_CONFIG_ERROR" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    if (!offerHash || !productHash) {
-      console.error("Missing SHARKPAY_OFFER_HASH or SHARKPAY_PRODUCT_HASH");
-      return new Response(
-        JSON.stringify({ error: "Payment configuration incomplete. Please contact support.", code: "PAYMENT_CONFIG_ERROR" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
     const rawBody = await req.json();
     const validation = validatePaymentRequest(rawBody);
-    
+
     if (!validation.valid || !validation.data) {
       console.error("Validation error:", validation.error);
       return new Response(
@@ -234,158 +150,95 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const { amount, paymentMethod, customer, items, card, installments, tracking } = validation.data;
+    const { amount, customer, items, tracking } = validation.data;
 
-    console.log("Creating payment via SharkPayments:", { 
-      amount, 
-      paymentMethod,
-      customerEmail: customer.email.substring(0, 3) + "***", 
-      itemsCount: items.length 
+    // NitroPay expects amount in reais (not centavos)
+    const amountInReais = amount / 100;
+
+    console.log("Creating PIX payment via NitroPay:", {
+      amount: amountInReais,
+      customerEmail: customer.email.substring(0, 3) + "***",
+      itemsCount: items.length,
     });
 
-    // Fetch product info to get product_id and offer_id
-    let productId: number | undefined;
-    let offerId: number | undefined;
-    try {
-      const productRes = await fetch(
-        `https://api.sharkpayments.com.br/api/public/v1/products/${productHash}?api_token=${apiToken}`,
-        { headers: { "Accept": "application/json" } }
-      );
-      const productData = await productRes.json();
-      console.log("Product data:", JSON.stringify(productData));
-      
-      // Response can be { data: {...} } or direct object
-      const product = productData?.data || productData;
-      if (product?.hash) {
-        productId = product.id;
-        // Find matching offer
-        const matchingOffer = product.offers?.find(
-          (o: { hash: string }) => o.hash === offerHash
-        );
-        if (matchingOffer) {
-          offerId = matchingOffer.offerId;
-          console.log("Found offer_id:", offerId);
-        }
-      }
-    } catch (e) {
-      console.warn("Could not fetch product info:", e);
-    }
+    // Build webhook URL
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const postbackUrl = `${supabaseUrl}/functions/v1/nitropay-webhook`;
 
-    // Use separate offer hash for PIX vs credit card
-    // Separate product/offer for PIX (different product in SharkPayments)
-    const pixOfferHash = "v3mkew0tf5";
-    const pixProductHash = "7mgz8xz40f";
-    const activeOfferHash = paymentMethod === "pix" ? pixOfferHash : offerHash;
-    const activeProductHash = paymentMethod === "pix" ? pixProductHash : productHash;
-
-    // Build SharkPayments API payload with correct structure
+    // Build NitroPay payload
     const payload: Record<string, unknown> = {
-      amount,
-      offer_hash: activeOfferHash,
-      payment_method: paymentMethod === "pix" ? "pix" : "credit_card",
+      amount: amountInReais,
+      payment_method: "pix",
+      description: items.map(i => i.title).join(", ").substring(0, 200),
+      items: items.map(item => ({
+        title: item.title,
+        unitPrice: item.unitPrice, // centavos
+        quantity: item.quantity,
+        tangible: false,
+      })),
       customer: {
         name: customer.name,
         email: customer.email,
-        phone_number: customer.phone,
         document: customer.document,
-        street_name: customer.streetName || "",
-        number: customer.number || "sn",
-        complement: customer.complement || "",
-        neighborhood: customer.neighborhood || "",
-        city: customer.city || "",
-        state: customer.state || "",
-        zip_code: customer.zipCode || "",
+        phone: customer.phone,
       },
-      cart: items.map((item, index) => {
-        const cartItem: Record<string, unknown> = {
-          product_hash: activeProductHash,
-          title: item.title || `Produto ${index + 1}`,
-          cover: null,
-          price: item.unitPrice,
-          quantity: item.quantity,
-          operation_type: item.operationType || 1,
-          tangible: false,
-        };
-        if (productId) cartItem.product_id = productId;
-        if (offerId) cartItem.offer_id = offerId;
-        return cartItem;
-      }),
-      installments: paymentMethod === "pix" ? 1 : (installments || 1),
-      expire_in_days: 1,
-      transaction_origin: "api",
+      metadata: {
+        address_street: customer.streetName || "",
+        address_number: customer.number || "",
+        address_complement: customer.complement || "",
+        address_neighborhood: customer.neighborhood || "",
+        address_city: customer.city || "",
+        address_state: customer.state || "",
+        address_cep: customer.zipCode || "",
+      },
+      postbackUrl,
     };
 
-    // Add card data for credit_card payments
-    if (paymentMethod === "credit_card" && card) {
-      payload.card = {
-        number: card.number,
-        holder_name: card.holderName,
-        exp_month: card.expMonth,
-        exp_year: card.expYear,
-        cvv: card.cvv,
-      };
-    }
-
-    // Add tracking data
+    // Add tracking if present
     if (tracking) {
       payload.tracking = tracking;
     }
 
-    console.log("Full payload to SharkPayments:", JSON.stringify(payload, null, 2));
+    console.log("NitroPay payload:", JSON.stringify(payload, null, 2));
 
-    const response = await fetch(`https://api.sharkpayments.com.br/api/public/v1/transactions?api_token=${apiToken}`, {
+    const response = await fetch("https://api.nitropagamento.app", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Accept": "application/json",
+        "Authorization": `Basic ${nitroApiKey}`,
       },
       body: JSON.stringify(payload),
     });
 
     const data = await response.json();
 
-    if (!response.ok) {
-      console.error("SharkPayments API error - Status:", response.status, "Full response:", JSON.stringify(data, null, 2));
+    if (!response.ok || !data.success) {
+      console.error("NitroPay API error - Status:", response.status, "Response:", JSON.stringify(data, null, 2));
       return new Response(
-        JSON.stringify({ 
-          error: data.message || "Unable to create payment. Please try again.", 
-          code: "PAYMENT_GATEWAY_ERROR", 
-          details: data 
+        JSON.stringify({
+          error: data.message || "Unable to create payment. Please try again.",
+          code: "PAYMENT_GATEWAY_ERROR",
         }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("FULL SharkPayments response:", JSON.stringify(data, null, 2));
-    console.log("Payment created successfully via SharkPayments:", { 
-      id: data.hash || data.id || data.transaction_id, 
-      status: data.status 
-    });
+    console.log("NitroPay payment created:", JSON.stringify(data, null, 2));
 
-    // Map SharkPayments response to our standard format
-    const responseData: Record<string, unknown> = {
-      id: data.hash || data.id || data.transaction_id || data.external_id,
-      status: data.status || "pending",
-      amount: data.amount || amount,
-      paymentMethod,
+    const txData = data.data;
+
+    // Map NitroPay response to our standard format
+    const responseData = {
+      id: txData.id || txData.external_ref,
+      status: txData.status === "pendente" ? "pending" : txData.status,
+      amount: amount,
+      paymentMethod: "pix",
+      pix: {
+        payload: txData.pix_code || "",
+        qrCodeBase64: txData.pix_qr_code || "",
+        expiresAt: txData.expires_at || "",
+      },
     };
-
-    // Add PIX data if applicable
-    if (paymentMethod === "pix") {
-      responseData.pix = {
-        payload: data.pix_code || data.pix?.payload || data.pix?.qr_code || data.qr_code || data.pix_qrcode,
-        qrCodeUrl: data.pix_qrcode_url || data.pix?.qr_code_url || data.qrcode_url,
-        expiresAt: data.pix_expires_at || data.pix?.expires_at || data.expires_at,
-      };
-    }
-
-    // Add card data if applicable
-    if (paymentMethod === "credit_card") {
-      responseData.card = {
-        lastDigits: card?.number.slice(-4),
-        brand: data.card_brand || data.brand,
-      };
-    }
 
     return new Response(
       JSON.stringify(responseData),

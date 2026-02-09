@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Search, Menu, X, Truck, Package, Zap, Loader2, Gift, CheckSquare, Square, QrCode, CreditCard } from "lucide-react";
+import { Search, Menu, X, Truck, Package, Zap, Loader2, Gift, CheckSquare, Square, QrCode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getUtmifyParams, saveUtmParams, getUtmifyLeadId, getClientIP } from "@/lib/utmify";
@@ -152,7 +152,7 @@ const CheckoutPage = ({
     cvv: "",
   });
   const [selectedShipping, setSelectedShipping] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"pix" | "credit_card">("pix");
+  const [paymentMethod] = useState<"pix">("pix");
   const [installments, setInstallments] = useState(1);
   const [addressFilled, setAddressFilled] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
@@ -379,11 +379,7 @@ const CheckoutPage = ({
       return;
     }
 
-    // Validate card if credit_card payment
-    if (paymentMethod === "credit_card" && !validateCardForm()) {
-      toast.error("Por favor, verifique os dados do cartão");
-      return;
-    }
+    // Only PIX for now
 
     setLoadingPayment(true);
     try {
@@ -419,12 +415,8 @@ const CheckoutPage = ({
         });
       }
 
-      // Calculate total with interest for credit card
-      const selectedInstallmentOption = installmentOptions.find(opt => opt.value === installments);
-      const finalTotal = paymentMethod === "credit_card" && selectedInstallmentOption 
-        ? selectedInstallmentOption.totalAmount 
-        : total;
-      const totalCents = Math.round(finalTotal * 100);
+      // PIX only - no interest calculation needed
+      const totalCents = Math.round(total * 100);
       const utmParams = getUtmifyParams();
 
       // Build payment request body
@@ -448,18 +440,7 @@ const CheckoutPage = ({
         tracking: utmParams,
       };
 
-      // Add card data for credit_card payment
-      if (paymentMethod === "credit_card") {
-        const expiryParts = cardData.expiry.split("/");
-        paymentBody.card = {
-          number: cardData.number.replace(/\s/g, ""),
-          holderName: cardData.holderName,
-          expMonth: parseInt(expiryParts[0], 10),
-          expYear: 2000 + parseInt(expiryParts[1], 10),
-          cvv: cardData.cvv,
-        };
-        paymentBody.installments = installments;
-      }
+      // PIX only - no card data needed
 
       const { data, error } = await supabase.functions.invoke("create-pix-payment", {
         body: paymentBody
@@ -506,7 +487,7 @@ const CheckoutPage = ({
         customer_phone: formData.phone,
         customer_document: formData.cpf,
         total_amount: total,
-        status: paymentMethod === "credit_card" && data.status === "paid" ? "paid" : "pending",
+        status: "pending",
         pix_payload: data.pix?.payload || "",
         shipping_option: shippingOption?.name || "",
         shipping_price: shippingOption?.price || 0,
@@ -539,7 +520,7 @@ const CheckoutPage = ({
       supabase.functions.invoke("track-utmify", {
         body: {
           orderId,
-          status: paymentMethod === "credit_card" && data.status === "paid" ? "paid" : "pending",
+          status: "pending",
           customer: {
             name: formData.fullName,
             email: formData.email,
@@ -571,23 +552,12 @@ const CheckoutPage = ({
         });
       }
 
-      // Handle response based on payment method
-      if (paymentMethod === "pix") {
-        // Navegar para página de pagamento Pix
-        onPixGenerated({
-          payload: data.pix?.payload || "",
-          expiresAt: data.pix?.expiresAt,
-          orderId: orderId
-        }, total);
-      } else {
-        // Credit card - show success message
-        if (data.status === "paid" || data.status === "approved") {
-          toast.success("Pagamento aprovado! Seu pedido foi confirmado.");
-          // Could redirect to a success page here
-        } else {
-          toast.error("Pagamento não aprovado. Por favor, tente novamente.");
-        }
-      }
+      // Navigate to PIX payment page
+      onPixGenerated({
+        payload: data.pix?.payload || "",
+        expiresAt: data.pix?.expiresAt,
+        orderId: orderId
+      }, total);
     } catch (err) {
       console.error("Payment error:", err);
       toast.error("Erro ao processar pagamento");
@@ -793,110 +763,17 @@ const CheckoutPage = ({
           </div>
         )}
 
-        {/* Payment Method Selection */}
+        {/* Payment Method - PIX Only */}
         {addressFilled && selectedShipping && (
           <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
             <h2 className="font-bold text-sm text-gray-900 mb-4">Forma de Pagamento</h2>
-            <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "pix" | "credit_card")}>
-              <div className="space-y-3">
-                <label className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${paymentMethod === "pix" ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-gray-300"}`}>
-                  <RadioGroupItem value="pix" id="pix" />
-                  <QrCode className="w-5 h-5 text-green-600" />
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-900">PIX</p>
-                    <p className="text-xs text-gray-500">Aprovação instantânea</p>
-                  </div>
-                </label>
-                <label className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${paymentMethod === "credit_card" ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"}`}>
-                  <RadioGroupItem value="credit_card" id="credit_card" />
-                  <CreditCard className="w-5 h-5 text-blue-600" />
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-900">Cartão de Crédito</p>
-                    <p className="text-xs text-gray-500">Até 12x sem juros</p>
-                  </div>
-                </label>
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-green-500 bg-green-50">
+              <QrCode className="w-5 h-5 text-green-600" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">PIX</p>
+                <p className="text-xs text-gray-500">Aprovação instantânea</p>
               </div>
-            </RadioGroup>
-
-            {/* Credit Card Form */}
-            {paymentMethod === "credit_card" && (
-              <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
-                <div>
-                  <Label htmlFor="cardNumber" className="text-xs text-gray-600">
-                    Número do Cartão
-                  </Label>
-                  <Input
-                    id="cardNumber"
-                    name="number"
-                    value={cardData.number}
-                    onChange={handleCardInputChange}
-                    placeholder="0000 0000 0000 0000"
-                    className={`mt-1 h-11 ${errors.cardNumber ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                  />
-                  {errors.cardNumber && <p className="text-[10px] text-red-500 mt-1">{errors.cardNumber}</p>}
-                </div>
-                <div>
-                  <Label htmlFor="holderName" className="text-xs text-gray-600">
-                    Nome no Cartão
-                  </Label>
-                  <Input
-                    id="holderName"
-                    name="holderName"
-                    value={cardData.holderName}
-                    onChange={handleCardInputChange}
-                    placeholder="NOME COMO ESTÁ NO CARTÃO"
-                    className="mt-1 h-11 uppercase"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="expiry" className="text-xs text-gray-600">
-                      Validade
-                    </Label>
-                    <Input
-                      id="expiry"
-                      name="expiry"
-                      value={cardData.expiry}
-                      onChange={handleCardInputChange}
-                      placeholder="MM/AA"
-                      className={`mt-1 h-11 ${errors.cardExpiry ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                    />
-                    {errors.cardExpiry && <p className="text-[10px] text-red-500 mt-1">{errors.cardExpiry}</p>}
-                  </div>
-                  <div>
-                    <Label htmlFor="cvv" className="text-xs text-gray-600">
-                      CVV
-                    </Label>
-                    <Input
-                      id="cvv"
-                      name="cvv"
-                      value={cardData.cvv}
-                      onChange={handleCardInputChange}
-                      placeholder="123"
-                      className={`mt-1 h-11 ${errors.cardCvv ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                    />
-                    {errors.cardCvv && <p className="text-[10px] text-red-500 mt-1">{errors.cardCvv}</p>}
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="installments" className="text-xs text-gray-600">
-                    Parcelas
-                  </Label>
-                  <select
-                    id="installments"
-                    value={installments}
-                    onChange={(e) => setInstallments(parseInt(e.target.value, 10))}
-                    className="mt-1 h-11 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  >
-                    {installmentOptions.map(opt => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         )}
 
@@ -982,22 +859,17 @@ const CheckoutPage = ({
           <Button
             onClick={handleSubmit}
             disabled={!addressFilled || !selectedShipping || !!errors.cpf || !!errors.cep || loadingPayment}
-            className={`w-full h-12 ${paymentMethod === "pix" ? "bg-green-500 hover:bg-green-600" : "bg-blue-500 hover:bg-blue-600"} disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-lg`}
+            className="w-full h-12 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-lg"
           >
             {loadingPayment ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 PROCESSANDO...
               </>
-            ) : paymentMethod === "pix" ? (
+            ) : (
               <>
                 <QrCode className="w-4 h-4 mr-2" />
                 PAGAR COM PIX
-              </>
-            ) : (
-              <>
-                <CreditCard className="w-4 h-4 mr-2" />
-                PAGAR COM CARTÃO
               </>
             )}
           </Button>
