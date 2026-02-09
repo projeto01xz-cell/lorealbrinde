@@ -11,15 +11,32 @@ serve(async (req) => {
   }
 
   const apiToken = Deno.env.get("SHARKPAY_API_TOKEN");
+  const results: Record<string, unknown> = {};
   
-  // List products
-  const res = await fetch(`https://api.sharkpayments.com.br/api/public/v1/products?api_token=${apiToken}`, {
+  // Test 1: Check balance
+  const balanceRes = await fetch(`https://api.sharkpayments.com.br/api/public/v1/balance?api_token=${apiToken}`, {
     headers: { "Accept": "application/json" },
   });
-  const data = await res.json();
-  console.log("Products response:", JSON.stringify(data, null, 2));
+  results.balance = await balanceRes.json();
   
-  return new Response(JSON.stringify(data), {
+  // Test 2: Check bank accounts
+  const bankRes = await fetch(`https://api.sharkpayments.com.br/api/public/v1/bank-accounts`, {
+    headers: { 
+      "Accept": "application/json",
+      "Authorization": `Bearer ${apiToken}`,
+    },
+  });
+  results.bankAccounts = await bankRes.json();
+
+  // Test 3: Check installments
+  const installRes = await fetch(`https://api.sharkpayments.com.br/api/public/v1/installments?api_token=${apiToken}&amount=36900&interest_type=simple`, {
+    headers: { "Accept": "application/json" },
+  });
+  results.installments = await installRes.json();
+
+  console.log("Results:", JSON.stringify(results, null, 2));
+  
+  return new Response(JSON.stringify(results, null, 2), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
