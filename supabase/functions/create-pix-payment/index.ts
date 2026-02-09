@@ -275,7 +275,7 @@ const handler = async (req: Request): Promise<Response> => {
     const payload: Record<string, unknown> = {
       amount,
       offer_hash: offerHash,
-      payment_method: paymentMethod,
+      payment_method: paymentMethod === "pix" ? "pix" : "credit_card",
       customer: {
         name: customer.name,
         email: customer.email,
@@ -349,6 +349,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    console.log("FULL SharkPayments response:", JSON.stringify(data, null, 2));
     console.log("Payment created successfully via SharkPayments:", { 
       id: data.hash || data.id || data.transaction_id, 
       status: data.status 
