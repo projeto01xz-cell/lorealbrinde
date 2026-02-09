@@ -16,8 +16,8 @@ serve(async (req) => {
   
   const results: Record<string, unknown> = {};
 
-  // Test 1: With postback_url and all fields
-  const payload1 = {
+  // Test 1: tangible true instead of false
+  const base = {
     amount: 36900,
     offer_hash: offerHash,
     payment_method: "pix",
@@ -25,72 +25,75 @@ serve(async (req) => {
       name: "Teste Silva",
       email: "teste@teste.com",
       phone_number: "11999999999",
-      document: "52998224725",
-      document_type: "cpf",
-      street_name: "Rua Teste",
-      number: "123",
-      complement: "",
-      neighborhood: "Centro",
-      city: "Sao Paulo",
-      state: "SP",
-      zip_code: "01001000",
+      document: "11144477735",
     },
-    cart: [
-      {
-        product_hash: productHash,
-        title: "primeira venda",
-        cover: null,
-        price: 36900,
-        quantity: 1,
-        operation_type: 1,
-        tangible: false,
-      }
-    ],
     installments: 1,
-    expire_in_days: 1,
-    transaction_origin: "api",
-    postback_url: "https://pmsaearbupcinwukoeeh.supabase.co/functions/v1/sharkpay-webhook",
   };
 
   const res1 = await fetch(`https://api.sharkpayments.com.br/api/public/v1/transactions?api_token=${apiToken}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    body: JSON.stringify(payload1),
+    body: JSON.stringify({
+      ...base,
+      cart: [{ product_hash: productHash, title: "primeira venda", price: 36900, quantity: 1, operation_type: 1, tangible: true }],
+    }),
   });
-  results.test1_all_fields = { status: res1.status, body: await res1.text() };
+  results.test1_tangible_true = { status: res1.status, body: await res1.text() };
 
-  // Test 2: phone with country code
-  const payload2 = {
-    ...payload1,
-    customer: {
-      ...payload1.customer,
-      phone_number: "+5511999999999",
-    },
-  };
-  delete (payload2 as Record<string, unknown>).postback_url;
-
+  // Test 2: Without tangible and operation_type 
   const res2 = await fetch(`https://api.sharkpayments.com.br/api/public/v1/transactions?api_token=${apiToken}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    body: JSON.stringify(payload2),
+    body: JSON.stringify({
+      ...base,
+      cart: [{ product_hash: productHash, title: "primeira venda", price: 36900, quantity: 1 }],
+    }),
   });
-  results.test2_phone_country = { status: res2.status, body: await res2.text() };
+  results.test2_minimal_cart = { status: res2.status, body: await res2.text() };
 
-  // Test 3: Try "boleto" payment method to see if pix is the issue
-  const payload3 = {
-    ...payload1,
-    payment_method: "boleto",
-  };
-
+  // Test 3: Without installments
   const res3 = await fetch(`https://api.sharkpayments.com.br/api/public/v1/transactions?api_token=${apiToken}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    body: JSON.stringify(payload3),
+    body: JSON.stringify({
+      amount: 36900,
+      offer_hash: offerHash,
+      payment_method: "pix",
+      customer: { name: "Teste Silva", email: "teste@teste.com", phone_number: "11999999999", document: "11144477735" },
+      cart: [{ product_hash: productHash, title: "primeira venda", price: 36900, quantity: 1 }],
+    }),
   });
-  results.test3_boleto = { status: res3.status, body: await res3.text() };
+  results.test3_no_installments = { status: res3.status, body: await res3.text() };
+
+  // Test 4: With product_hash as offer_hash in offer_hash field (both same)
+  const res4 = await fetch(`https://api.sharkpayments.com.br/api/public/v1/transactions?api_token=${apiToken}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify({
+      amount: 2000,
+      offer_hash: productHash,
+      payment_method: "pix",
+      customer: { name: "Teste Silva", email: "teste@teste.com", phone_number: "11999999999", document: "11144477735" },
+      cart: [{ product_hash: productHash, title: "primeira venda", price: 2000, quantity: 1 }],
+    }),
+  });
+  results.test4_default_offer_2000 = { status: res4.status, body: await res4.text() };
+
+  // Test 5: R$5 minimum with offer
+  const res5 = await fetch(`https://api.sharkpayments.com.br/api/public/v1/transactions?api_token=${apiToken}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify({
+      amount: 500,
+      offer_hash: offerHash,
+      payment_method: "pix",
+      customer: { name: "Teste Silva", email: "teste@teste.com", phone_number: "11999999999", document: "11144477735" },
+      cart: [{ product_hash: productHash, title: "primeira venda", price: 500, quantity: 1 }],
+    }),
+  });
+  results.test5_500_cents = { status: res5.status, body: await res5.text() };
 
   console.log("Results:", JSON.stringify(results, null, 2));
-
   return new Response(JSON.stringify(results, null, 2), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
