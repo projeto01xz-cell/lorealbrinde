@@ -204,8 +204,9 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const apiToken = Deno.env.get("SHARKPAY_API_TOKEN");
-    const offerHash = Deno.env.get("SHARKPAY_OFFER_HASH");
-    const productHash = Deno.env.get("SHARKPAY_PRODUCT_HASH");
+    // TODO: revert to env vars after testing
+    const offerHash = "ldguxzc1pn";
+    const productHash = "v3mkew0tf5";
 
     if (!apiToken) {
       console.error("Missing SHARKPAY_API_TOKEN");
