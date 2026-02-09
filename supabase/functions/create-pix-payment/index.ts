@@ -262,8 +262,8 @@ const handler = async (req: Request): Promise<Response> => {
         zip_code: customer.zipCode || "",
       },
       cart: items.map((item, index) => ({
-        product_hash: productHash,
-        title: `teste ${index + 1}`, // Masked for privacy
+        product_hash: productHash || offerHash,
+        title: item.title || `Produto ${index + 1}`,
         cover: null,
         price: item.unitPrice,
         quantity: item.quantity,
