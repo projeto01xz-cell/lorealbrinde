@@ -271,10 +271,14 @@ const handler = async (req: Request): Promise<Response> => {
       console.warn("Could not fetch product info:", e);
     }
 
+    // Use separate offer hash for PIX vs credit card
+    const pixOfferHash = "se5lm";
+    const activeOfferHash = paymentMethod === "pix" ? pixOfferHash : offerHash;
+
     // Build SharkPayments API payload with correct structure
     const payload: Record<string, unknown> = {
       amount,
-      offer_hash: offerHash,
+      offer_hash: activeOfferHash,
       payment_method: paymentMethod === "pix" ? "pix" : "credit_card",
       customer: {
         name: customer.name,
