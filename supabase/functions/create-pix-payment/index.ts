@@ -272,6 +272,7 @@ const handler = async (req: Request): Promise<Response> => {
       })),
       expire_in_days: 1,
       transaction_origin: "api",
+      postback_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/sharkpay-webhook`,
     };
 
     // Add card data for credit_card payments
