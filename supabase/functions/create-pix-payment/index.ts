@@ -201,11 +201,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("NitroPay payload:", JSON.stringify(payload, null, 2));
 
+    // Encode API key for Basic auth if not already base64
+    // If key contains ":", it's pk:sk format - encode to base64
+    // If key is already base64 or a single token, use as-is
+    let authValue = nitroApiKey;
+    if (nitroApiKey.includes(":")) {
+      // pk:sk format - encode to base64
+      authValue = btoa(nitroApiKey);
+    }
+    // Try both Basic and Bearer approaches
+    const isBase64 = /^[A-Za-z0-9+/=]+$/.test(nitroApiKey) && nitroApiKey.length > 20;
+
     const response = await fetch("https://api.nitropagamento.app", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Basic ${nitroApiKey}`,
+        "Authorization": `Basic ${authValue}`,
       },
       body: JSON.stringify(payload),
     });
