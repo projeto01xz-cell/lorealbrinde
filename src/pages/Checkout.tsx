@@ -875,6 +875,18 @@ export default function Checkout() {
               </label>
             </RadioGroup>
 
+            {/* Aviso ao selecionar cartão */}
+            {selectedPaymentMethod === "credit" && (
+              <div className="bg-red-50 border border-red-300 rounded-lg p-3 mt-3">
+                <p className="text-xs text-red-800 font-semibold">
+                  ❌ No cartão de crédito não conseguimos aplicar o preço promocional. Você pagará o valor integral de <span className="font-black">R$ {product.originalPrice ? product.originalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '3.859,00'}</span>.
+                </p>
+                <p className="text-xs text-red-700 mt-1">
+                  Selecione o <span className="font-bold">PIX</span> para aproveitar a promoção!
+                </p>
+              </div>
+            )}
+
             {/* Credit Card Form */}
             {selectedPaymentMethod === "credit" && (
               <div className="mt-4 pt-4 border-t border-border space-y-4">
