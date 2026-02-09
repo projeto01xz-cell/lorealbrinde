@@ -16,47 +16,40 @@ serve(async (req) => {
   
   const results: Record<string, unknown> = {};
 
-  // Check which payment methods are available: the offer has ["1", "3"]
-  // Company has "3,1,2"
-  // 1 = credit_card, 2 = pix(?), 3 = billet(?)
-  // Billet worked (3), PIX fails (2 not in offer)
-  
-  // Test 1: Verify by checking offer details - payment_methods field
+  // Get checkout data to check acquirer/config for PIX
   const checkoutRes = await fetch(`https://api.sharkpayments.com.br/api/public/v1/checkout/${offerHash}?api_token=${apiToken}`, {
     headers: { "Accept": "application/json" },
   });
   const checkoutData = await checkoutRes.json();
-  results.offer_payment_methods = checkoutData?.offer?.payment_methods;
-  results.company_payment_methods = checkoutData?.payment_methods_available;
+  // Check for PIX-specific config
+  results.acquirer_creditcard = checkoutData?.acquirer_creditcard;
+  results.configs = checkoutData?.configs;
+  results.receive_producer = checkoutData?.receive_producer;
+  results.company_keys = checkoutData?.company ? Object.keys(checkoutData.company) : null;
+  results.company_pix = checkoutData?.company?.pix_key || checkoutData?.company?.pix;
+  results.company_bank = checkoutData?.company?.bank_account || checkoutData?.company?.bank;
+  results.seller = checkoutData?.seller;
+  
+  // Dump relevant parts of company
+  const company = checkoutData?.company;
+  if (company) {
+    results.company_relevant = {
+      pix_key: company.pix_key,
+      pix_key_type: company.pix_key_type,
+      bank_account: company.bank_account,
+      account_type: company.account_type,
+      mp_access_token: company.mp_access_token ? "EXISTS" : "MISSING",
+      mp_public_key: company.mp_public_key ? "EXISTS" : "MISSING",
+      payment_gateway: company.payment_gateway,
+      acquirer: company.acquirer,
+      status: company.status,
+    };
+  }
 
-  // Test 2: Try the product's default offer (hash = 66gx6d3zrv, which might have PIX enabled)
-  const defaultCheckoutRes = await fetch(`https://api.sharkpayments.com.br/api/public/v1/checkout/${productHash}?api_token=${apiToken}`, {
-    headers: { "Accept": "application/json" },
-  });
-  const defaultCheckoutData = await defaultCheckoutRes.json();
-  results.default_offer_payment_methods = defaultCheckoutData?.offer?.payment_methods;
-
-  // Test 3: Try PIX with the default offer (if PIX is enabled there)
-  const res3 = await fetch(`https://api.sharkpayments.com.br/api/public/v1/transactions?api_token=${apiToken}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    body: JSON.stringify({
-      amount: 2000,
-      offer_hash: productHash,
-      payment_method: "pix",
-      customer: { name: "Teste Silva", email: "teste@teste.com", phone_number: "11999999999", document: "52998224725" },
-      cart: [{ product_hash: productHash, title: "Curso Primeira venda", price: 2000, quantity: 1, operation_type: 1, tangible: false }],
-      installments: 1,
-    }),
-  });
-  results.test3_pix_default_offer = { status: res3.status, body: await res3.text() };
-
-  // Test 4: Check new R$5 offer
-  const r5CheckoutRes = await fetch(`https://api.sharkpayments.com.br/api/public/v1/checkout/66gx6d3zrv_jxjdzucn9l?api_token=${apiToken}`, {
-    headers: { "Accept": "application/json" },
-  });
-  const r5Data = await r5CheckoutRes.json();
-  results.r5_offer_payment_methods = r5Data?.offer?.payment_methods;
+  // Check the full checkout data for any pix-related keys
+  const allKeys = JSON.stringify(checkoutData);
+  const pixMentions = allKeys.match(/pix[^"]*"/gi);
+  results.pix_related_keys = pixMentions;
 
   console.log("Results:", JSON.stringify(results, null, 2));
   return new Response(JSON.stringify(results, null, 2), {
