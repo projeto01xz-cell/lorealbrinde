@@ -130,14 +130,17 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const nitroApiKey = Deno.env.get("NITROPAY_API_KEY");
-    if (!nitroApiKey) {
-      console.error("Missing NITROPAY_API_KEY");
+    const nitroPublicKey = Deno.env.get("NITROPAY_PUBLIC_KEY");
+    const nitroSecretKey = Deno.env.get("NITROPAY_SECRET_KEY");
+    if (!nitroPublicKey || !nitroSecretKey) {
+      console.error("Missing NITROPAY_PUBLIC_KEY or NITROPAY_SECRET_KEY");
       return new Response(
         JSON.stringify({ error: "Payment processing unavailable. Please try again later.", code: "PAYMENT_CONFIG_ERROR" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    // Build Basic auth: base64(publicKey:secretKey)
+    const basicAuth = btoa(`${nitroPublicKey}:${nitroSecretKey}`);
 
     const rawBody = await req.json();
     const validation = validatePaymentRequest(rawBody);
@@ -201,22 +204,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("NitroPay payload:", JSON.stringify(payload, null, 2));
 
-    // Encode API key for Basic auth if not already base64
-    // If key contains ":", it's pk:sk format - encode to base64
-    // If key is already base64 or a single token, use as-is
-    let authValue = nitroApiKey;
-    if (nitroApiKey.includes(":")) {
-      // pk:sk format - encode to base64
-      authValue = btoa(nitroApiKey);
-    }
-    // Try both Basic and Bearer approaches
-    const isBase64 = /^[A-Za-z0-9+/=]+$/.test(nitroApiKey) && nitroApiKey.length > 20;
-
     const response = await fetch("https://api.nitropagamento.app", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Basic ${authValue}`,
+        "Authorization": `Basic ${basicAuth}`,
       },
       body: JSON.stringify(payload),
     });
