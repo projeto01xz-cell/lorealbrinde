@@ -254,14 +254,17 @@ const handler = async (req: Request): Promise<Response> => {
       const productData = await productRes.json();
       console.log("Product data:", JSON.stringify(productData));
       
-      if (productData?.data) {
-        productId = productData.data.id;
+      // Response can be { data: {...} } or direct object
+      const product = productData?.data || productData;
+      if (product?.hash) {
+        productId = product.id;
         // Find matching offer
-        const matchingOffer = productData.data.offers?.find(
+        const matchingOffer = product.offers?.find(
           (o: { hash: string }) => o.hash === offerHash
         );
         if (matchingOffer) {
           offerId = matchingOffer.offerId;
+          console.log("Found offer_id:", offerId);
         }
       }
     } catch (e) {
@@ -303,7 +306,6 @@ const handler = async (req: Request): Promise<Response> => {
       installments: installments || 1,
       expire_in_days: 1,
       transaction_origin: "api",
-      postback_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/sharkpay-webhook`,
     };
 
     // Add card data for credit_card payments
