@@ -12,10 +12,10 @@ serve(async (req) => {
 
   const apiToken = Deno.env.get("SHARKPAY_API_TOKEN");
 
-  // Payload exatamente como a documentação da API (incluindo product_id, offer_id e installments)
+  // Use correct amount matching the offer price (36900) and numeric IDs
   const payload = {
     amount: 15000,
-    offer_hash: "v3mkew0tf5",
+    offer_hash: "7mgz8xz40f_3g4otk0svf",
     payment_method: "pix",
     customer: {
       name: "João Silva",
@@ -33,7 +33,9 @@ serve(async (req) => {
     cart: [
       {
         product_hash: "7mgz8xz40f",
-        title: "Produto Teste",
+        product_id: 497776,
+        offer_id: 793193,
+        title: "teste 1",
         cover: null,
         price: 15000,
         quantity: 1,
@@ -46,24 +48,22 @@ serve(async (req) => {
     transaction_origin: "api",
   };
 
-  console.log("Sending raw test payload:", JSON.stringify(payload, null, 2));
+  console.log("Sending payload:", JSON.stringify(payload, null, 2));
 
-  // Try the documented endpoint
-  const url = `https://api.sharkpayments.com.br/api/public/v1/transactions?api_token=${apiToken}`;
-  console.log("URL:", url);
-  
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  const response = await fetch(
+    `https://api.sharkpayments.com.br/api/public/v1/transactions?api_token=${apiToken}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
 
   const data = await response.json();
-  console.log("Response status:", response.status);
-  console.log("Response body:", JSON.stringify(data, null, 2));
+  console.log("Response:", response.status, JSON.stringify(data, null, 2));
 
   return new Response(JSON.stringify({ status: response.status, data }, null, 2), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
