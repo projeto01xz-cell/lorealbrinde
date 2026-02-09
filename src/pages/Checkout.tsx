@@ -540,8 +540,8 @@ export default function Checkout() {
 
         {/* Promo Banner - Full Width */}
         <div className="bg-black py-3 text-center">
-          <p className="text-white text-xs font-medium px-4 max-w-lg mx-auto">
-            🔥 <span className="font-bold">QUEIMÃO DE ESTOQUE GTSM1</span> — Promoção válida até 19/02!
+          <p className="text-white text-[11px] sm:text-xs font-bold px-4 max-w-lg mx-auto">
+            ⚠️ A oferta é exclusiva para pagamento via PIX. Pagamento via cartão, será cobrado o valor integral.
           </p>
         </div>
 
