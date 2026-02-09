@@ -291,7 +291,7 @@ const handler = async (req: Request): Promise<Response> => {
       payload.tracking = tracking;
     }
 
-    console.log("Sending request to SharkPayments API...");
+    console.log("Full payload to SharkPayments:", JSON.stringify(payload, null, 2));
 
     const response = await fetch(`https://api.sharkpayments.com.br/api/public/v1/transactions?api_token=${apiToken}`, {
       method: "POST",
@@ -305,7 +305,7 @@ const handler = async (req: Request): Promise<Response> => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("SharkPayments API error:", data);
+      console.error("SharkPayments API error - Status:", response.status, "Full response:", JSON.stringify(data, null, 2));
       return new Response(
         JSON.stringify({ 
           error: data.message || "Unable to create payment. Please try again.", 
