@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Search, Menu, X, Truck, Package, Zap, Loader2, Gift, CheckSquare, Square, QrCode } from "lucide-react";
+import { Search, Menu, X, Truck, Package, Zap, Loader2, Gift, CheckSquare, Square, QrCode, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getUtmifyParams, saveUtmParams, getUtmifyLeadId, getClientIP } from "@/lib/utmify";
@@ -153,7 +153,7 @@ const CheckoutPage = ({
     cvv: "",
   });
   const [selectedShipping, setSelectedShipping] = useState("");
-  const [paymentMethod] = useState<"pix">("pix");
+  const [paymentMethod, setPaymentMethod] = useState<"pix" | "credit_card">("pix");
   const [installments, setInstallments] = useState(1);
   const [addressFilled, setAddressFilled] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
@@ -765,16 +765,51 @@ const CheckoutPage = ({
           </div>
         )}
 
-        {/* Payment Method - PIX Only */}
+        {/* Payment Method */}
         {addressFilled && selectedShipping && (
           <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
             <h2 className="font-bold text-sm text-gray-900 mb-4">Forma de Pagamento</h2>
-            <div className="flex items-center gap-3 p-3 rounded-lg border border-green-500 bg-green-50">
-              <QrCode className="w-5 h-5 text-green-600" />
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900">PIX</p>
-                <p className="text-xs text-gray-500">Aprovação instantânea</p>
-              </div>
+
+            {/* Aviso promoção PIX */}
+            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-4">
+              <p className="text-xs text-yellow-800 font-semibold">
+                ⚠️ Promoção exclusiva para pagamento via PIX! No cartão de crédito, o valor cobrado será o integral de R$ 3.859,00.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {/* PIX Option */}
+              <button
+                onClick={() => setPaymentMethod("pix")}
+                className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${paymentMethod === "pix" ? "border-green-500 bg-green-50" : "border-gray-200 bg-white hover:bg-gray-50"}`}
+              >
+                <QrCode className={`w-5 h-5 ${paymentMethod === "pix" ? "text-green-600" : "text-gray-400"}`} />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-900">PIX</p>
+                  <p className="text-xs text-gray-500">Aprovação instantânea • Preço promocional</p>
+                </div>
+                <span className="text-sm font-black text-green-600">
+                  R$ {total.toFixed(2).replace(".", ",")}
+                </span>
+              </button>
+
+              {/* Credit Card Option */}
+              <button
+                onClick={() => {
+                  setPaymentMethod("credit_card");
+                  toast.error("Pagamento via cartão de crédito indisponível no momento. Utilize o PIX para aproveitar o preço promocional!");
+                }}
+                className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${paymentMethod === "credit_card" ? "border-purple-500 bg-purple-50" : "border-gray-200 bg-white hover:bg-gray-50"}`}
+              >
+                <CreditCard className={`w-5 h-5 ${paymentMethod === "credit_card" ? "text-purple-600" : "text-gray-400"}`} />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-900">Cartão de Crédito</p>
+                  <p className="text-xs text-gray-500">Valor integral sem desconto</p>
+                </div>
+                <span className="text-sm font-bold text-gray-400 line-through">
+                  R$ 3.859,00
+                </span>
+              </button>
             </div>
           </div>
         )}
@@ -860,7 +895,7 @@ const CheckoutPage = ({
         <div className="max-w-sm mx-auto">
           <Button
             onClick={handleSubmit}
-            disabled={!addressFilled || !selectedShipping || !!errors.cpf || !!errors.cep || loadingPayment}
+            disabled={!addressFilled || !selectedShipping || !!errors.cpf || !!errors.cep || loadingPayment || paymentMethod === "credit_card"}
             className="w-full h-12 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-lg"
           >
             {loadingPayment ? (
