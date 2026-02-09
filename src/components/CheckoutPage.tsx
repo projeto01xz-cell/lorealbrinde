@@ -794,11 +794,10 @@ const CheckoutPage = ({
               <button
                 onClick={() => {
                   setPaymentMethod("credit_card");
-                  toast.error("Pagamento via cartão de crédito indisponível no momento. Utilize o PIX para aproveitar o preço promocional!");
                 }}
-                className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${paymentMethod === "credit_card" ? "border-purple-500 bg-purple-50" : "border-gray-200 bg-white hover:bg-gray-50"}`}
+                className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${paymentMethod === "credit_card" ? "border-red-500 bg-red-50" : "border-gray-200 bg-white hover:bg-gray-50"}`}
               >
-                <CreditCard className={`w-5 h-5 ${paymentMethod === "credit_card" ? "text-purple-600" : "text-gray-400"}`} />
+                <CreditCard className={`w-5 h-5 ${paymentMethod === "credit_card" ? "text-red-600" : "text-gray-400"}`} />
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-gray-900">Cartão de Crédito</p>
                   <p className="text-xs text-gray-500">Valor integral sem desconto</p>
@@ -807,6 +806,18 @@ const CheckoutPage = ({
                   R$ 3.859,00
                 </span>
               </button>
+
+              {/* Aviso ao selecionar cartão */}
+              {paymentMethod === "credit_card" && (
+                <div className="bg-red-50 border border-red-300 rounded-lg p-3 mt-2">
+                  <p className="text-xs text-red-800 font-semibold">
+                    ❌ No cartão de crédito não conseguimos aplicar o preço promocional. Você pagará o valor integral de <span className="font-black">R$ 3.859,00</span>.
+                  </p>
+                  <p className="text-xs text-red-700 mt-1">
+                    Selecione o <span className="font-bold">PIX</span> para aproveitar a promoção!
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
