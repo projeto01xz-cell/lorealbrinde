@@ -204,9 +204,8 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const apiToken = Deno.env.get("SHARKPAY_API_TOKEN");
-    // TODO: revert to env vars after testing
-    const offerHash = "ldguxzc1pn";
-    const productHash = "v3mkew0tf5";
+    const offerHash = Deno.env.get("SHARKPAY_OFFER_HASH");
+    const productHash = Deno.env.get("SHARKPAY_PRODUCT_HASH");
 
     if (!apiToken) {
       console.error("Missing SHARKPAY_API_TOKEN");
@@ -244,6 +243,31 @@ const handler = async (req: Request): Promise<Response> => {
       itemsCount: items.length 
     });
 
+    // Fetch product info to get product_id and offer_id
+    let productId: number | undefined;
+    let offerId: number | undefined;
+    try {
+      const productRes = await fetch(
+        `https://api.sharkpayments.com.br/api/public/v1/products/${productHash}?api_token=${apiToken}`,
+        { headers: { "Accept": "application/json" } }
+      );
+      const productData = await productRes.json();
+      console.log("Product data:", JSON.stringify(productData));
+      
+      if (productData?.data) {
+        productId = productData.data.id;
+        // Find matching offer
+        const matchingOffer = productData.data.offers?.find(
+          (o: { hash: string }) => o.hash === offerHash
+        );
+        if (matchingOffer) {
+          offerId = matchingOffer.offerId;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not fetch product info:", e);
+    }
+
     // Build SharkPayments API payload with correct structure
     const payload: Record<string, unknown> = {
       amount,
@@ -262,15 +286,21 @@ const handler = async (req: Request): Promise<Response> => {
         state: customer.state || "",
         zip_code: customer.zipCode || "",
       },
-      cart: items.map((item, index) => ({
-        product_hash: productHash || offerHash,
-        title: item.title || `Produto ${index + 1}`,
-        cover: null,
-        price: item.unitPrice,
-        quantity: item.quantity,
-        operation_type: item.operationType || 1,
-        tangible: true,
-      })),
+      cart: items.map((item, index) => {
+        const cartItem: Record<string, unknown> = {
+          product_hash: productHash,
+          title: item.title || `Produto ${index + 1}`,
+          cover: null,
+          price: item.unitPrice,
+          quantity: item.quantity,
+          operation_type: item.operationType || 1,
+          tangible: false,
+        };
+        if (productId) cartItem.product_id = productId;
+        if (offerId) cartItem.offer_id = offerId;
+        return cartItem;
+      }),
+      installments: installments || 1,
       expire_in_days: 1,
       transaction_origin: "api",
       postback_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/sharkpay-webhook`,
@@ -285,7 +315,6 @@ const handler = async (req: Request): Promise<Response> => {
         exp_year: card.expYear,
         cvv: card.cvv,
       };
-      payload.installments = installments || 1;
     }
 
     // Add tracking data
