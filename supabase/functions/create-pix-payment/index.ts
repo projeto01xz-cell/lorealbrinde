@@ -310,7 +310,7 @@ const handler = async (req: Request): Promise<Response> => {
         if (offerId) cartItem.offer_id = offerId;
         return cartItem;
       }),
-      ...(paymentMethod !== "pix" ? { installments: installments || 1 } : {}),
+      installments: paymentMethod === "pix" ? 1 : (installments || 1),
       expire_in_days: 1,
       transaction_origin: "api",
     };
