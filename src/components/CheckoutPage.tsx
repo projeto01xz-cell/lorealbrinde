@@ -23,6 +23,7 @@ interface CheckoutPageProps {
     payload: string;
     expiresAt?: string;
     orderId?: string;
+    qrCodeBase64?: string;
   }, total: number) => void;
 }
 
@@ -556,7 +557,8 @@ const CheckoutPage = ({
       onPixGenerated({
         payload: data.pix?.payload || "",
         expiresAt: data.pix?.expiresAt,
-        orderId: orderId
+        orderId: orderId,
+        qrCodeBase64: data.pix?.qrCodeBase64 || "",
       }, total);
     } catch (err) {
       console.error("Payment error:", err);

@@ -12,6 +12,7 @@ interface PixData {
   payload: string;
   expiresAt?: string;
   orderId?: string;
+  qrCodeBase64?: string;
 }
 
 const Questionario = () => {
