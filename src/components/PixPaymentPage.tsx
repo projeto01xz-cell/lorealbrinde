@@ -10,6 +10,7 @@ interface PixPaymentPageProps {
     payload: string;
     expiresAt?: string;
     orderId?: string;
+    qrCodeBase64?: string;
   };
   total: number;
   customerName: string;
@@ -144,6 +145,17 @@ const PixPaymentPage = ({ pixData, total, customerName }: PixPaymentPageProps) =
               R$ {total.toFixed(2).replace(".", ",")}
             </p>
           </div>
+
+          {/* QR Code */}
+          {pixData.qrCodeBase64 && (
+            <div className="flex justify-center mb-4">
+              <img
+                src={pixData.qrCodeBase64.startsWith("data:") ? pixData.qrCodeBase64 : `data:image/png;base64,${pixData.qrCodeBase64}`}
+                alt="QR Code PIX"
+                className="w-48 h-48 rounded-lg border border-gray-200"
+              />
+            </div>
+          )}
 
           <div className="bg-gray-50 rounded-lg p-4 mb-4">
             <p className="text-xs text-gray-500 mb-2 font-medium">Pix Copia e Cola</p>

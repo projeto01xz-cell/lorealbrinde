@@ -9,6 +9,7 @@ interface PixData {
   id: string;
   payload: string;
   qrCodeUrl?: string;
+  qrCodeBase64?: string;
   expiresAt?: string;
   amount: number;
 }
@@ -176,6 +177,17 @@ export default function PagamentoPix() {
                 {formatPrice(orderData.total)}
               </p>
             </div>
+
+            {/* QR Code */}
+            {pixData.qrCodeBase64 && (
+              <div className="flex justify-center mb-4">
+                <img
+                  src={pixData.qrCodeBase64.startsWith("data:") ? pixData.qrCodeBase64 : `data:image/png;base64,${pixData.qrCodeBase64}`}
+                  alt="QR Code PIX"
+                  className="w-48 h-48 rounded-lg border border-border"
+                />
+              </div>
+            )}
 
             <div className="bg-secondary/30 rounded-lg p-4 mb-4">
               <p className="text-xs text-muted-foreground mb-2 font-medium">
