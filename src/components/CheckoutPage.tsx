@@ -805,12 +805,6 @@ const CheckoutPage = ({
           <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
             <h2 className="font-bold text-sm text-gray-900 mb-4">Forma de Pagamento</h2>
 
-            {/* Aviso promoção PIX */}
-            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-4">
-              <p className="text-xs text-yellow-800 font-semibold">
-                ⚠️ Promoção exclusiva para pagamento via PIX! No cartão de crédito, o valor cobrado será o integral de R$ 3.859,00.
-              </p>
-            </div>
 
             <div className="space-y-3">
               {/* PIX Option */}
@@ -848,9 +842,6 @@ const CheckoutPage = ({
               {/* Card form when credit card selected */}
               {paymentMethod === "credit_card" && (
                 <div className="bg-white border border-gray-200 rounded-lg p-4 mt-2 space-y-3">
-                  <p className="text-xs text-red-700 font-semibold mb-2">
-                    ⚠️ Valor integral: <span className="font-black">R$ {(3859.00 + shippingPrice + bumpsTotal).toFixed(2).replace(".", ",")}</span>
-                  </p>
                   <div>
                     <Label htmlFor="cardNumber" className="text-xs text-gray-600">Número do Cartão</Label>
                     <Input id="cardNumber" name="number" value={cardData.number} onChange={handleCardInputChange} placeholder="0000 0000 0000 0000" className={`mt-1 h-11 ${errors.cardNumber ? "border-red-500" : ""}`} />
