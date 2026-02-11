@@ -990,7 +990,7 @@ export default function Checkout() {
                   <span className="text-base font-bold text-foreground">Total</span>
                   <span className="text-xl font-bold text-primary">
                     {selectedPaymentMethod === "pix" 
-                      ? formatPrice(total * 0.95) 
+                      ? formatPrice(total) 
                       : formatPrice(installmentOptions.find(o => o.value === installments)?.totalAmount || total)}
                   </span>
                 </div>
