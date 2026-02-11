@@ -538,12 +538,6 @@ export default function Checkout() {
       
       <main className="flex-1 pb-8">
 
-        {/* Promo Banner - Full Width */}
-        <div className="bg-black py-3 text-center">
-          <p className="text-white text-[11px] sm:text-xs font-bold px-4 max-w-lg mx-auto">
-            ⚠️ A oferta é exclusiva para pagamento via PIX. Pagamento via cartão, será cobrado o valor integral.
-          </p>
-        </div>
 
         <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
           {/* Product Summary */}
@@ -875,17 +869,6 @@ export default function Checkout() {
               </label>
             </RadioGroup>
 
-            {/* Aviso ao selecionar cartão */}
-            {selectedPaymentMethod === "credit" && (
-              <div className="bg-red-50 border border-red-300 rounded-lg p-3 mt-3">
-                <p className="text-xs text-red-800 font-semibold">
-                  ❌ No cartão de crédito não conseguimos aplicar o preço promocional. Você pagará o valor integral de <span className="font-black">R$ {product.originalPrice ? product.originalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '3.859,00'}</span>.
-                </p>
-                <p className="text-xs text-red-700 mt-1">
-                  Selecione o <span className="font-bold">PIX</span> para aproveitar a promoção!
-                </p>
-              </div>
-            )}
 
             {/* Credit Card Form */}
             {selectedPaymentMethod === "credit" && (
