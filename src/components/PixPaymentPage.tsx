@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Search, Menu, X, Copy, Check, Clock, ShieldCheck, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import QRCode from "qrcode";
 import lorealLogo from "@/assets/loreal-paris-logo.svg";
 
 interface PixPaymentPageProps {
@@ -21,6 +22,32 @@ const PixPaymentPage = ({ pixData, total, customerName }: PixPaymentPageProps) =
   const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<string>("pending");
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
+  const qrGenerated = useRef(false);
+
+  // Generate QR Code from PIX payload
+  useEffect(() => {
+    if (pixData.payload && !qrGenerated.current) {
+      qrGenerated.current = true;
+      // If we already have a base64 from the API, use it
+      if (pixData.qrCodeBase64) {
+        setQrCodeDataUrl(
+          pixData.qrCodeBase64.startsWith("data:")
+            ? pixData.qrCodeBase64
+            : `data:image/png;base64,${pixData.qrCodeBase64}`
+        );
+      } else {
+        // Generate QR code from PIX payload
+        QRCode.toDataURL(pixData.payload, {
+          width: 280,
+          margin: 2,
+          color: { dark: "#000000", light: "#ffffff" },
+        })
+          .then((url: string) => setQrCodeDataUrl(url))
+          .catch((err: Error) => console.error("QR Code generation error:", err));
+      }
+    }
+  }, [pixData.payload, pixData.qrCodeBase64]);
 
   const handleCopy = async () => {
     if (pixData.payload) {
@@ -146,11 +173,11 @@ const PixPaymentPage = ({ pixData, total, customerName }: PixPaymentPageProps) =
             </p>
           </div>
 
-          {/* QR Code */}
-          {pixData.qrCodeBase64 && (
+          {/* QR Code - generated from payload or from API base64 */}
+          {qrCodeDataUrl && (
             <div className="flex justify-center mb-4">
               <img
-                src={pixData.qrCodeBase64.startsWith("data:") ? pixData.qrCodeBase64 : `data:image/png;base64,${pixData.qrCodeBase64}`}
+                src={qrCodeDataUrl}
                 alt="QR Code PIX"
                 className="w-48 h-48 rounded-lg border border-gray-200"
               />
