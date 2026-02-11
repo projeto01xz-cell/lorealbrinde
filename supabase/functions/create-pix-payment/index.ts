@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
@@ -303,6 +303,49 @@ const handler = async (req: Request): Promise<Response> => {
 
     // SharkPayments returns data at root level
     const txData = data.data || data;
+
+    // Save order to database
+    try {
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if (supabaseUrl && supabaseServiceKey) {
+        const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+        const externalId = String(txData.id || txData.hash || `SP-${Date.now()}`);
+        const orderStatus = paymentMethod === "credit_card" 
+          ? (txData.payment_status === "paid" || txData.payment_status === "approved" ? "paid" : "pending")
+          : "pending";
+
+        const { error: insertError } = await supabaseAdmin.from("orders").insert({
+          external_id: externalId,
+          customer_name: customer.name,
+          customer_email: customer.email,
+          customer_phone: customer.phone,
+          customer_document: customer.document,
+          total_amount: amount / 100,
+          status: orderStatus,
+          pix_payload: txData.pix?.pix_qr_code || txData.pix?.pix_url || null,
+          shipping_option: items.length > 1 ? items[items.length - 1]?.title : null,
+          shipping_price: null,
+          address_cep: customer.zipCode || null,
+          address_street: customer.streetName || null,
+          address_number: customer.number || null,
+          address_complement: customer.complement || null,
+          address_neighborhood: customer.neighborhood || null,
+          address_city: customer.city || null,
+          address_state: customer.state || null,
+          products: JSON.parse(JSON.stringify(items)),
+          utm_params: tracking ? JSON.parse(JSON.stringify(tracking)) : null,
+        });
+
+        if (insertError) {
+          console.error("Error saving order to database:", insertError);
+        } else {
+          console.log("Order saved to database with external_id:", externalId);
+        }
+      }
+    } catch (dbError) {
+      console.error("Database save error:", dbError);
+    }
+
 
     // Build response based on payment method
     if (paymentMethod === "credit_card") {
