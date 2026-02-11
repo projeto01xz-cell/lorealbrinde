@@ -5,6 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const SHARKPAY_API_URL = "https://api.sharkpayments.com.br/api/public/v1";
+
 interface PaymentRequest {
   amount: number; // em centavos
   paymentMethod: "pix";
@@ -130,17 +132,17 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const nitroPublicKey = Deno.env.get("NITROPAY_PUBLIC_KEY");
-    const nitroSecretKey = Deno.env.get("NITROPAY_SECRET_KEY");
-    if (!nitroPublicKey || !nitroSecretKey) {
-      console.error("Missing NITROPAY_PUBLIC_KEY or NITROPAY_SECRET_KEY");
+    const apiToken = Deno.env.get("SHARKPAY_API_TOKEN");
+    const offerHash = Deno.env.get("SHARKPAY_OFFER_HASH");
+    const productHash = Deno.env.get("SHARKPAY_PRODUCT_HASH");
+    
+    if (!apiToken || !offerHash || !productHash) {
+      console.error("Missing SHARKPAY_API_TOKEN, SHARKPAY_OFFER_HASH, or SHARKPAY_PRODUCT_HASH");
       return new Response(
         JSON.stringify({ error: "Payment processing unavailable. Please try again later.", code: "PAYMENT_CONFIG_ERROR" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-    // Build Basic auth: base64(publicKey:secretKey)
-    const basicAuth = btoa(`${nitroPublicKey}:${nitroSecretKey}`);
 
     const rawBody = await req.json();
     const validation = validatePaymentRequest(rawBody);
@@ -155,91 +157,107 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { amount, customer, items, tracking } = validation.data;
 
-    // NitroPay expects amount in reais (not centavos)
-    const amountInReais = amount / 100;
-
-    console.log("Creating PIX payment via NitroPay:", {
-      amount: amountInReais,
+    console.log("Creating PIX payment via SharkPayments:", {
+      amount,
       customerEmail: customer.email.substring(0, 3) + "***",
       itemsCount: items.length,
     });
 
     // Build webhook URL
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const postbackUrl = `${supabaseUrl}/functions/v1/nitropay-webhook`;
+    const postbackUrl = `${supabaseUrl}/functions/v1/sharkpay-webhook`;
 
-    // Build NitroPay payload
+    // Build SharkPayments cart from items
+    const cart = items.map((item, index) => ({
+      product_hash: productHash,
+      title: item.title,
+      cover: null,
+      price: item.unitPrice,
+      quantity: item.quantity,
+      operation_type: item.operationType || (index === 0 ? 1 : 2),
+      tangible: false,
+    }));
+
+    // Build SharkPayments payload following their API spec
     const payload: Record<string, unknown> = {
-      amount: amountInReais,
+      amount,
+      offer_hash: offerHash,
       payment_method: "pix",
-      description: items.map(i => i.title).join(", ").substring(0, 200),
-      items: items.map(item => ({
-        title: item.title,
-        unitPrice: item.unitPrice, // centavos
-        quantity: item.quantity,
-        tangible: false,
-      })),
       customer: {
         name: customer.name,
         email: customer.email,
+        phone_number: customer.phone,
         document: customer.document,
-        phone: customer.phone,
+        street_name: customer.streetName || "",
+        number: customer.number || "sn",
+        complement: customer.complement || "",
+        neighborhood: customer.neighborhood || "",
+        city: customer.city || "",
+        state: customer.state || "",
+        zip_code: customer.zipCode || "",
       },
-      metadata: {
-        address_street: customer.streetName || "",
-        address_number: customer.number || "",
-        address_complement: customer.complement || "",
-        address_neighborhood: customer.neighborhood || "",
-        address_city: customer.city || "",
-        address_state: customer.state || "",
-        address_cep: customer.zipCode || "",
-      },
-      postbackUrl,
+      cart,
+      installments: 1,
+      expire_in_days: 1,
+      transaction_origin: "api",
+      postback_url: postbackUrl,
     };
 
-    // Add tracking if present
+    // Add tracking/UTM if present
     if (tracking) {
-      payload.tracking = tracking;
+      payload.tracking = {
+        src: tracking.src || "",
+        utm_source: tracking.utm_source || "",
+        utm_medium: tracking.utm_medium || "",
+        utm_campaign: tracking.utm_campaign || "",
+        utm_term: tracking.utm_term || "",
+        utm_content: tracking.utm_content || "",
+      };
     }
 
-    console.log("NitroPay payload:", JSON.stringify(payload, null, 2));
+    console.log("SharkPayments payload:", JSON.stringify(payload, null, 2));
 
-    const response = await fetch("https://api.nitropagamento.app", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Basic ${basicAuth}`,
-      },
-      body: JSON.stringify(payload),
-    });
+    const response = await fetch(
+      `${SHARKPAY_API_URL}/transactions?api_token=${apiToken}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
 
     const data = await response.json();
 
-    if (!response.ok || !data.success) {
-      console.error("NitroPay API error - Status:", response.status, "Response:", JSON.stringify(data, null, 2));
+    if (!response.ok) {
+      console.error("SharkPayments API error - Status:", response.status, "Response:", JSON.stringify(data, null, 2));
       return new Response(
         JSON.stringify({
-          error: data.message || "Unable to create payment. Please try again.",
+          error: data.message || data.error || "Unable to create payment. Please try again.",
           code: "PAYMENT_GATEWAY_ERROR",
         }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("NitroPay payment created:", JSON.stringify(data, null, 2));
+    console.log("SharkPayments payment created:", JSON.stringify(data, null, 2));
 
-    const txData = data.data;
+    // SharkPayments response - extract transaction data
+    // The response may have data directly or nested in a data property
+    const txData = data.data || data;
 
-    // Map NitroPay response to our standard format
+    // Map SharkPayments response to our standard format
     const responseData = {
-      id: txData.id || txData.external_ref,
-      status: txData.status === "pendente" ? "pending" : txData.status,
+      id: txData.hash || txData.id || txData.external_ref || `SP-${Date.now()}`,
+      status: txData.status === "waiting_payment" || txData.status === "pending" ? "pending" : txData.status,
       amount: amount,
       paymentMethod: "pix",
       pix: {
-        payload: txData.pix_code || "",
-        qrCodeBase64: txData.pix_qr_code || "",
-        expiresAt: txData.expires_at || "",
+        payload: txData.pix_code || txData.pix?.code || txData.pix?.payload || "",
+        qrCodeBase64: txData.pix_qr_code || txData.pix?.qr_code || txData.pix?.qr_code_base64 || "",
+        expiresAt: txData.expires_at || txData.pix?.expires_at || "",
       },
     };
 
