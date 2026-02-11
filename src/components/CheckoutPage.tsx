@@ -639,17 +639,9 @@ const CheckoutPage = ({
 
   return (
     <div className="min-h-[100svh] bg-gray-50 pb-32">
-      {/* Promo Banner */}
-      <div className="fixed top-0 left-0 right-0 z-[60] bg-black py-2 px-4">
-        <div className="flex items-center justify-center">
-          <span className="text-[11px] sm:text-xs font-bold text-white text-center leading-tight">
-            ⚠️ A oferta é exclusiva para pagamento via PIX. Pagamento via cartão, será cobrado o valor integral.
-          </span>
-        </div>
-      </div>
 
       {/* Header */}
-      <header className="fixed top-[36px] left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200">
+      <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200">
         <div className="px-4 h-12 flex items-center justify-between max-w-screen-sm mx-auto">
           <button aria-label="Buscar" className="w-9 h-9 flex items-center justify-center text-gray-700 hover:text-purple-600 transition-colors -ml-1">
             <Search className="w-[18px] h-[18px]" />
