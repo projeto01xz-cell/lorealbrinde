@@ -56,7 +56,7 @@ export default function Navbar() {
               <ShoppingCart className="h-6 w-6 text-foreground" strokeWidth={1.5} />
               <span className="absolute -top-0.5 -right-0.5 h-5 w-5 bg-primary text-primary-foreground 
                              text-[10px] font-bold rounded-full flex items-center justify-center">
-                {cartCount.toString().padStart(2, '0')}
+                {cartCount}
               </span>
             </button>
           </div>
