@@ -244,20 +244,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("SharkPayments payment created:", JSON.stringify(data, null, 2));
 
-    // SharkPayments response - extract transaction data
-    // The response may have data directly or nested in a data property
+    // SharkPayments returns data at root level (hash, pix, payment_status, etc.)
     const txData = data.data || data;
 
     // Map SharkPayments response to our standard format
+    // pix.pix_qr_code = código copia e cola (EMV payload)
+    // pix.qr_code_base64 = imagem QR code em base64 (pode ser null)
+    // pix.pix_url = URL do QR code (pode ser null)
     const responseData = {
-      id: txData.hash || txData.id || txData.external_ref || `SP-${Date.now()}`,
-      status: txData.status === "waiting_payment" || txData.status === "pending" ? "pending" : txData.status,
+      id: txData.hash || txData.id || `SP-${Date.now()}`,
+      status: txData.payment_status === "waiting_payment" || txData.payment_status === "pending" ? "pending" : txData.payment_status,
       amount: amount,
       paymentMethod: "pix",
       pix: {
-        payload: txData.pix_code || txData.pix?.code || txData.pix?.payload || "",
-        qrCodeBase64: txData.pix_qr_code || txData.pix?.qr_code || txData.pix?.qr_code_base64 || "",
-        expiresAt: txData.expires_at || txData.pix?.expires_at || "",
+        payload: txData.pix?.pix_qr_code || txData.pix?.pix_url || "",
+        qrCodeBase64: txData.pix?.qr_code_base64 || "",
+        expiresAt: txData.expires_at || "",
       },
     };
 
