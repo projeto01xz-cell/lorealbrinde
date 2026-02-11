@@ -92,7 +92,7 @@ Design moderno e motor potente de 1000W para deslocamentos urbanos práticos. Ve
 • Zero emissão de poluentes
 
 *Autonomia varia conforme peso e terreno.`,
-    price: 369.00,
+    price: 149.90,
     originalPrice: 3890,
     image: scooterX1301,
     images: [scooterX1301, scooterX1302, scooterX1303, scooterX1304],
@@ -151,7 +151,7 @@ O display digital colorido permite acompanhar velocidade, nível de bateria e in
 
 ⚠️ Aviso
 *A autonomia pode variar conforme peso do condutor, tipo de terreno e uso em subidas.`,
-    price: 349.00,
+    price: 139.90,
     originalPrice: 2890,
     image: scooterDemarche01,
     images: [scooterDemarche01, scooterDemarche02, scooterDemarche03, scooterDemarche04],
@@ -262,7 +262,7 @@ Recomendamos sempre o uso de equipamentos de segurança (capacete e itens de pro
     id: '18',
     name: 'Scooter Elétrica GTS 500W 48V 20Ah JD-06',
     description: 'Scooter elétrica retrô com design elegante, banco confortável e excelente autonomia. Não precisa de CNH.',
-    price: 359.00,
+    price: 145.90,
     originalPrice: 3490,
     image: scooterGts01,
     images: [scooterGts01, scooterGts02, scooterGts03, scooterGts04],
@@ -364,7 +364,7 @@ Recomendamos sempre o uso de equipamentos de segurança (capacete e itens de pro
     id: '5',
     name: 'Scooter Elétrica Pro 800W',
     description: 'Scooter elétrica de alta performance com motor 800W, freio a disco e autonomia de 45km.',
-    price: 345.00,
+    price: 142.90,
     originalPrice: 2290,
     image: scooterPro01,
     images: [scooterPro01, scooterPro02, scooterPro03, scooterPro04],
@@ -385,7 +385,7 @@ Recomendamos sempre o uso de equipamentos de segurança (capacete e itens de pro
     id: '6',
     name: 'Scooter Urbana 350W',
     description: 'Scooter compacta e leve para deslocamentos urbanos. Dobrável e fácil de transportar.',
-    price: 335.00,
+    price: 132.90,
     originalPrice: 1590,
     image: 'https://images.unsplash.com/photo-1604868189265-219ba7ffc595?w=500&h=500&fit=crop',
     category: 'scooters',
@@ -404,7 +404,7 @@ Recomendamos sempre o uso de equipamentos de segurança (capacete e itens de pro
     id: '7',
     name: 'Scooter Off-Road 1200W',
     description: 'Scooter elétrica para terrenos irregulares com pneus largos e suspensão dupla.',
-    price: 365.00,
+    price: 150.00,
     originalPrice: 2790,
     image: 'https://images.unsplash.com/photo-1565536420726-7c90fd8c7336?w=500&h=500&fit=crop',
     category: 'scooters',
