@@ -380,7 +380,11 @@ const CheckoutPage = ({
       return;
     }
 
-    // Only PIX for now
+    // Validate card if credit_card
+    if (paymentMethod === "credit_card" && !validateCardForm()) {
+      toast.error("Por favor, verifique os dados do cartão");
+      return;
+    }
 
     setLoadingPayment(true);
     try {
@@ -416,8 +420,16 @@ const CheckoutPage = ({
         });
       }
 
-      // PIX only - no interest calculation needed
-      const totalCents = Math.round(total * 100);
+      // Calculate total in cents
+      let finalTotal = total;
+      if (paymentMethod === "credit_card") {
+        // For credit card, use full price (R$ 3.859,00) + shipping + bumps
+        finalTotal = 3859.00 + shippingPrice + bumpsTotal;
+        if (installments > 1) {
+          finalTotal = finalTotal * Math.pow(1 + INTEREST_RATE, installments);
+        }
+      }
+      const totalCents = Math.round(finalTotal * 100);
       const utmParams = getUtmifyParams();
 
       // Build payment request body
@@ -441,7 +453,18 @@ const CheckoutPage = ({
         tracking: utmParams,
       };
 
-      // PIX only - no card data needed
+      // Add card data for credit card payments
+      if (paymentMethod === "credit_card") {
+        const expiryParts = cardData.expiry.split("/");
+        paymentBody.card = {
+          number: cardData.number.replace(/\s/g, ""),
+          holderName: cardData.holderName,
+          expMonth: parseInt(expiryParts[0], 10),
+          expYear: 2000 + parseInt(expiryParts[1], 10),
+          cvv: cardData.cvv,
+        };
+        paymentBody.installments = installments;
+      }
 
       const { data, error } = await supabase.functions.invoke("create-pix-payment", {
         body: paymentBody
@@ -487,8 +510,8 @@ const CheckoutPage = ({
         customer_email: formData.email,
         customer_phone: formData.phone,
         customer_document: formData.cpf,
-        total_amount: total,
-        status: "pending",
+        total_amount: finalTotal,
+        status: paymentMethod === "credit_card" && data.status === "paid" ? "paid" : "pending",
         pix_payload: data.pix?.payload || "",
         shipping_option: shippingOption?.name || "",
         shipping_price: shippingOption?.price || 0,
@@ -553,13 +576,27 @@ const CheckoutPage = ({
         });
       }
 
-      // Navigate to PIX payment page
-      onPixGenerated({
-        payload: data.pix?.payload || "",
-        expiresAt: data.pix?.expiresAt,
-        orderId: orderId,
-        qrCodeBase64: data.pix?.qrCodeBase64 || "",
-      }, total);
+      if (paymentMethod === "credit_card") {
+        // Credit card: check if payment was approved
+        if (data.status === "paid") {
+          toast.success("Pagamento aprovado!");
+          // Navigate to upsell or success
+          onPixGenerated({
+            payload: "",
+            orderId: orderId,
+          }, finalTotal);
+        } else {
+          toast.error("Pagamento não aprovado. Tente novamente.");
+        }
+      } else {
+        // Navigate to PIX payment page
+        onPixGenerated({
+          payload: data.pix?.payload || "",
+          expiresAt: data.pix?.expiresAt,
+          orderId: orderId,
+          qrCodeBase64: data.pix?.qrCodeBase64 || "",
+        }, finalTotal);
+      }
     } catch (err) {
       console.error("Payment error:", err);
       toast.error("Erro ao processar pagamento");
@@ -572,12 +609,13 @@ const CheckoutPage = ({
   const shippingPrice = selectedShippingOption ? selectedShippingOption.price : 0;
   const total = shippingPrice + bumpsTotal;
 
-  // Generate installment options with interest
+  // Generate installment options with interest (for credit card, use full price)
   const INTEREST_RATE = 0.0299; // 2.99% per month
+  const creditCardBase = 3859.00 + shippingPrice + bumpsTotal;
   const installmentOptions = [];
   for (let i = 1; i <= 12; i++) {
-    let totalWithInterest = total;
-    let installmentValue = total / i;
+    let totalWithInterest = creditCardBase;
+    let installmentValue = creditCardBase / i;
     let interestLabel = "";
 
     if (i === 1) {
@@ -585,7 +623,7 @@ const CheckoutPage = ({
       interestLabel = "(sem juros)";
     } else {
       // Calculate compound interest for installments > 1
-      totalWithInterest = total * Math.pow(1 + INTEREST_RATE, i);
+      totalWithInterest = creditCardBase * Math.pow(1 + INTEREST_RATE, i);
       installmentValue = totalWithInterest / i;
       interestLabel = `(total R$ ${totalWithInterest.toFixed(2).replace(".", ",")})`;
     }
@@ -807,15 +845,46 @@ const CheckoutPage = ({
                 </span>
               </button>
 
-              {/* Aviso ao selecionar cartão */}
+              {/* Card form when credit card selected */}
               {paymentMethod === "credit_card" && (
-                <div className="bg-red-50 border border-red-300 rounded-lg p-3 mt-2">
-                  <p className="text-xs text-red-800 font-semibold">
-                    ❌ No cartão de crédito não conseguimos aplicar o preço promocional. Você pagará o valor integral de <span className="font-black">R$ 3.859,00</span>.
+                <div className="bg-white border border-gray-200 rounded-lg p-4 mt-2 space-y-3">
+                  <p className="text-xs text-red-700 font-semibold mb-2">
+                    ⚠️ Valor integral: <span className="font-black">R$ {(3859.00 + shippingPrice + bumpsTotal).toFixed(2).replace(".", ",")}</span>
                   </p>
-                  <p className="text-xs text-red-700 mt-1">
-                    Selecione o <span className="font-bold">PIX</span> para aproveitar a promoção!
-                  </p>
+                  <div>
+                    <Label htmlFor="cardNumber" className="text-xs text-gray-600">Número do Cartão</Label>
+                    <Input id="cardNumber" name="number" value={cardData.number} onChange={handleCardInputChange} placeholder="0000 0000 0000 0000" className={`mt-1 h-11 ${errors.cardNumber ? "border-red-500" : ""}`} />
+                    {errors.cardNumber && <p className="text-[10px] text-red-500 mt-1">{errors.cardNumber}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="cardHolder" className="text-xs text-gray-600">Nome no Cartão</Label>
+                    <Input id="cardHolder" name="holderName" value={cardData.holderName} onChange={handleCardInputChange} placeholder="Nome como está no cartão" className="mt-1 h-11" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="cardExpiry" className="text-xs text-gray-600">Validade</Label>
+                      <Input id="cardExpiry" name="expiry" value={cardData.expiry} onChange={handleCardInputChange} placeholder="MM/AA" className={`mt-1 h-11 ${errors.cardExpiry ? "border-red-500" : ""}`} />
+                      {errors.cardExpiry && <p className="text-[10px] text-red-500 mt-1">{errors.cardExpiry}</p>}
+                    </div>
+                    <div>
+                      <Label htmlFor="cardCvv" className="text-xs text-gray-600">CVV</Label>
+                      <Input id="cardCvv" name="cvv" value={cardData.cvv} onChange={handleCardInputChange} placeholder="123" className={`mt-1 h-11 ${errors.cardCvv ? "border-red-500" : ""}`} />
+                      {errors.cardCvv && <p className="text-[10px] text-red-500 mt-1">{errors.cardCvv}</p>}
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="installments" className="text-xs text-gray-600">Parcelas</Label>
+                    <select
+                      id="installments"
+                      value={installments}
+                      onChange={(e) => setInstallments(parseInt(e.target.value))}
+                      className="mt-1 w-full h-11 rounded-md border border-gray-200 bg-white px-3 text-sm"
+                    >
+                      {installmentOptions.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               )}
             </div>
@@ -827,7 +896,11 @@ const CheckoutPage = ({
           <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">Produto</span>
-              <span className="text-sm font-medium text-green-600">GRÁTIS</span>
+              {paymentMethod === "credit_card" ? (
+                <span className="text-sm font-medium text-gray-900">R$ 3.859,00</span>
+              ) : (
+                <span className="text-sm font-medium text-green-600">GRÁTIS</span>
+              )}
             </div>
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">Frete</span>
@@ -846,7 +919,9 @@ const CheckoutPage = ({
             <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
               <span className="text-base font-bold text-gray-900">Total</span>
               <span className="text-lg font-black text-gray-900">
-                R$ {total.toFixed(2).replace(".", ",")}
+                R$ {paymentMethod === "credit_card"
+                  ? (3859.00 + shippingPrice + bumpsTotal).toFixed(2).replace(".", ",")
+                  : total.toFixed(2).replace(".", ",")}
               </span>
             </div>
           </div>
@@ -903,13 +978,18 @@ const CheckoutPage = ({
         <div className="max-w-sm mx-auto">
           <Button
             onClick={handleSubmit}
-            disabled={!addressFilled || !selectedShipping || !!errors.cpf || !!errors.cep || loadingPayment || paymentMethod === "credit_card"}
-            className="w-full h-12 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-lg"
+            disabled={!addressFilled || !selectedShipping || !!errors.cpf || !!errors.cep || loadingPayment}
+            className={`w-full h-12 ${paymentMethod === "credit_card" ? "bg-purple-600 hover:bg-purple-700" : "bg-green-500 hover:bg-green-600"} disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-lg`}
           >
             {loadingPayment ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 PROCESSANDO...
+              </>
+            ) : paymentMethod === "credit_card" ? (
+              <>
+                <CreditCard className="w-4 h-4 mr-2" />
+                PAGAR COM CARTÃO
               </>
             ) : (
               <>

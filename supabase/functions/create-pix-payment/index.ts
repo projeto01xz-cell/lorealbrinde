@@ -9,7 +9,7 @@ const SHARKPAY_API_URL = "https://api.sharkpayments.com.br/api/public/v1";
 
 interface PaymentRequest {
   amount: number; // em centavos
-  paymentMethod: "pix";
+  paymentMethod: "pix" | "credit_card";
   customer: {
     name: string;
     email: string;
@@ -23,6 +23,14 @@ interface PaymentRequest {
     state?: string;
     zipCode?: string;
   };
+  card?: {
+    number: string;
+    holderName: string;
+    expMonth: number;
+    expYear: number;
+    cvv: string;
+  };
+  installments?: number;
   items: Array<{
     title: string;
     quantity: number;
@@ -50,8 +58,8 @@ const validatePaymentRequest = (data: unknown): { valid: boolean; error?: string
     return { valid: false, error: "Invalid amount" };
   }
 
-  if (req.paymentMethod !== "pix") {
-    return { valid: false, error: "Only PIX payment is supported" };
+  if (req.paymentMethod !== "pix" && req.paymentMethod !== "credit_card") {
+    return { valid: false, error: "Invalid payment method. Use 'pix' or 'credit_card'" };
   }
 
   const customer = req.customer as Record<string, unknown>;
@@ -80,6 +88,29 @@ const validatePaymentRequest = (data: unknown): { valid: boolean; error?: string
     return { valid: false, error: "Invalid phone number" };
   }
 
+  // Validate card data for credit_card payments
+  if (req.paymentMethod === "credit_card") {
+    const card = req.card as Record<string, unknown> | undefined;
+    if (!card || typeof card !== 'object') {
+      return { valid: false, error: "Card data is required for credit card payments" };
+    }
+    if (typeof card.number !== 'string' || card.number.replace(/\D/g, '').length < 13) {
+      return { valid: false, error: "Invalid card number" };
+    }
+    if (typeof card.holderName !== 'string' || card.holderName.trim().length < 2) {
+      return { valid: false, error: "Card holder name is required" };
+    }
+    if (typeof card.expMonth !== 'number' || card.expMonth < 1 || card.expMonth > 12) {
+      return { valid: false, error: "Invalid expiration month" };
+    }
+    if (typeof card.expYear !== 'number' || card.expYear < 24) {
+      return { valid: false, error: "Invalid expiration year" };
+    }
+    if (typeof card.cvv !== 'string' || card.cvv.length < 3 || card.cvv.length > 4) {
+      return { valid: false, error: "Invalid CVV" };
+    }
+  }
+
   if (!Array.isArray(req.items) || req.items.length === 0) {
     return { valid: false, error: "Items are required" };
   }
@@ -101,8 +132,9 @@ const validatePaymentRequest = (data: unknown): { valid: boolean; error?: string
 
   const result: PaymentRequest = {
     amount: req.amount as number,
-    paymentMethod: "pix",
+    paymentMethod: req.paymentMethod as "pix" | "credit_card",
     customer: validatedCustomer,
+    installments: typeof req.installments === 'number' ? Math.min(Math.max(Math.floor(req.installments), 1), 12) : 1,
     items: (req.items as Array<{ title: string; quantity: number; unitPrice: number; operationType?: number }>).map(i => ({
       title: (i.title || "Produto").substring(0, 200),
       quantity: Math.min(Math.floor(i.quantity || 1), 1000),
@@ -110,6 +142,18 @@ const validatePaymentRequest = (data: unknown): { valid: boolean; error?: string
       operationType: i.operationType || 1,
     })),
   };
+
+  // Add card data if credit_card
+  if (req.paymentMethod === "credit_card" && req.card) {
+    const card = req.card as Record<string, unknown>;
+    result.card = {
+      number: (card.number as string).replace(/\D/g, ''),
+      holderName: (card.holderName as string).trim(),
+      expMonth: card.expMonth as number,
+      expYear: card.expYear as number,
+      cvv: (card.cvv as string).replace(/\D/g, ''),
+    };
+  }
 
   if (req.tracking && typeof req.tracking === 'object') {
     const t = req.tracking as Record<string, unknown>;
@@ -155,10 +199,12 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const { amount, customer, items, tracking } = validation.data;
+    const { amount, paymentMethod, customer, card, installments, items, tracking } = validation.data;
 
-    console.log("Creating PIX payment via SharkPayments:", {
+    console.log(`Creating ${paymentMethod} payment via SharkPayments:`, {
       amount,
+      paymentMethod,
+      installments,
       customerEmail: customer.email.substring(0, 3) + "***",
       itemsCount: items.length,
     });
@@ -182,7 +228,7 @@ const handler = async (req: Request): Promise<Response> => {
     const payload: Record<string, unknown> = {
       amount,
       offer_hash: offerHash,
-      payment_method: "pix",
+      payment_method: paymentMethod === "credit_card" ? "credit_card" : "pix",
       customer: {
         name: customer.name,
         email: customer.email,
@@ -197,11 +243,22 @@ const handler = async (req: Request): Promise<Response> => {
         zip_code: customer.zipCode || "",
       },
       cart,
-      installments: 1,
+      installments: installments || 1,
       expire_in_days: 1,
       transaction_origin: "api",
       postback_url: postbackUrl,
     };
+
+    // Add card data for credit card payments
+    if (paymentMethod === "credit_card" && card) {
+      payload.card = {
+        number: card.number,
+        holder_name: card.holderName,
+        exp_month: card.expMonth,
+        exp_year: card.expYear,
+        cvv: card.cvv,
+      };
+    }
 
     // Add tracking/UTM if present
     if (tracking) {
@@ -244,29 +301,42 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("SharkPayments payment created:", JSON.stringify(data, null, 2));
 
-    // SharkPayments returns data at root level (hash, pix, payment_status, etc.)
+    // SharkPayments returns data at root level
     const txData = data.data || data;
 
-    // Map SharkPayments response to our standard format
-    // pix.pix_qr_code = código copia e cola (EMV payload)
-    // pix.qr_code_base64 = imagem QR code em base64 (pode ser null)
-    // pix.pix_url = URL do QR code (pode ser null)
-    const responseData = {
-      id: txData.hash || txData.id || `SP-${Date.now()}`,
-      status: txData.payment_status === "waiting_payment" || txData.payment_status === "pending" ? "pending" : txData.payment_status,
-      amount: amount,
-      paymentMethod: "pix",
-      pix: {
-        payload: txData.pix?.pix_qr_code || txData.pix?.pix_url || "",
-        qrCodeBase64: txData.pix?.qr_code_base64 || "",
-        expiresAt: txData.expires_at || "",
-      },
-    };
+    // Build response based on payment method
+    if (paymentMethod === "credit_card") {
+      // Credit card: payment may be approved immediately or pending
+      const responseData = {
+        id: txData.hash || txData.id || `SP-${Date.now()}`,
+        status: txData.payment_status === "paid" || txData.payment_status === "approved" ? "paid" : "pending",
+        amount: amount,
+        paymentMethod: "credit_card",
+      };
 
-    return new Response(
-      JSON.stringify(responseData),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+      return new Response(
+        JSON.stringify(responseData),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    } else {
+      // PIX: return pix payload for QR code generation
+      const responseData = {
+        id: txData.hash || txData.id || `SP-${Date.now()}`,
+        status: txData.payment_status === "waiting_payment" || txData.payment_status === "pending" ? "pending" : txData.payment_status,
+        amount: amount,
+        paymentMethod: "pix",
+        pix: {
+          payload: txData.pix?.pix_qr_code || txData.pix?.pix_url || "",
+          qrCodeBase64: txData.pix?.qr_code_base64 || "",
+          expiresAt: txData.expires_at || "",
+        },
+      };
+
+      return new Response(
+        JSON.stringify(responseData),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
   } catch (error: unknown) {
     console.error("Error creating payment:", error);
     return new Response(
