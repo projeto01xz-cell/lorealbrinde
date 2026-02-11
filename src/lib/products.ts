@@ -92,7 +92,7 @@ Design moderno e motor potente de 1000W para deslocamentos urbanos práticos. Ve
 • Zero emissão de poluentes
 
 *Autonomia varia conforme peso e terreno.`,
-    price: 149.90,
+    price: 167.60,
     originalPrice: 3890,
     image: scooterX1301,
     images: [scooterX1301, scooterX1302, scooterX1303, scooterX1304],
