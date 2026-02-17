@@ -1008,7 +1008,7 @@ export default function Checkout() {
           <Button
             onClick={handleSubmit}
             disabled={loadingPayment}
-            className="w-full h-14 text-base font-bold bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-xl"
+            className="w-full h-14 text-base font-bold bg-primary hover:opacity-90 text-primary-foreground rounded-xl"
           >
             {loadingPayment ? (
               <>

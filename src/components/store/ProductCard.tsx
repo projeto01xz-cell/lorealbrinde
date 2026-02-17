@@ -17,13 +17,12 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <article className="card-product flex flex-col bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      {/* Main Content - Horizontal Layout */}
+    <article className="card-product flex flex-col bg-card rounded-xl overflow-hidden border border-border">
       <div className="flex p-3 gap-3">
-        {/* Image Container - Left Side */}
+        {/* Image */}
         <Link 
           to={`/produto/${product.id}`}
-          className="relative flex-shrink-0 w-[140px] h-[140px] overflow-hidden bg-secondary/30 rounded-lg"
+          className="relative flex-shrink-0 w-[130px] h-[130px] overflow-hidden bg-secondary/30 rounded-lg"
         >
           <img
             src={product.image}
@@ -31,64 +30,48 @@ export default function ProductCard({ product }: ProductCardProps) {
             className="w-full h-full object-contain p-1"
             loading="lazy"
           />
-          
-          {/* Badges Container - Top of Image */}
-          <div className="absolute top-1 left-1 flex flex-col gap-0.5">
-            {discount > 0 && (
-              <span className="bg-destructive text-destructive-foreground text-[8px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                <svg className="h-2 w-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                  <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
-                {discount}%
-              </span>
-            )}
-            {product.freeShipping && (
-              <span className="bg-primary text-primary-foreground text-[8px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                <Truck className="h-2 w-2" />
-                FRETE GRÁTIS
-              </span>
-            )}
-          </div>
+          {discount > 0 && (
+            <span className="absolute top-1.5 left-1.5 bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5 rounded">
+              -{discount}%
+            </span>
+          )}
         </Link>
 
-        {/* Info Container - Right Side */}
+        {/* Info */}
         <div className="flex flex-col flex-1 min-w-0">
-          {/* Title */}
           <Link to={`/produto/${product.id}`}>
             <h3 className="font-semibold text-foreground line-clamp-3 text-sm leading-tight mb-2">
               {product.name}
             </h3>
           </Link>
 
-          {/* Price Section */}
           <div className="mt-auto space-y-0.5">
             {product.originalPrice && (
               <span className="text-xs text-muted-foreground line-through block">
                 R$ {product.originalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </span>
             )}
-            
             <p className="text-xl font-bold text-primary">
               {formatPrice(product.price)}
             </p>
-            
             <p className="text-xs text-muted-foreground">
               À vista no PIX
             </p>
-            
-            <p className="text-xs text-muted-foreground">
-              ou <span className="text-primary font-medium">12x</span> de <span className="font-medium text-foreground">{formatPrice(product.price / 12)}</span>
-            </p>
+            {product.freeShipping && (
+              <p className="text-xs text-primary font-medium flex items-center gap-1">
+                <Truck className="h-3 w-3" />
+                Frete grátis
+              </p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* CTA Button - Full Width */}
+      {/* CTA */}
       <div className="px-3 pb-3">
         <button 
           onClick={handleBuy}
-          className="w-full bg-[#22c55e] hover:bg-[#16a34a] text-white font-bold text-sm py-3 rounded-lg
-                   flex items-center justify-center gap-2 transition-colors"
+          className="btn-cart rounded-lg text-sm py-3"
           disabled={!product.inStock}
           aria-label={product.inStock ? 'Comprar produto' : 'Produto indisponível'}
         >
@@ -96,7 +79,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.inStock ? 'COMPRAR' : 'ESGOTADO'}
         </button>
       </div>
-
     </article>
   );
 }
