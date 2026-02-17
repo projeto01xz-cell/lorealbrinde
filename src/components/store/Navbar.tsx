@@ -1,7 +1,6 @@
 import { Search, ShoppingCart, Menu, X, ChevronRight, User } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import gtsm1Logo from "@/assets/gtsm1-logo.png";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,13 +34,9 @@ export default function Navbar() {
               )}
             </button>
 
-            {/* Logo */}
+            {/* Logo as Text */}
             <Link to="/" className="flex-shrink-0">
-              <img 
-                src={gtsm1Logo} 
-                alt="GTSM1" 
-                className="h-8 w-auto"
-              />
+              <span className="text-xl font-bold text-foreground tracking-tight">GTSM1</span>
             </Link>
 
             {/* Search Bar - Desktop */}
