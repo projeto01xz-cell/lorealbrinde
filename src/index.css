@@ -2,31 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 96%;
-    --foreground: 0 0% 13%;
+    --background: 0 0% 98%;
+    --foreground: 220 20% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 13%;
+    --card-foreground: 220 20% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 13%;
+    --popover-foreground: 220 20% 20%;
 
-    /* Primary Green - CTA / Prices */
-    --primary: 145 63% 42%;
+    /* Primary Blue */
+    --primary: 220 80% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 92%;
-    --secondary-foreground: 0 0% 13%;
+    --secondary: 220 15% 95%;
+    --secondary-foreground: 220 20% 20%;
 
-    --muted: 0 0% 92%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 220 10% 94%;
+    --muted-foreground: 220 10% 46%;
 
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 13%;
+    --accent: 220 15% 96%;
+    --accent-foreground: 220 20% 20%;
 
     /* Destructive Red - Offers/Discounts */
     --destructive: 0 84% 50%;
@@ -35,38 +35,37 @@
     --success: 145 63% 42%;
     --success-foreground: 0 0% 100%;
 
-    --border: 0 0% 88%;
-    --input: 0 0% 88%;
-    --ring: 145 63% 42%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 220 80% 45%;
 
     --radius: 0.5rem;
 
-    /* Custom properties */
-    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06);
+    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.08);
+    --shadow-lg: 0 10px 25px -5px rgb(0 0 0 / 0.1);
   }
 
   .dark {
-    --background: 0 0% 8%;
+    --background: 220 15% 8%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 12%;
+    --card: 220 15% 12%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 12%;
+    --popover: 220 15% 12%;
     --popover-foreground: 0 0% 98%;
-    --primary: 145 63% 45%;
+    --primary: 220 80% 55%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 16%;
+    --secondary: 220 15% 16%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 16%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 0 0% 16%;
+    --muted: 220 15% 16%;
+    --muted-foreground: 220 10% 60%;
+    --accent: 220 15% 16%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 145 63% 45%;
+    --border: 220 15% 20%;
+    --input: 220 15% 20%;
+    --ring: 220 80% 55%;
   }
 }
 
@@ -90,7 +89,7 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Roboto', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   #root {
@@ -101,35 +100,30 @@
 }
 
 @layer components {
-  /* Primary CTA Button - Green */
   .btn-primary {
     @apply bg-primary text-primary-foreground font-semibold rounded-lg
            hover:opacity-90 transition-all duration-200 active:scale-[0.98]
            min-h-[44px] px-6;
   }
 
-  /* Secondary Button */
   .btn-secondary {
     @apply bg-secondary text-secondary-foreground font-medium rounded-lg 
            border border-border hover:bg-muted transition-all duration-200
            min-h-[44px] px-6;
   }
 
-  /* Add to Cart Button - Full width green */
   .btn-cart {
     @apply w-full bg-primary text-primary-foreground font-bold rounded-lg
            flex items-center justify-center gap-2 py-3
            hover:opacity-90 transition-all duration-200 active:scale-[0.98]
-           min-h-[48px] text-sm uppercase tracking-wide;
+           min-h-[48px] text-base;
   }
 
-  /* Product Card */
   .card-product {
     @apply bg-card rounded-lg shadow-sm
            transition-all duration-300 hover:shadow-md;
   }
 
-  /* Input field with proper touch target */
   .input-field {
     @apply w-full px-4 py-3 rounded-lg border border-border bg-card 
            text-foreground placeholder:text-muted-foreground 
@@ -137,7 +131,6 @@
            transition-all duration-200 min-h-[44px];
   }
 
-  /* Filter chips */
   .chip {
     @apply inline-flex items-center px-4 py-2 rounded-full text-sm font-medium 
            whitespace-nowrap transition-all min-h-[40px];
@@ -151,7 +144,6 @@
     @apply bg-card text-foreground border border-border hover:bg-secondary;
   }
 
-  /* Badge styles */
   .badge {
     @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-bold uppercase;
   }
@@ -164,7 +156,6 @@
     @apply bg-primary/10 text-primary;
   }
 
-  /* Price styles */
   .price-current {
     @apply text-xl font-bold text-primary;
   }
@@ -192,7 +183,6 @@
     animation: fadeIn 0.4s ease-out forwards;
   }
 
-  /* Hide scrollbar for category filter */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -202,7 +192,6 @@
     display: none;
   }
 
-  /* Touch target minimum size */
   .touch-target {
     @apply min-w-[44px] min-h-[44px];
   }
