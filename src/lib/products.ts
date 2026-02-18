@@ -61,7 +61,7 @@ O Ventilador Turbo é a solução ideal para quem busca muito mais vento com eco
     price: 37.80,
     originalPrice: 189.90,
     image: ventilador01,
-    images: [ventilador01, ventilador02, ventilador03, ventilador04],
+    images: [ventilador01, ventilador02, ventilador03, ventilador04, ventilador05, ventilador06, ventilador07],
     category: 'ventiladores',
     rating: 4.9,
     reviews: 1847,
