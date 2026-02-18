@@ -1,11 +1,34 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, Truck, Shield, RotateCcw, Clock, Check, ChevronLeft, ChevronRight, Minus, Plus, ShoppingCart, Flame } from "lucide-react";
 import Navbar from "@/components/store/Navbar";
 import Footer from "@/components/store/Footer";
 import { getFeaturedProducts, formatPrice, calculateDiscount } from "@/lib/products";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+
+const PURCHASE_NOTIFICATIONS = [
+  { name: "Maria", city: "São Paulo" },
+  { name: "João", city: "Rio de Janeiro" },
+  { name: "Ana", city: "Belo Horizonte" },
+  { name: "Carlos", city: "Curitiba" },
+  { name: "Fernanda", city: "Salvador" },
+  { name: "Lucas", city: "Fortaleza" },
+  { name: "Juliana", city: "Porto Alegre" },
+  { name: "Roberto", city: "Manaus" },
+  { name: "Patrícia", city: "Recife" },
+  { name: "Diego", city: "Goiânia" },
+  { name: "Camila", city: "Belém" },
+  { name: "Rafael", city: "Florianópolis" },
+  { name: "Larissa", city: "Maceió" },
+  { name: "Thiago", city: "Natal" },
+  { name: "Bruna", city: "Teresina" },
+  { name: "Eduardo", city: "Campo Grande" },
+  { name: "Vanessa", city: "João Pessoa" },
+  { name: "Marcelo", city: "Aracaju" },
+  { name: "Letícia", city: "São Luís" },
+  { name: "Felipe", city: "Vitória" },
+];
 
 // Gera ou recupera um tempo final fixo para a sessão (reinicia a cada visita)
 function getCountdownTarget(): number {
@@ -25,6 +48,8 @@ export default function Index() {
   const [quantity, setQuantity] = useState(1);
   const [timeLeft, setTimeLeft] = useState({ h: 23, m: 47, s: 33 });
 
+  const [activeNotif, setActiveNotif] = useState<{ name: string; city: string } | null>(null);
+
   useEffect(() => {
     const target = getCountdownTarget();
     const tick = () => {
@@ -41,6 +66,37 @@ export default function Index() {
     tick();
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Purchase notifications
+  useEffect(() => {
+    let usedIndexes: number[] = [];
+    const showNotif = () => {
+      let idx = Math.floor(Math.random() * PURCHASE_NOTIFICATIONS.length);
+      if (usedIndexes.includes(idx)) {
+        idx = (idx + 1) % PURCHASE_NOTIFICATIONS.length;
+      }
+      usedIndexes = [...usedIndexes.slice(-5), idx];
+      setActiveNotif(PURCHASE_NOTIFICATIONS[idx]);
+      setTimeout(() => setActiveNotif(null), 4000);
+    };
+    // First notification after 8s
+    const first = setTimeout(showNotif, 8000);
+    // Then repeat every 18-28s
+    const getDelay = () => 18000 + Math.random() * 10000;
+    let repeat: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      repeat = setTimeout(() => {
+        showNotif();
+        schedule();
+      }, getDelay());
+    };
+    const scheduleStart = setTimeout(schedule, 8000);
+    return () => {
+      clearTimeout(first);
+      clearTimeout(repeat);
+      clearTimeout(scheduleStart);
+    };
   }, []);
 
   if (!product) return null;
@@ -410,6 +466,31 @@ export default function Index() {
           🛒 Comprar Agora
         </button>
       </div>
+
+      {/* Purchase Notification Toast */}
+      <AnimatePresence>
+        {activeNotif && (
+          <motion.div
+            key={activeNotif.name + activeNotif.city}
+            initial={{ opacity: 0, x: -80, y: 0 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: -80 }}
+            transition={{ type: "spring", stiffness: 300, damping: 28 }}
+            className="fixed bottom-20 left-4 z-[60] lg:bottom-6 flex items-center gap-3 bg-card border border-border rounded-xl shadow-2xl px-4 py-3 max-w-[280px]"
+          >
+            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <ShoppingCart className="h-4 w-4 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-foreground leading-tight">
+                {activeNotif.name} de {activeNotif.city}
+              </p>
+              <p className="text-xs text-muted-foreground leading-tight">acabou de comprar! 🔥</p>
+              <p className="text-[10px] text-muted-foreground/60 mt-0.5">há poucos instantes</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
