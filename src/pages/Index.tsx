@@ -345,16 +345,36 @@ export default function Index() {
       <Footer />
 
       {/* Sticky Buy - Mobile */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card border-t border-border p-3 flex items-center gap-3 shadow-2xl">
-        <div className="flex flex-col min-w-0">
-          {product.originalPrice && (
-            <span className="text-xs text-muted-foreground line-through leading-none">{formatPrice(product.originalPrice)}</span>
-          )}
-          <span className="text-xl font-extrabold text-foreground leading-tight">{formatPrice(tierPrice)}</span>
+      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden shadow-2xl">
+        {/* Urgency strip */}
+        <div className="bg-destructive text-destructive-foreground text-center text-[11px] font-bold py-1 tracking-wide animate-pulse">
+          🔥 OFERTA POR TEMPO LIMITADO — ESTOQUE ACABANDO!
         </div>
-        <button onClick={handleBuyNow} className="btn-buy flex-1 rounded font-bold text-base">
-          🛒 comprar agora
-        </button>
+        <div className="bg-card border-t border-border px-3 py-2.5 flex items-center gap-3">
+          {/* Price info */}
+          <div className="flex flex-col min-w-0 flex-shrink-0">
+            {product.originalPrice && (
+              <span className="text-[11px] text-muted-foreground line-through leading-none">
+                {formatPrice(product.originalPrice)}
+              </span>
+            )}
+            <span className="text-xl font-black text-foreground leading-tight">
+              {formatPrice(tierPrice)}
+            </span>
+            <span className="text-[10px] text-muted-foreground leading-none">
+              3x de {formatPrice(tierPrice / 3)} s/ juros
+            </span>
+          </div>
+
+          {/* CTA Button */}
+          <button
+            onClick={handleBuyNow}
+            className="flex-1 btn-buy rounded-lg font-black text-base flex items-center justify-center gap-2 py-3.5"
+          >
+            <ShoppingCart className="h-5 w-5" />
+            COMPRAR AGORA
+          </button>
+        </div>
       </div>
 
       {/* Purchase Notification Toast */}
