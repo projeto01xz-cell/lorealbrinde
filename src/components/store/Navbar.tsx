@@ -44,7 +44,7 @@ export default function Navbar() {
               <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
                 <Zap className="h-4 w-4 text-white" />
               </div>
-              <span className="text-sm font-extrabold text-white tracking-tight">JSvariedades</span>
+              <span className="text-sm font-extrabold text-white tracking-tight leading-tight">Feira da<br className="hidden xs:block" /> Madrugada SP</span>
             </Link>
 
             {/* Search Bar */}
