@@ -60,7 +60,7 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col pb-20 lg:pb-0">
       <Navbar />
       <main className="flex-1">
         <div className="max-w-7xl mx-auto">
@@ -80,8 +80,8 @@ export default function Index() {
                 </span>
               )}
 
-              {/* Main Image */}
-              <div className="relative aspect-square">
+              {/* Main Image - smaller on mobile */}
+              <div className="relative aspect-square max-h-[60vw] md:max-h-none mx-auto w-full">
                 <img
                   src={productImages[selectedImageIndex]}
                   alt={product.name}
@@ -148,24 +148,24 @@ export default function Index() {
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className="bg-destructive text-destructive-foreground rounded-xl px-4 py-3 flex items-center justify-between gap-3"
+                className="bg-destructive text-destructive-foreground rounded-xl px-3 py-2.5 flex items-center justify-between gap-2"
               >
-                <div className="flex items-center gap-2">
-                  <Flame className="h-5 w-5 flex-shrink-0 animate-pulse" />
-                  <span className="text-sm font-bold leading-tight">Oferta relâmpago termina em:</span>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Flame className="h-4 w-4 flex-shrink-0 animate-pulse" />
+                  <span className="text-xs sm:text-sm font-bold leading-tight truncate">Oferta termina em:</span>
                 </div>
-                <div className="flex items-center gap-1 font-mono">
+                <div className="flex items-center gap-0.5 font-mono flex-shrink-0">
                   {[
                     { v: timeLeft.h, label: 'h' },
                     { v: timeLeft.m, label: 'm' },
                     { v: timeLeft.s, label: 's' },
                   ].map(({ v, label }, i) => (
                     <span key={i} className="flex items-center gap-0.5">
-                      <span className="bg-destructive-foreground/20 text-destructive-foreground font-extrabold text-lg px-2 py-0.5 rounded min-w-[2.2rem] text-center tabular-nums">
+                      <span className="bg-destructive-foreground/20 text-destructive-foreground font-extrabold text-base px-1.5 py-0.5 rounded min-w-[1.8rem] text-center tabular-nums">
                         {String(v).padStart(2, '0')}
                       </span>
-                      <span className="text-xs font-semibold opacity-80">{label}</span>
-                      {i < 2 && <span className="font-bold text-lg mx-0.5">:</span>}
+                      <span className="text-[10px] font-semibold opacity-80">{label}</span>
+                      {i < 2 && <span className="font-bold text-base mx-0.5">:</span>}
                     </span>
                   ))}
                 </div>
@@ -211,10 +211,10 @@ export default function Index() {
                 </p>
               </div>
 
-              {/* Buy Button */}
+              {/* Buy Button - hidden on mobile (uses sticky footer instead) */}
               <button
                 onClick={handleBuyNow}
-                className="btn-cart text-lg py-4 rounded-xl font-bold"
+                className="hidden lg:block btn-cart text-lg py-4 rounded-xl font-bold"
               >
                 Comprar Agora
               </button>
@@ -396,6 +396,20 @@ export default function Index() {
         </div>
       </main>
       <Footer />
+
+      {/* Sticky Buy Button - Mobile Only */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-background border-t border-border p-3 flex items-center gap-3 shadow-2xl">
+        <div className="flex flex-col min-w-0">
+          <span className="text-xs text-muted-foreground line-through leading-none">{product.originalPrice ? formatPrice(product.originalPrice) : ''}</span>
+          <span className="text-xl font-extrabold text-foreground leading-tight">{formatPrice(product.price)}</span>
+        </div>
+        <button
+          onClick={handleBuyNow}
+          className="btn-cart flex-1 py-3.5 rounded-xl font-bold text-base"
+        >
+          🛒 Comprar Agora
+        </button>
+      </div>
     </div>
   );
 }
