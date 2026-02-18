@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Loader2, MapPin, User, Lock, QrCode, CheckCircle2, ChevronRight, ShieldCheck, Truck } from "lucide-react";
+import { Loader2, MapPin, User, Lock, QrCode, CheckCircle2, ChevronRight, ShieldCheck, Truck, Moon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { getProductById, formatPrice, Product } from "@/lib/products";
-import Navbar from "@/components/store/Navbar";
+import { Link } from "react-router-dom";
 
 // ── Máscaras ─────────────────────────────────────────────────────────────────
 const maskCPF = (v: string) =>
@@ -263,7 +263,27 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen bg-secondary/30 flex flex-col">
-      <Navbar />
+      {/* Header simplificado do checkout */}
+      <header className="sticky top-0 z-30 border-b border-white/20" style={{ backgroundColor: 'hsl(270 55% 38%)' }}>
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="relative w-7 h-7 flex-shrink-0">
+              <div className="absolute inset-0 rounded-full bg-yellow-300/30 animate-pulse" />
+              <div className="absolute inset-0.5 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(45 100% 65%), hsl(45 100% 45%))' }}>
+                <Moon className="h-3.5 w-3.5 drop-shadow-sm" style={{ color: 'hsl(270 55% 20%)', fill: 'hsl(270 55% 20%)' }} />
+              </div>
+            </div>
+            <div className="flex flex-col leading-none">
+              <span className="text-[10px] font-semibold text-yellow-300 tracking-widest uppercase">Feira da</span>
+              <span className="text-sm font-black text-white tracking-tight">Madrugada SP</span>
+            </div>
+          </Link>
+          <div className="flex items-center gap-1.5 text-xs font-medium text-white/90">
+            <Lock className="h-3.5 w-3.5 text-yellow-300" />
+            <span>Compra 100% segura</span>
+          </div>
+        </div>
+      </header>
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
 
