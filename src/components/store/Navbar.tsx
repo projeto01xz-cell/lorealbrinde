@@ -39,13 +39,20 @@ export default function Navbar() {
             </button>
 
             {/* Center: Logo */}
-            <Link to="/" className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5">
-              <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
-                <Moon className="h-4 w-4 text-white" fill="white" />
+            <Link to="/" className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+              {/* Moon icon with glow ring */}
+              <div className="relative w-8 h-8 flex-shrink-0">
+                {/* Outer glow ring */}
+                <div className="absolute inset-0 rounded-full bg-yellow-300/30 animate-pulse" />
+                {/* Inner circle */}
+                <div className="absolute inset-0.5 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(45 100% 65%), hsl(45 100% 45%))' }}>
+                  <Moon className="h-4 w-4 drop-shadow-sm" style={{ color: 'hsl(270 55% 20%)', fill: 'hsl(270 55% 20%)' }} />
+                </div>
               </div>
-              <span className="text-sm font-extrabold text-white tracking-tight leading-tight">
-                Feira da Madrugada SP
-              </span>
+              <div className="flex flex-col leading-none">
+                <span className="text-[11px] font-semibold text-yellow-300 tracking-widest uppercase leading-none">Feira da</span>
+                <span className="text-sm font-black text-white tracking-tight leading-none">Madrugada SP</span>
+              </div>
             </Link>
 
             {/* Right: Cart */}
