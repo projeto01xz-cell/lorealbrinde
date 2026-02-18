@@ -2,6 +2,9 @@ import ventilador01 from '@/assets/products/ventilador-turbo-01.png';
 import ventilador02 from '@/assets/products/ventilador-turbo-02.png';
 import ventilador03 from '@/assets/products/ventilador-turbo-03.png';
 import ventilador04 from '@/assets/products/ventilador-turbo-04.png';
+import ventilador05 from '@/assets/products/ventilador-turbo-05.png';
+import ventilador06 from '@/assets/products/ventilador-turbo-06.png';
+import ventilador07 from '@/assets/products/ventilador-turbo-07.png';
 
 export interface Product {
   id: string;
