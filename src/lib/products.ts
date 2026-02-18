@@ -62,7 +62,7 @@ Perfeito para qualquer tipo de ambiente, é até 4x mais silencioso e ainda mais
 • Grade removível para fácil limpeza
 • Proteção térmica automática
 • Base antiderrapante estável`,
-    price: 37.80,
+    price: 37.82,
     originalPrice: 189.90,
     image: ventilador01,
     images: [ventilador01, ventilador02, ventilador03, ventilador04, ventilador05, ventilador06, ventilador07],

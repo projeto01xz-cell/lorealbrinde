@@ -85,7 +85,7 @@ export default function Index() {
     };
     const first = setTimeout(showNotif, 3000);
     let repeat: ReturnType<typeof setTimeout>;
-    const schedule = () => { repeat = setTimeout(() => { showNotif(); schedule(); }, 5000); };
+    const schedule = () => { repeat = setTimeout(() => { showNotif(); schedule(); }, 10000); };
     const scheduleStart = setTimeout(schedule, 3000);
     return () => { clearTimeout(first); clearTimeout(repeat!); clearTimeout(scheduleStart); };
   }, []);
