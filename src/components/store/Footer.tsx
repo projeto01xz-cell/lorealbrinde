@@ -62,7 +62,7 @@ export default function Footer() {
       <div className="border-t border-border">
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} GTSM1 — Todos os direitos reservados.
+            © {new Date().getFullYear()} JSvaridedaes — Todos os direitos reservados.
           </p>
           <div className="flex gap-4 text-xs text-muted-foreground">
             <Link to="#" className="hover:text-primary transition-colors">Política de Privacidade</Link>
