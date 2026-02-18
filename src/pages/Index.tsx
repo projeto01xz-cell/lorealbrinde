@@ -95,10 +95,13 @@ export default function Index() {
   const discount = calculateDiscount(product.price, product.originalPrice);
   const productImages = product.images && product.images.length > 0 ? product.images : [product.image];
   const currentTier = getTierForQty(quantity);
-  // Tier price is based on originalPrice * (1 - tier discount/100)
-  const tierPrice = product.originalPrice
-    ? product.originalPrice * (currentTier.pct / 100)
-    : product.price;
+  // For qty 1 (tier 1-5), use fixed product.price (R$ 37,82)
+  // For bulk tiers, apply corresponding discount on originalPrice
+  const tierPrice = quantity === 1
+    ? product.price
+    : product.originalPrice
+      ? product.originalPrice * ((100 - currentTier.pct) / 100)
+      : product.price;
 
   const handleBuyNow = () => navigate(`/checkout?produto=${product.id}&quantidade=${quantity}`);
   const handlePrevImage = () => setSelectedImageIndex((p) => (p === 0 ? productImages.length - 1 : p - 1));
