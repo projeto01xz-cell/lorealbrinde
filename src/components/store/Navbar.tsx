@@ -1,4 +1,4 @@
-import { Search, ShoppingCart, Menu, X, ChevronRight, Zap, Headphones, Speaker, BatteryCharging, Wind, MonitorSmartphone, Mouse, Lightbulb } from "lucide-react";
+import { ShoppingCart, Menu, X, ChevronRight, Zap, Headphones, Speaker, BatteryCharging, Wind, MonitorSmartphone, Mouse, Lightbulb } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -15,7 +15,6 @@ const CATEGORIES = [
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <header className="sticky top-0 left-0 right-0 z-50 w-full shadow-md">
@@ -28,47 +27,30 @@ export default function Navbar() {
       {/* Purple main header */}
       <div className="w-full" style={{ backgroundColor: 'hsl(270 55% 38%)' }}>
         <div className="max-w-7xl mx-auto px-3 sm:px-4">
-          <div className="flex items-center gap-2 h-14">
+          <div className="flex items-center justify-between h-14">
 
-            {/* Hamburger */}
-            <button
-              className="p-2 -ml-1 text-white flex-shrink-0 touch-target"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Menu"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
+            {/* Left: Hamburger + Logo */}
+            <div className="flex items-center gap-2">
+              <button
+                className="p-2 -ml-1 text-white flex-shrink-0 touch-target"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="Menu"
+              >
+                <Menu className="h-6 w-6" />
+              </button>
 
-            {/* Logo */}
-            <Link to="/" className="flex-shrink-0 flex items-center gap-1.5">
-              <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-white" />
-              </div>
-              <span className="text-sm font-extrabold text-white tracking-tight leading-tight">Feira da<br className="hidden xs:block" /> Madrugada SP</span>
-            </Link>
-
-            {/* Search Bar */}
-            <div className="flex-1 min-w-0 mx-1 sm:mx-3">
-              <div className="relative flex items-center">
-                <input
-                  type="text"
-                  placeholder="Busque o que deseja"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white rounded py-2 pl-3 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none border-0"
-                />
-                <button
-                  className="absolute right-0 top-0 h-full px-3 rounded-r flex items-center justify-center"
-                  style={{ backgroundColor: 'hsl(45 100% 51%)' }}
-                  aria-label="Buscar"
-                >
-                  <Search className="h-3.5 w-3.5" style={{ color: 'hsl(0 0% 10%)' }} />
-                </button>
-              </div>
+              <Link to="/" className="flex items-center gap-1.5">
+                <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+                  <Zap className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm font-extrabold text-white tracking-tight leading-tight">
+                  Feira da Madrugada SP
+                </span>
+              </Link>
             </div>
 
-            {/* Cart icon */}
-            <button className="relative p-2 text-white hover:bg-white/10 rounded transition-colors flex-shrink-0" aria-label="Carrinho">
+            {/* Right: Cart */}
+            <button className="relative p-2 text-white hover:bg-white/10 rounded transition-colors" aria-label="Carrinho">
               <ShoppingCart className="h-5 w-5" />
               <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center" style={{ backgroundColor: 'hsl(45 100% 51%)', color: 'hsl(0 0% 10%)' }}>0</span>
             </button>
@@ -131,7 +113,6 @@ export default function Navbar() {
             className="absolute left-0 top-0 bottom-0 w-72 bg-card shadow-2xl flex flex-col overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Drawer header */}
             <div className="flex items-center justify-between px-4 py-4 flex-shrink-0" style={{ backgroundColor: 'hsl(270 55% 38%)' }}>
               <span className="text-base font-bold text-white">Menu</span>
               <button onClick={() => setIsMenuOpen(false)} className="text-white p-1">
