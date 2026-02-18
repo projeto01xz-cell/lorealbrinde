@@ -256,9 +256,9 @@ export default function Index() {
             {/* Sample Reviews */}
             <div className="space-y-4">
               {[
-              { name: 'João S.', rating: 5, date: '10/01/2025', comment: 'Ventilador incrível! Muito silencioso e faz um vento enorme. Vale muito a pena!', verified: true },
-                { name: 'Maria L.', rating: 5, date: '08/01/2025', comment: 'Chegou rápido, montagem super fácil. Está fresquinho aqui em casa o dia todo!', verified: true },
-                { name: 'Carlos M.', rating: 4, date: '05/01/2025', comment: 'Ótimo custo-benefício, bem potente. Recomendo muito para quem quer economizar!', verified: true },
+              { name: 'Fernanda R.', rating: 5, date: '29/04/2025', comment: 'Maravilhoso, ótima qualidade e silencioso. O melhor ventilador que já tive em casa!', verified: true },
+                { name: 'Carlos M.', rating: 5, date: '17/01/2026', comment: 'Motor mais potente, hélice bem travada e montagem facilíssima. Tem mais volume de ar do que ventiladores de 40cm. É o melhor do mercado!', verified: true },
+                { name: 'Roberto S.', rating: 4, date: '26/09/2023', comment: 'Ventilador muito potente, ventila bastante. Um técnico me recomendou pela durabilidade e qualidade. Recomendo!', verified: true },
               ].map((review, index) => (
                 <div key={index} className="p-4 border border-border rounded-xl">
                   <div className="flex items-center justify-between mb-2">
