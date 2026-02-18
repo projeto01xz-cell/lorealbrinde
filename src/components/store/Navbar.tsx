@@ -86,22 +86,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Search Bar - Mobile */}
-          <div className="md:hidden pb-3">
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                placeholder="Buscar produtos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-secondary rounded-lg py-2.5 pl-4 pr-10 text-foreground placeholder:text-muted-foreground 
-                         focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm border border-border"
-              />
-              <button className="absolute right-3 text-muted-foreground" aria-label="Buscar">
-                <Search className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
+          {/* Search Bar - Mobile: hidden to save space */}
         </div>
       </div>
 
