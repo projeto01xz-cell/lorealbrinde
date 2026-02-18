@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Star, Truck, Shield, RotateCcw, Clock, Check,
   ChevronLeft, ChevronRight, Minus, Plus, Flame,
-  ShoppingCart, MapPin, Package, CreditCard, ThumbsUp,
+  ShoppingCart, MapPin, Package, CreditCard, ThumbsUp, Heart, Zap,
 } from "lucide-react";
 import Navbar from "@/components/store/Navbar";
 import Footer from "@/components/store/Footer";
@@ -22,16 +22,6 @@ const PURCHASE_NOTIFICATIONS = [
   { name: "Roberto", city: "Manaus" },
   { name: "Patrícia", city: "Recife" },
   { name: "Diego", city: "Goiânia" },
-  { name: "Camila", city: "Belém" },
-  { name: "Rafael", city: "Florianópolis" },
-  { name: "Larissa", city: "Maceió" },
-  { name: "Thiago", city: "Natal" },
-  { name: "Bruna", city: "Teresina" },
-  { name: "Eduardo", city: "Campo Grande" },
-  { name: "Vanessa", city: "João Pessoa" },
-  { name: "Marcelo", city: "Aracaju" },
-  { name: "Letícia", city: "São Luís" },
-  { name: "Felipe", city: "Vitória" },
 ];
 
 function getCountdownTarget(): number {
@@ -45,6 +35,18 @@ function getCountdownTarget(): number {
   const target = Date.now() + maxMs;
   sessionStorage.setItem(key, String(target));
   return target;
+}
+
+// Discount tiers (Feira da Madrugada style)
+const DISCOUNT_TIERS = [
+  { min: 1, max: 5, pct: 80, label: "1 - 5" },
+  { min: 6, max: 11, pct: 75, label: "6 - 11" },
+  { min: 12, max: 39, pct: 70, label: "12 - 39" },
+  { min: 40, max: Infinity, pct: 65, label: "40+" },
+];
+
+function getTierForQty(qty: number) {
+  return DISCOUNT_TIERS.find(t => qty >= t.min && qty <= t.max) || DISCOUNT_TIERS[0];
 }
 
 export default function Index() {
@@ -92,12 +94,18 @@ export default function Index() {
 
   const discount = calculateDiscount(product.price, product.originalPrice);
   const productImages = product.images && product.images.length > 0 ? product.images : [product.image];
+  const currentTier = getTierForQty(quantity);
+  // Tier price is based on originalPrice * (1 - tier discount/100)
+  const tierPrice = product.originalPrice
+    ? product.originalPrice * (currentTier.pct / 100)
+    : product.price;
 
   const handleBuyNow = () => navigate(`/checkout?produto=${product.id}&quantidade=${quantity}`);
   const handlePrevImage = () => setSelectedImageIndex((p) => (p === 0 ? productImages.length - 1 : p - 1));
   const handleNextImage = () => setSelectedImageIndex((p) => (p === productImages.length - 1 ? 0 : p + 1));
 
-  const mlBlue = "hsl(210 100% 40%)";
+  const successColor = "hsl(142 70% 35%)";
+  const primaryColor = "hsl(270 55% 38%)";
 
   return (
     <div className="min-h-screen bg-background flex flex-col pb-20 lg:pb-0">
@@ -107,8 +115,10 @@ export default function Index() {
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-4 py-2 hidden lg:block">
           <p className="text-xs text-muted-foreground">
-            <span className="ml-link cursor-pointer">Início</span> &gt;{" "}
-            <span className="ml-link cursor-pointer">Ventiladores</span> &gt;{" "}
+            <span className="ml-link cursor-pointer">Início</span>{" "}
+            <span className="mx-1">»</span>
+            <span className="ml-link cursor-pointer">Ventiladores</span>
+            <span className="mx-1">»</span>
             <span className="text-foreground">{product.name}</span>
           </p>
         </div>
@@ -117,52 +127,53 @@ export default function Index() {
         <div className="max-w-7xl mx-auto lg:px-4 lg:pb-8">
           <div className="lg:flex lg:gap-4 lg:items-start">
 
-            {/* LEFT: Gallery + Description */}
+            {/* LEFT: Gallery + Info */}
             <div className="lg:flex-1 min-w-0">
+
               {/* Gallery Card */}
-              <div className="bg-card lg:rounded-xl lg:border lg:border-border overflow-hidden">
-                {/* Badges */}
-                <div className="flex items-center gap-2 px-4 pt-4">
+              <div className="bg-card lg:rounded lg:border lg:border-border overflow-hidden">
+                {/* Discount badge on image */}
+                <div className="relative">
                   {discount > 0 && (
-                    <span className="text-xs font-bold px-2 py-1 rounded text-destructive-foreground bg-destructive">
-                      🔥 QUEIMÃO
+                    <span className="absolute top-3 left-3 z-10 text-xs font-bold px-2 py-1 rounded text-destructive-foreground bg-destructive">
+                      -{discount}%
                     </span>
                   )}
-                  <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ color: 'hsl(145 63% 36%)', backgroundColor: 'hsl(145 63% 36% / 0.1)' }}>
-                    Frete Grátis
-                  </span>
-                </div>
+                  <button className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+                    <Heart className="h-4 w-4 text-muted-foreground" />
+                  </button>
 
-                {/* Main Image */}
-                <div className="relative aspect-square max-h-[70vw] md:max-h-[500px] mx-auto flex items-center justify-center px-6 py-4">
-                  <img
-                    src={productImages[selectedImageIndex]}
-                    alt={product.name}
-                    className="w-full h-full object-contain"
-                  />
-                  <button
-                    onClick={handlePrevImage}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-card border border-border rounded-full flex items-center justify-center text-foreground hover:bg-secondary transition-colors shadow-sm"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={handleNextImage}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-card border border-border rounded-full flex items-center justify-center text-foreground hover:bg-secondary transition-colors shadow-sm"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
+                  {/* Main Image */}
+                  <div className="relative aspect-square max-h-[70vw] md:max-h-[480px] mx-auto flex items-center justify-center px-6 py-4">
+                    <img
+                      src={productImages[selectedImageIndex]}
+                      alt={product.name}
+                      className="w-full h-full object-contain"
+                    />
+                    <button
+                      onClick={handlePrevImage}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-card border border-border rounded-full flex items-center justify-center hover:bg-secondary transition-colors shadow-sm"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={handleNextImage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-card border border-border rounded-full flex items-center justify-center hover:bg-secondary transition-colors shadow-sm"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Thumbnails */}
-                <div className="flex gap-2 px-4 pb-4 overflow-x-auto scrollbar-hide justify-center">
+                <div className="flex gap-2 px-4 pb-4 overflow-x-auto scrollbar-hide">
                   {productImages.map((img, index) => (
                     <button
                       key={index}
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`flex-shrink-0 w-14 h-14 rounded-lg border-2 overflow-hidden transition-all ${
+                      className={`flex-shrink-0 w-14 h-14 rounded border-2 overflow-hidden transition-all ${
                         selectedImageIndex === index
-                          ? "border-foreground"
+                          ? "border-primary"
                           : "border-border hover:border-muted-foreground"
                       }`}
                     >
@@ -172,14 +183,25 @@ export default function Index() {
                 </div>
               </div>
 
-              {/* Product Info (mobile only - shown below gallery) */}
+              {/* Product Info mobile */}
               <div className="lg:hidden px-4 py-5 bg-card mt-2 space-y-4">
-                <MobileProductInfo product={product} discount={discount} timeLeft={timeLeft} quantity={quantity} setQuantity={setQuantity} handleBuyNow={handleBuyNow} mlBlue={mlBlue} />
+                <MobileProductInfo
+                  product={product}
+                  discount={discount}
+                  timeLeft={timeLeft}
+                  quantity={quantity}
+                  setQuantity={setQuantity}
+                  handleBuyNow={handleBuyNow}
+                  successColor={successColor}
+                  primaryColor={primaryColor}
+                  tierPrice={tierPrice}
+                  currentTier={currentTier}
+                />
               </div>
 
               {/* Description */}
-              <div className="bg-card mt-2 lg:mt-4 lg:rounded-xl lg:border lg:border-border px-4 lg:px-6 py-6">
-                <h2 className="text-xl font-semibold text-foreground mb-4 pb-3 border-b border-border">
+              <div className="bg-card mt-2 lg:mt-4 lg:rounded lg:border lg:border-border px-4 lg:px-6 py-6">
+                <h2 className="text-lg font-bold text-foreground mb-4 pb-3 border-b border-border">
                   Descrição do produto
                 </h2>
                 <div className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
@@ -189,14 +211,14 @@ export default function Index() {
 
               {/* Specs */}
               {product.specs && Object.keys(product.specs).length > 0 && (
-                <div className="bg-card mt-2 lg:mt-4 lg:rounded-xl lg:border lg:border-border px-4 lg:px-6 py-6">
-                  <h2 className="text-xl font-semibold text-foreground mb-4 pb-3 border-b border-border">
-                    Especificações
+                <div className="bg-card mt-2 lg:mt-4 lg:rounded lg:border lg:border-border px-4 lg:px-6 py-6">
+                  <h2 className="text-lg font-bold text-foreground mb-4 pb-3 border-b border-border">
+                    Especificações técnicas
                   </h2>
                   <div className="grid grid-cols-1 divide-y divide-border">
                     {Object.entries(product.specs).map(([key, value], i) => (
-                      <div key={i} className="flex py-3 gap-4">
-                        <span className="text-sm text-muted-foreground w-36 flex-shrink-0">{key}</span>
+                      <div key={i} className={`flex py-3 gap-4 ${i % 2 === 0 ? 'bg-secondary/30 -mx-4 px-4 lg:-mx-6 lg:px-6' : ''}`}>
+                        <span className="text-sm text-muted-foreground w-40 flex-shrink-0">{key}</span>
                         <span className="text-sm text-foreground font-medium">{value}</span>
                       </div>
                     ))}
@@ -205,21 +227,19 @@ export default function Index() {
               )}
 
               {/* Reviews */}
-              <div className="bg-card mt-2 lg:mt-4 lg:rounded-xl lg:border lg:border-border px-4 lg:px-6 py-6">
-                <h2 className="text-xl font-semibold text-foreground mb-4 pb-3 border-b border-border">
-                  Opiniões do produto
+              <div className="bg-card mt-2 lg:mt-4 lg:rounded lg:border lg:border-border px-4 lg:px-6 py-6">
+                <h2 className="text-lg font-bold text-foreground mb-4 pb-3 border-b border-border">
+                  Opiniões dos clientes
                 </h2>
-
-                {/* Rating summary */}
-                <div className="flex items-center gap-6 mb-6 p-4 bg-secondary/50 rounded-xl">
+                <div className="flex items-center gap-6 mb-6 p-4 bg-secondary/40 rounded">
                   <div className="text-center">
-                    <p className="text-5xl font-bold text-foreground">{product.rating}</p>
+                    <p className="text-5xl font-black text-foreground">{product.rating}</p>
                     <div className="flex justify-center mt-1 gap-0.5">
                       {[1,2,3,4,5].map((s) => (
                         <Star key={s} className={`h-4 w-4 ${s <= Math.round(product.rating) ? "fill-amber-400 text-amber-400" : "fill-muted text-muted"}`} />
                       ))}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">{product.reviews?.toLocaleString("pt-BR")} opiniões</p>
+                    <p className="text-xs text-muted-foreground mt-1">{product.reviews?.toLocaleString("pt-BR")} avaliações</p>
                   </div>
                   <div className="flex-1 space-y-1.5">
                     {[5,4,3,2,1].map((rating) => {
@@ -240,19 +260,17 @@ export default function Index() {
                     })}
                   </div>
                 </div>
-
-                {/* Review cards */}
                 <div className="space-y-4">
                   {[
-                    { name: "Fernanda R.", rating: 5, date: "29/04/2025", comment: "Maravilhoso, ótima qualidade e silencioso. O melhor ventilador que já tive em casa!", verified: true, helpful: 47 },
-                    { name: "Carlos M.", rating: 5, date: "17/01/2026", comment: "Motor mais potente, hélice bem travada e montagem facilíssima. Tem mais volume de ar do que ventiladores de 40cm. É o melhor do mercado!", verified: true, helpful: 31 },
-                    { name: "Roberto S.", rating: 4, date: "26/09/2025", comment: "Ventilador muito potente, ventila bastante. Um técnico me recomendou pela durabilidade e qualidade. Recomendo!", verified: true, helpful: 18 },
+                    { name: "Fernanda R.", rating: 5, date: "29/04/2025", comment: "Maravilhoso, ótima qualidade e silencioso. O melhor ventilador que já tive em casa!", helpful: 47 },
+                    { name: "Carlos M.", rating: 5, date: "17/01/2026", comment: "Motor mais potente, hélice bem travada e montagem facilíssima. É o melhor do mercado!", helpful: 31 },
+                    { name: "Roberto S.", rating: 4, date: "26/09/2025", comment: "Ventilador muito potente, ventila bastante. Recomendo!", helpful: 18 },
                   ].map((review, index) => (
                     <div key={index} className="border-t border-border pt-4">
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                            <span className="text-sm font-bold text-foreground">{review.name[0]}</span>
+                          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold text-primary-foreground" style={{ backgroundColor: primaryColor }}>
+                            {review.name[0]}
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-foreground">{review.name}</p>
@@ -263,14 +281,12 @@ export default function Index() {
                             </div>
                           </div>
                         </div>
-                        <span className="text-xs text-muted-foreground flex-shrink-0">{review.date}</span>
+                        <span className="text-xs text-muted-foreground">{review.date}</span>
                       </div>
-                      <p className="text-sm text-foreground mt-2 leading-relaxed">{review.comment}</p>
-                      {review.verified && (
-                        <p className="text-xs mt-2 flex items-center gap-1" style={{ color: mlBlue }}>
-                          <Check className="h-3 w-3" /> Compra verificada
-                        </p>
-                      )}
+                      <p className="text-sm text-foreground leading-relaxed">{review.comment}</p>
+                      <p className="text-xs mt-2 flex items-center gap-1" style={{ color: successColor }}>
+                        <Check className="h-3 w-3" /> Compra verificada
+                      </p>
                       <div className="flex items-center gap-2 mt-3">
                         <span className="text-xs text-muted-foreground">Útil?</span>
                         <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground border border-border rounded px-2 py-0.5 transition-colors">
@@ -283,15 +299,15 @@ export default function Index() {
               </div>
 
               {/* FAQ */}
-              <div className="bg-card mt-2 lg:mt-4 lg:rounded-xl lg:border lg:border-border px-4 lg:px-6 py-6 lg:mb-0">
-                <h2 className="text-xl font-semibold text-foreground mb-4 pb-3 border-b border-border">
+              <div className="bg-card mt-2 lg:mt-4 lg:rounded lg:border lg:border-border px-4 lg:px-6 py-6 lg:mb-0">
+                <h2 className="text-lg font-bold text-foreground mb-4 pb-3 border-b border-border">
                   Perguntas frequentes
                 </h2>
                 <Accordion type="single" collapsible className="w-full">
                   {[
-                    { q: "Quanto tempo demora para a entrega chegar?", a: "O prazo de entrega é de até 12 dias úteis após a confirmação do pagamento. O envio é feito imediatamente após a aprovação." },
+                    { q: "Quanto tempo demora para a entrega chegar?", a: "O prazo de entrega é de até 12 dias úteis após a confirmação do pagamento." },
                     { q: "Qual a forma de pagamento aceita?", a: "Aceitamos pagamento via PIX com aprovação instantânea." },
-                    { q: "Posso devolver se o produto não atender minhas expectativas?", a: "Sim! Você tem até 7 dias corridos após o recebimento para solicitar a devolução, conforme o Código de Defesa do Consumidor." },
+                    { q: "Posso devolver se o produto não atender minhas expectativas?", a: "Sim! Você tem até 7 dias corridos após o recebimento para solicitar a devolução." },
                     { q: "O produto possui garantia?", a: "Sim, todos os nossos produtos possuem garantia de 90 dias diretamente com a loja." },
                     { q: "O frete é realmente grátis?", a: "Sim! O frete é 100% gratuito para todo o Brasil, sem valor mínimo de compra." },
                   ].map((faq, i) => (
@@ -308,9 +324,20 @@ export default function Index() {
               </div>
             </div>
 
-            {/* RIGHT: Purchase panel (desktop only) */}
-            <div className="hidden lg:block w-[320px] xl:w-[360px] flex-shrink-0 space-y-3">
-              <DesktopBuyPanel product={product} discount={discount} timeLeft={timeLeft} quantity={quantity} setQuantity={setQuantity} handleBuyNow={handleBuyNow} mlBlue={mlBlue} />
+            {/* RIGHT: Purchase panel desktop */}
+            <div className="hidden lg:block w-[330px] xl:w-[360px] flex-shrink-0 space-y-3">
+              <DesktopBuyPanel
+                product={product}
+                discount={discount}
+                timeLeft={timeLeft}
+                quantity={quantity}
+                setQuantity={setQuantity}
+                handleBuyNow={handleBuyNow}
+                successColor={successColor}
+                primaryColor={primaryColor}
+                tierPrice={tierPrice}
+                currentTier={currentTier}
+              />
             </div>
           </div>
         </div>
@@ -318,16 +345,16 @@ export default function Index() {
 
       <Footer />
 
-      {/* Sticky Buy Button - Mobile Only */}
+      {/* Sticky Buy - Mobile */}
       <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card border-t border-border p-3 flex items-center gap-3 shadow-2xl">
         <div className="flex flex-col min-w-0">
           {product.originalPrice && (
             <span className="text-xs text-muted-foreground line-through leading-none">{formatPrice(product.originalPrice)}</span>
           )}
-          <span className="text-xl font-extrabold text-foreground leading-tight">{formatPrice(product.price)}</span>
+          <span className="text-xl font-extrabold text-foreground leading-tight">{formatPrice(tierPrice)}</span>
         </div>
-        <button onClick={handleBuyNow} className="btn-buy flex-1 rounded-lg font-bold text-base">
-          Comprar agora
+        <button onClick={handleBuyNow} className="btn-buy flex-1 rounded font-bold text-base">
+          🛒 comprar agora
         </button>
       </div>
 
@@ -342,14 +369,14 @@ export default function Index() {
             transition={{ type: "spring", stiffness: 320, damping: 26 }}
             className="fixed bottom-20 left-3 z-[60] lg:bottom-6 max-w-[300px] w-[calc(100vw-24px)] lg:w-[300px]"
           >
-            <div className="bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
-              <div className="h-1 w-full" style={{ backgroundColor: 'hsl(45 100% 51%)' }} />
+            <div className="bg-card border border-border rounded shadow-2xl overflow-hidden">
+              <div className="h-1 w-full" style={{ backgroundColor: 'hsl(142 70% 35%)' }} />
               <div className="flex items-center gap-3 px-4 py-3">
                 <div className="relative flex-shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                    <span className="text-base font-extrabold text-foreground">{activeNotif.name[0]}</span>
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-extrabold text-primary-foreground" style={{ backgroundColor: primaryColor }}>
+                    {activeNotif.name[0]}
                   </div>
-                  <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'hsl(145 63% 36%)' }}>
+                  <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: successColor }}>
                     <Check className="h-2.5 w-2.5 text-white" />
                   </span>
                 </div>
@@ -362,7 +389,7 @@ export default function Index() {
               </div>
               <div className="flex items-center justify-between px-4 pb-3 -mt-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'hsl(145 63% 36%)' }} />
+                  <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: successColor }} />
                   <span className="text-[11px] text-muted-foreground">há poucos instantes</span>
                 </div>
                 <div className="flex gap-0.5">
@@ -381,9 +408,9 @@ export default function Index() {
 
 function CountdownBanner({ timeLeft }: { timeLeft: { h: number; m: number; s: number } }) {
   return (
-    <div className="flex items-center gap-2 p-3 rounded-lg" style={{ backgroundColor: 'hsl(0 84% 50% / 0.08)', border: '1px solid hsl(0 84% 50% / 0.2)' }}>
-      <Flame className="h-4 w-4 flex-shrink-0 animate-pulse text-destructive" />
-      <span className="text-xs font-bold text-destructive flex-shrink-0">Oferta termina em:</span>
+    <div className="flex items-center gap-2 p-3 rounded" style={{ backgroundColor: 'hsl(45 100% 51% / 0.12)', border: '1px solid hsl(45 100% 51% / 0.3)' }}>
+      <Zap className="h-4 w-4 flex-shrink-0 animate-pulse" style={{ color: 'hsl(45 100% 40%)' }} />
+      <span className="text-xs font-bold flex-shrink-0" style={{ color: 'hsl(45 100% 32%)' }}>Queima Estoque:</span>
       <div className="flex items-center gap-0.5 font-mono ml-auto">
         {[
           { v: timeLeft.h, label: "h" },
@@ -391,11 +418,11 @@ function CountdownBanner({ timeLeft }: { timeLeft: { h: number; m: number; s: nu
           { v: timeLeft.s, label: "s" },
         ].map(({ v, label }, i) => (
           <span key={i} className="flex items-center gap-0.5">
-            <span className="bg-destructive text-destructive-foreground font-extrabold text-sm px-1.5 py-0.5 rounded min-w-[1.6rem] text-center tabular-nums">
+            <span className="font-extrabold text-sm px-1.5 py-0.5 rounded min-w-[1.6rem] text-center tabular-nums" style={{ backgroundColor: 'hsl(45 100% 51%)', color: 'hsl(0 0% 10%)' }}>
               {String(v).padStart(2, "0")}
             </span>
-            <span className="text-[10px] text-destructive font-semibold">{label}</span>
-            {i < 2 && <span className="font-bold text-destructive mx-0.5">:</span>}
+            <span className="text-[10px] font-semibold" style={{ color: 'hsl(45 100% 32%)' }}>{label}</span>
+            {i < 2 && <span className="font-bold mx-0.5" style={{ color: 'hsl(45 100% 32%)' }}>:</span>}
           </span>
         ))}
       </div>
@@ -413,44 +440,90 @@ function StarRow({ rating }: { rating: number }) {
   );
 }
 
-function PriceBlock({ product, discount, mlBlue }: { product: any; discount: number; mlBlue: string }) {
+function PriceBlock({ product, discount, successColor, tierPrice }: { product: any; discount: number; successColor: string; tierPrice: number }) {
   return (
     <div className="space-y-1">
       {product.originalPrice && (
         <p className="text-sm text-muted-foreground line-through">{formatPrice(product.originalPrice)}</p>
       )}
-      <div className="flex items-baseline gap-2">
-        <span className="text-3xl font-semibold text-foreground">{formatPrice(product.price)}</span>
+      <div className="flex items-baseline gap-2 flex-wrap">
+        <span className="text-3xl font-black text-foreground">{formatPrice(tierPrice)}</span>
         {discount > 0 && (
-          <span className="text-sm font-semibold text-destructive">{discount}% OFF</span>
+          <span className="text-sm font-bold bg-destructive text-destructive-foreground px-2 py-0.5 rounded">-{discount}%</span>
         )}
       </div>
-      <p className="text-xs" style={{ color: mlBlue }}>Pagamento via PIX • Aprovação instantânea</p>
+      <p className="text-xs font-medium" style={{ color: successColor }}>
+        ou 3x de {formatPrice(tierPrice / 3)} sem juros •{" "}
+        <span className="font-bold">Frete Grátis</span> acima de R$ 99,99
+      </p>
     </div>
   );
 }
 
-function ShippingBox({ mlBlue }: { mlBlue: string }) {
+function QuantityTierTable({ quantity, setQuantity, product, successColor }: { quantity: number; setQuantity: (q: number) => void; product: any; successColor: string }) {
+  const currentTier = getTierForQty(quantity);
   return (
-    <div className="border border-border rounded-lg p-4 space-y-3">
-      <p className="text-sm font-semibold text-foreground">Frete e envio</p>
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-semibold" style={{ color: successColor }}>🏷️ Leve + Pague -</span>
+      </div>
+      <div className="border border-border rounded overflow-hidden text-sm">
+        <div className="grid grid-cols-3 bg-secondary text-xs font-bold text-muted-foreground">
+          <div className="px-3 py-2">Quantidade</div>
+          <div className="px-3 py-2">Desconto</div>
+          <div className="px-3 py-2">Preço unit.</div>
+        </div>
+        {DISCOUNT_TIERS.map((tier) => {
+          const tierUnitPrice = product.originalPrice
+            ? product.originalPrice * (tier.pct / 100)
+            : product.price;
+          const isActive = currentTier.label === tier.label;
+          return (
+            <button
+              key={tier.label}
+              onClick={() => setQuantity(tier.min)}
+              className={`w-full grid grid-cols-3 border-t border-border transition-colors ${isActive ? 'bg-success/10' : 'hover:bg-secondary/60'}`}
+            >
+              <div className={`px-3 py-2.5 text-left font-medium ${isActive ? '' : 'text-foreground'}`} style={isActive ? { color: successColor } : {}}>
+                {tier.label}
+              </div>
+              <div className={`px-3 py-2.5 text-left font-bold ${isActive ? '' : 'text-destructive'}`} style={isActive ? { color: successColor } : {}}>
+                -{100 - tier.pct}%
+              </div>
+              <div className={`px-3 py-2.5 text-left font-semibold ${isActive ? '' : 'text-foreground'}`} style={isActive ? { color: successColor } : {}}>
+                {formatPrice(tierUnitPrice)} {isActive && '✓'}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ShippingBox({ successColor }: { successColor: string }) {
+  return (
+    <div className="border border-border rounded p-4 space-y-3">
       <div className="flex items-start gap-3">
-        <Truck className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: 'hsl(145 63% 36%)' }} />
+        <Shield className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: 'hsl(270 55% 38%)' }} />
         <div>
-          <p className="text-sm font-bold" style={{ color: 'hsl(145 63% 36%)' }}>Frete grátis</p>
-          <p className="text-xs text-muted-foreground">Envio para todo o Brasil</p>
+          <p className="text-sm font-semibold text-foreground">Compra garantida</p>
+          <p className="text-xs text-muted-foreground">Receba o produto ou devolvemos o dinheiro.</p>
         </div>
       </div>
       <div className="flex items-start gap-3">
-        <Package className="h-5 w-5 flex-shrink-0 mt-0.5 text-muted-foreground" />
+        <Zap className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: successColor }} />
         <div>
-          <p className="text-sm text-foreground">Chega em até <span className="font-semibold">12 dias úteis</span></p>
-          <p className="text-xs text-muted-foreground">Após confirmação do pagamento</p>
+          <p className="text-sm font-semibold" style={{ color: successColor }}>Envio rápido FULL</p>
+          <p className="text-xs text-muted-foreground">Velocidade e segurança na entrega.</p>
         </div>
       </div>
       <div className="flex items-start gap-3">
-        <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5 text-muted-foreground" />
-        <p className="text-xs text-muted-foreground">Calcule o prazo exato pelo seu CEP no checkout</p>
+        <Truck className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: successColor }} />
+        <div>
+          <p className="text-sm font-bold" style={{ color: successColor }}>Frete Grátis</p>
+          <p className="text-xs text-muted-foreground">Envio para todo o Brasil. Chega em até 12 dias úteis.</p>
+        </div>
       </div>
     </div>
   );
@@ -460,11 +533,11 @@ function QuantitySelector({ quantity, setQuantity }: { quantity: number; setQuan
   return (
     <div className="flex items-center gap-3">
       <span className="text-sm text-muted-foreground">Quantidade:</span>
-      <div className="flex items-center border border-border rounded-lg overflow-hidden">
+      <div className="flex items-center border border-border rounded overflow-hidden">
         <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-9 h-9 flex items-center justify-center text-foreground hover:bg-secondary transition-colors">
           <Minus className="h-3.5 w-3.5" />
         </button>
-        <span className="w-10 h-9 flex items-center justify-center text-sm font-semibold bg-card border-x border-border">{quantity}</span>
+        <span className="w-12 h-9 flex items-center justify-center text-sm font-bold bg-card border-x border-border">{quantity}</span>
         <button onClick={() => setQuantity(quantity + 1)} className="w-9 h-9 flex items-center justify-center text-foreground hover:bg-secondary transition-colors">
           <Plus className="h-3.5 w-3.5" />
         </button>
@@ -473,39 +546,19 @@ function QuantitySelector({ quantity, setQuantity }: { quantity: number; setQuan
   );
 }
 
-function TrustBadges() {
-  return (
-    <div className="space-y-2">
-      {[
-        { icon: Shield, label: "Compra protegida", sub: "Garantia de reembolso" },
-        { icon: RotateCcw, label: "Devolução grátis", sub: "Até 7 dias após recebimento" },
-        { icon: CreditCard, label: "Pagamento seguro", sub: "Seus dados protegidos" },
-      ].map((item, i) => (
-        <div key={i} className="flex items-center gap-3">
-          <item.icon className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-          <div>
-            <p className="text-sm font-medium text-foreground">{item.label}</p>
-            <p className="text-xs text-muted-foreground">{item.sub}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 /* Desktop panel */
-function DesktopBuyPanel({ product, discount, timeLeft, quantity, setQuantity, handleBuyNow, mlBlue }: any) {
+function DesktopBuyPanel({ product, discount, timeLeft, quantity, setQuantity, handleBuyNow, successColor, primaryColor, tierPrice, currentTier }: any) {
   return (
     <>
-      {/* Main buy card */}
-      <div className="bg-card rounded-xl border border-border p-5 space-y-4 shadow-sm">
-        {/* Condition */}
+      <div className="bg-card rounded border border-border p-5 space-y-4 shadow-sm">
+        {/* Sold count */}
         <p className="text-xs text-muted-foreground">
-          <span className="ml-link" style={{ color: mlBlue }}>Novo</span> | +2.800 vendidos
+          Ref: {product.id} &nbsp;|&nbsp;
+          <span className="font-semibold">+ de {product.reviews?.toLocaleString("pt-BR")} vendidos</span>
         </p>
 
         {/* Title */}
-        <h1 className="text-lg font-semibold text-foreground leading-snug">{product.name}</h1>
+        <h1 className="text-base font-bold text-foreground leading-snug">{product.name}</h1>
 
         {/* Stars */}
         <div className="flex items-center gap-2">
@@ -518,51 +571,53 @@ function DesktopBuyPanel({ product, discount, timeLeft, quantity, setQuantity, h
         <CountdownBanner timeLeft={timeLeft} />
 
         {/* Price */}
-        <PriceBlock product={product} discount={discount} mlBlue={mlBlue} />
+        <PriceBlock product={product} discount={discount} successColor={successColor} tierPrice={tierPrice} />
+
+        {/* Trust badges */}
+        <ShippingBox successColor={successColor} />
+
+        {/* Tier table */}
+        <QuantityTierTable quantity={quantity} setQuantity={setQuantity} product={product} successColor={successColor} />
 
         {/* Quantity */}
         <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
 
         {/* CTAs */}
         <div className="space-y-2 pt-1">
-          <button onClick={handleBuyNow} className="btn-buy rounded-lg font-semibold text-[15px]">
-            Comprar agora
-          </button>
-          <button onClick={handleBuyNow} className="btn-secondary-ml rounded-lg text-[15px]">
-            Adicionar ao carrinho
+          <button onClick={handleBuyNow} className="btn-buy rounded font-bold text-[15px]">
+            🛒 comprar agora
           </button>
         </div>
-      </div>
 
-      {/* Shipping card */}
-      <div className="bg-card rounded-xl border border-border p-5 shadow-sm">
-        <ShippingBox mlBlue={mlBlue} />
-      </div>
-
-      {/* Trust */}
-      <div className="bg-card rounded-xl border border-border p-5 shadow-sm">
-        <TrustBadges />
+        <div className="flex items-center justify-center gap-4 pt-1 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1"><Shield className="h-3.5 w-3.5" /> Compra protegida</span>
+          <span className="flex items-center gap-1"><RotateCcw className="h-3.5 w-3.5" /> Devolução grátis</span>
+        </div>
       </div>
     </>
   );
 }
 
 /* Mobile info block */
-function MobileProductInfo({ product, discount, timeLeft, quantity, setQuantity, handleBuyNow, mlBlue }: any) {
+function MobileProductInfo({ product, discount, timeLeft, quantity, setQuantity, handleBuyNow, successColor, primaryColor, tierPrice, currentTier }: any) {
   return (
     <div className="space-y-4">
-      <p className="text-xs text-muted-foreground">Novo | +2.800 vendidos</p>
-      <h1 className="text-xl font-semibold text-foreground leading-snug">{product.name}</h1>
+      <p className="text-xs text-muted-foreground">+ de {product.reviews?.toLocaleString("pt-BR")} vendidos</p>
+      <h1 className="text-lg font-bold text-foreground leading-snug">{product.name}</h1>
       <div className="flex items-center gap-2">
         <StarRow rating={product.rating} />
         <span className="text-sm font-semibold">{product.rating}</span>
         <span className="text-xs text-muted-foreground">({product.reviews?.toLocaleString("pt-BR")})</span>
       </div>
       <CountdownBanner timeLeft={timeLeft} />
-      <PriceBlock product={product} discount={discount} mlBlue={mlBlue} />
-      <ShippingBox mlBlue={mlBlue} />
+      <PriceBlock product={product} discount={discount} successColor={successColor} tierPrice={tierPrice} />
+      <ShippingBox successColor={successColor} />
+      <QuantityTierTable quantity={quantity} setQuantity={setQuantity} product={product} successColor={successColor} />
       <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
-      <TrustBadges />
+      <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1"><Shield className="h-3.5 w-3.5" /> Compra protegida</span>
+        <span className="flex items-center gap-1"><RotateCcw className="h-3.5 w-3.5" /> Devolução grátis</span>
+      </div>
     </div>
   );
 }
