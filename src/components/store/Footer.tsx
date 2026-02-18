@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo & Description */}
           <div className="md:col-span-1">
-            <span className="text-xl font-extrabold text-white tracking-tight">JSvariedades</span>
+            <span className="text-xl font-extrabold text-white tracking-tight">Feira da Madrugada SP</span>
             <p className="text-sm text-white/70 leading-relaxed mt-3">
               Sua loja de variedades com os melhores produtos e preços. Qualidade e confiança.
             </p>
@@ -61,7 +61,7 @@ export default function Footer() {
       <div className="border-t border-white/20">
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-xs text-white/60">
-            © {new Date().getFullYear()} JSvariedades — Todos os direitos reservados.
+            © {new Date().getFullYear()} Feira da Madrugada SP — Todos os direitos reservados.
           </p>
           <div className="flex gap-4 text-xs text-white/60">
             <Link to="#" className="hover:text-white transition-colors">Política de Privacidade</Link>
