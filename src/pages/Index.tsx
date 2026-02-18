@@ -1,19 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Star, Truck, Shield, RotateCcw, Clock, Check, ChevronLeft, ChevronRight, Minus, Plus, ShoppingCart } from "lucide-react";
+import { Star, Truck, Shield, RotateCcw, Clock, Check, ChevronLeft, ChevronRight, Minus, Plus, ShoppingCart, Flame } from "lucide-react";
 import Navbar from "@/components/store/Navbar";
 import Footer from "@/components/store/Footer";
 import { getFeaturedProducts, formatPrice, calculateDiscount } from "@/lib/products";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { motion } from "framer-motion";
 
+// Gera ou recupera um tempo final fixo para a sessão (reinicia a cada visita)
+function getCountdownTarget(): number {
+  const key = 'countdown_target';
+  const stored = sessionStorage.getItem(key);
+  if (stored) return Number(stored);
+  const target = Date.now() + 23 * 60 * 60 * 1000 + 47 * 60 * 1000 + 33 * 1000;
+  sessionStorage.setItem(key, String(target));
+  return target;
+}
+
 export default function Index() {
   const navigate = useNavigate();
-  // Use the first featured product as the hero product
   const allFeatured = getFeaturedProducts();
   const product = allFeatured[0];
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [timeLeft, setTimeLeft] = useState({ h: 23, m: 47, s: 33 });
+
+  useEffect(() => {
+    const target = getCountdownTarget();
+    const tick = () => {
+      const diff = target - Date.now();
+      if (diff <= 0) {
+        setTimeLeft({ h: 0, m: 0, s: 0 });
+        return;
+      }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setTimeLeft({ h, m, s });
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   if (!product) return null;
 
@@ -114,6 +142,34 @@ export default function Index() {
                 <span className="text-sm font-semibold text-foreground">{product.rating}</span>
                 <span className="text-sm text-muted-foreground">({product.reviews} avaliações)</span>
               </div>
+
+              {/* Countdown Banner */}
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="bg-destructive text-destructive-foreground rounded-xl px-4 py-3 flex items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-2">
+                  <Flame className="h-5 w-5 flex-shrink-0 animate-pulse" />
+                  <span className="text-sm font-bold leading-tight">Oferta relâmpago termina em:</span>
+                </div>
+                <div className="flex items-center gap-1 font-mono">
+                  {[
+                    { v: timeLeft.h, label: 'h' },
+                    { v: timeLeft.m, label: 'm' },
+                    { v: timeLeft.s, label: 's' },
+                  ].map(({ v, label }, i) => (
+                    <span key={i} className="flex items-center gap-0.5">
+                      <span className="bg-destructive-foreground/20 text-destructive-foreground font-extrabold text-lg px-2 py-0.5 rounded min-w-[2.2rem] text-center tabular-nums">
+                        {String(v).padStart(2, '0')}
+                      </span>
+                      <span className="text-xs font-semibold opacity-80">{label}</span>
+                      {i < 2 && <span className="font-bold text-lg mx-0.5">:</span>}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
 
               {/* Price Box */}
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 space-y-3">
