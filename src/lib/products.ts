@@ -1,7 +1,7 @@
-import produto01 from '@/assets/products/produto-01.png';
-import produto02 from '@/assets/products/produto-02.png';
-import produto03 from '@/assets/products/produto-03.png';
-import produto04 from '@/assets/products/produto-04.png';
+import ventilador01 from '@/assets/products/ventilador-turbo-01.png';
+import ventilador02 from '@/assets/products/ventilador-turbo-02.png';
+import ventilador03 from '@/assets/products/ventilador-turbo-03.png';
+import ventilador04 from '@/assets/products/ventilador-turbo-04.png';
 
 export interface Product {
   id: string;
@@ -57,8 +57,8 @@ O Ventilador Turbo é a solução ideal para quem busca muito mais vento com eco
 • Certificado pelo INMETRO`,
     price: 37.80,
     originalPrice: 189.90,
-    image: produto01,
-    images: [produto01, produto02, produto03, produto04],
+    image: ventilador01,
+    images: [ventilador01, ventilador02, ventilador03, ventilador04],
     category: 'ventiladores',
     rating: 4.9,
     reviews: 1847,
