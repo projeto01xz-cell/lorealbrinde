@@ -1,4 +1,4 @@
-import { ShoppingCart, Menu, X, ChevronRight, Zap, Headphones, Speaker, BatteryCharging, Wind, MonitorSmartphone, Mouse, Lightbulb } from "lucide-react";
+import { ShoppingCart, Menu, X, ChevronRight, Moon, Headphones, Speaker, BatteryCharging, Wind, MonitorSmartphone, Mouse, Lightbulb } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -40,9 +40,9 @@ export default function Navbar() {
               </button>
 
               <Link to="/" className="flex items-center gap-1.5">
-                <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
-                  <Zap className="h-4 w-4 text-white" />
-                </div>
+              <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+                <Moon className="h-4 w-4 text-white" fill="white" />
+              </div>
                 <span className="text-sm font-extrabold text-white tracking-tight leading-tight">
                   Feira da Madrugada SP
                 </span>
