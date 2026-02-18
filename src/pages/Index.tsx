@@ -33,9 +33,14 @@ const PURCHASE_NOTIFICATIONS = [
 // Gera ou recupera um tempo final fixo para a sessão (reinicia a cada visita)
 function getCountdownTarget(): number {
   const key = 'countdown_target';
+  const maxMs = 10 * 60 * 60 * 1000;
   const stored = sessionStorage.getItem(key);
-  if (stored) return Number(stored);
-  const target = Date.now() + 10 * 60 * 60 * 1000;
+  if (stored) {
+    const val = Number(stored);
+    // Se o tempo restante for maior que 10h, descarta e recria
+    if (val - Date.now() <= maxMs) return val;
+  }
+  const target = Date.now() + maxMs;
   sessionStorage.setItem(key, String(target));
   return target;
 }
