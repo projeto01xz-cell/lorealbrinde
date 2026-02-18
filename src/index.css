@@ -6,40 +6,43 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 220 20% 20%;
+    --background: 0 0% 96%;
+    --foreground: 0 0% 13%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 20%;
+    --card-foreground: 0 0% 13%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 20%;
+    --popover-foreground: 0 0% 13%;
 
-    /* Primary Blue */
-    --primary: 220 80% 45%;
-    --primary-foreground: 0 0% 100%;
+    /* ML Yellow */
+    --primary: 45 100% 51%;
+    --primary-foreground: 0 0% 13%;
 
-    --secondary: 220 15% 95%;
-    --secondary-foreground: 220 20% 20%;
+    --secondary: 0 0% 94%;
+    --secondary-foreground: 0 0% 13%;
 
-    --muted: 220 10% 94%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 0 0% 91%;
+    --muted-foreground: 0 0% 46%;
 
-    --accent: 220 15% 96%;
-    --accent-foreground: 220 20% 20%;
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 13%;
 
-    /* Destructive Red - Offers/Discounts */
+    /* ML Blue for links/actions */
+    --ml-blue: 210 100% 40%;
+
+    /* Destructive Red */
     --destructive: 0 84% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 145 63% 42%;
+    --success: 145 63% 36%;
     --success-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 220 80% 45%;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 45 100% 51%;
 
-    --radius: 0.5rem;
+    --radius: 0.375rem;
 
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06);
     --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.08);
@@ -47,25 +50,25 @@
   }
 
   .dark {
-    --background: 220 15% 8%;
+    --background: 0 0% 10%;
     --foreground: 0 0% 98%;
-    --card: 220 15% 12%;
+    --card: 0 0% 14%;
     --card-foreground: 0 0% 98%;
-    --popover: 220 15% 12%;
+    --popover: 0 0% 14%;
     --popover-foreground: 0 0% 98%;
-    --primary: 220 80% 55%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 15% 16%;
+    --primary: 45 100% 51%;
+    --primary-foreground: 0 0% 13%;
+    --secondary: 0 0% 18%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 220 15% 16%;
-    --muted-foreground: 220 10% 60%;
-    --accent: 220 15% 16%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 18%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 15% 20%;
-    --input: 220 15% 20%;
-    --ring: 220 80% 55%;
+    --border: 0 0% 22%;
+    --input: 0 0% 22%;
+    --ring: 45 100% 51%;
   }
 }
 
@@ -100,23 +103,46 @@
 }
 
 @layer components {
-  .btn-primary {
-    @apply bg-primary text-primary-foreground font-semibold rounded-lg
-           hover:opacity-90 transition-all duration-200 active:scale-[0.98]
-           min-h-[44px] px-6;
+  /* ML-style buy button */
+  .btn-buy {
+    @apply w-full font-semibold rounded-lg
+           flex items-center justify-center gap-2 py-3.5
+           transition-all duration-200 active:scale-[0.98]
+           min-h-[50px] text-base;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+  .btn-buy:hover {
+    filter: brightness(0.93);
   }
 
-  .btn-secondary {
-    @apply bg-secondary text-secondary-foreground font-medium rounded-lg 
-           border border-border hover:bg-muted transition-all duration-200
+  /* ML-style secondary button */
+  .btn-secondary-ml {
+    @apply w-full font-semibold rounded-lg
+           flex items-center justify-center gap-2 py-3.5
+           transition-all duration-200 active:scale-[0.98]
+           min-h-[50px] text-base border;
+    background-color: hsl(210 100% 40% / 0.08);
+    color: hsl(210 100% 40%);
+    border-color: hsl(210 100% 40% / 0.3);
+  }
+  .btn-secondary-ml:hover {
+    background-color: hsl(210 100% 40% / 0.14);
+  }
+
+  .btn-primary {
+    @apply bg-primary text-primary-foreground font-semibold rounded-lg
+           hover:brightness-90 transition-all duration-200 active:scale-[0.98]
            min-h-[44px] px-6;
   }
 
   .btn-cart {
-    @apply w-full bg-primary text-primary-foreground font-bold rounded-lg
+    @apply w-full font-bold rounded-lg
            flex items-center justify-center gap-2 py-3
-           hover:opacity-90 transition-all duration-200 active:scale-[0.98]
+           hover:brightness-90 transition-all duration-200 active:scale-[0.98]
            min-h-[48px] text-base;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
   }
 
   .card-product {
@@ -144,69 +170,40 @@
     @apply bg-card text-foreground border border-border hover:bg-secondary;
   }
 
-  .badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-bold uppercase;
-  }
+  .badge { @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-bold uppercase; }
+  .badge-offer { @apply bg-destructive text-destructive-foreground; }
+  .badge-free-shipping { @apply bg-success/10 text-success; }
 
-  .badge-offer {
-    @apply bg-destructive text-destructive-foreground;
-  }
+  .price-current { @apply text-xl font-bold; color: hsl(var(--foreground)); }
+  .price-original { @apply text-sm text-muted-foreground line-through; }
+  .price-installments { @apply text-xs text-muted-foreground; }
 
-  .badge-free-shipping {
-    @apply bg-primary/10 text-primary;
-  }
-
-  .price-current {
-    @apply text-xl font-bold text-primary;
-  }
-
-  .price-original {
-    @apply text-sm text-muted-foreground line-through;
-  }
-
-  .price-installments {
-    @apply text-xs text-muted-foreground;
+  /* ML link style */
+  .ml-link {
+    color: hsl(210 100% 40%);
+    @apply text-sm hover:underline cursor-pointer;
   }
 }
 
 /* Hide Lovable badge */
-#lovable-badge {
-  display: none !important;
-}
+#lovable-badge { display: none !important; }
 
 @layer utilities {
-  .animate-fade-up {
-    animation: fadeUp 0.5s ease-out forwards;
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.4s ease-out forwards;
-  }
+  .animate-fade-up { animation: fadeUp 0.5s ease-out forwards; }
+  .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
 
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
 
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  .touch-target {
-    @apply min-w-[44px] min-h-[44px];
-  }
+  .touch-target { @apply min-w-[44px] min-h-[44px]; }
 
   @keyframes fadeUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
