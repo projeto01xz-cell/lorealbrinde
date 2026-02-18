@@ -26,28 +26,27 @@ export default function Navbar() {
 
       {/* Purple main header */}
       <div className="w-full" style={{ backgroundColor: 'hsl(270 55% 38%)' }}>
-        <div className="max-w-7xl mx-auto px-3 sm:px-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 relative">
           <div className="flex items-center justify-between h-14">
 
-            {/* Left: Hamburger + Logo */}
-            <div className="flex items-center gap-2">
-              <button
-                className="p-2 -ml-1 text-white flex-shrink-0 touch-target"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                aria-label="Menu"
-              >
-                <Menu className="h-6 w-6" />
-              </button>
+            {/* Left: Hamburger */}
+            <button
+              className="p-2 -ml-1 text-white flex-shrink-0 touch-target"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Menu"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
 
-              <Link to="/" className="flex items-center gap-1.5">
+            {/* Center: Logo */}
+            <Link to="/" className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5">
               <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
                 <Moon className="h-4 w-4 text-white" fill="white" />
               </div>
-                <span className="text-sm font-extrabold text-white tracking-tight leading-tight">
-                  Feira da Madrugada SP
-                </span>
-              </Link>
-            </div>
+              <span className="text-sm font-extrabold text-white tracking-tight leading-tight">
+                Feira da Madrugada SP
+              </span>
+            </Link>
 
             {/* Right: Cart */}
             <button className="relative p-2 text-white hover:bg-white/10 rounded transition-colors" aria-label="Carrinho">
