@@ -37,12 +37,13 @@ function getCountdownTarget(): number {
   return target;
 }
 
-// Discount tiers (Feira da Madrugada style)
+// Discount tiers — unit prices based on R$ 37,82 base price
+// pct = discount percentage off originalPrice to reach the unit price
 const DISCOUNT_TIERS = [
-  { min: 1, max: 5, pct: 80, label: "1 - 5" },
-  { min: 6, max: 11, pct: 75, label: "6 - 11" },
-  { min: 12, max: 39, pct: 70, label: "12 - 39" },
-  { min: 40, max: Infinity, pct: 65, label: "40+" },
+  { min: 1,  max: 5,        pct: 80.1, label: "1 - 5",   unitPrice: 37.82 },
+  { min: 6,  max: 11,       pct: 82,   label: "6 - 11",  unitPrice: 34.15 },
+  { min: 12, max: 39,       pct: 85,   label: "12 - 39", unitPrice: 28.49 },
+  { min: 40, max: Infinity, pct: 87,   label: "40+",     unitPrice: 24.68 },
 ];
 
 function getTierForQty(qty: number) {
@@ -95,13 +96,8 @@ export default function Index() {
   const discount = calculateDiscount(product.price, product.originalPrice);
   const productImages = product.images && product.images.length > 0 ? product.images : [product.image];
   const currentTier = getTierForQty(quantity);
-  // For qty 1 (tier 1-5), use fixed product.price (R$ 37,82)
-  // For bulk tiers, apply corresponding discount on originalPrice
-  const tierPrice = quantity === 1
-    ? product.price
-    : product.originalPrice
-      ? product.originalPrice * ((100 - currentTier.pct) / 100)
-      : product.price;
+  // Use the fixed unitPrice defined per tier
+  const tierPrice = currentTier.unitPrice;
 
   const handleBuyNow = () => navigate(`/checkout?produto=${product.id}&quantidade=${quantity}`);
   const handlePrevImage = () => setSelectedImageIndex((p) => (p === 0 ? productImages.length - 1 : p - 1));
@@ -477,9 +473,9 @@ function QuantityTierTable({ quantity, setQuantity, product, successColor }: { q
           <div className="px-3 py-2">Preço unit.</div>
         </div>
         {DISCOUNT_TIERS.map((tier) => {
-          const tierUnitPrice = product.originalPrice
-            ? product.originalPrice * (tier.pct / 100)
-            : product.price;
+          const discountPct = product.originalPrice
+            ? Math.round((1 - tier.unitPrice / product.originalPrice) * 100)
+            : 0;
           const isActive = currentTier.label === tier.label;
           return (
             <button
@@ -491,10 +487,10 @@ function QuantityTierTable({ quantity, setQuantity, product, successColor }: { q
                 {tier.label}
               </div>
               <div className={`px-3 py-2.5 text-left font-bold ${isActive ? '' : 'text-destructive'}`} style={isActive ? { color: successColor } : {}}>
-                -{100 - tier.pct}%
+                -{discountPct}%
               </div>
               <div className={`px-3 py-2.5 text-left font-semibold ${isActive ? '' : 'text-foreground'}`} style={isActive ? { color: successColor } : {}}>
-                {formatPrice(tierUnitPrice)} {isActive && '✓'}
+                {formatPrice(tier.unitPrice)} {isActive && '✓'}
               </div>
             </button>
           );
