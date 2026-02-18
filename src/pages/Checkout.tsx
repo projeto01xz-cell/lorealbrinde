@@ -285,10 +285,10 @@ export default function Checkout() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6 flex flex-col lg:grid lg:grid-cols-[1fr_360px] gap-6 items-start">
 
         {/* ── Left: Form ─────────────────────────────────────────── */}
-        <div className="space-y-4">
+        <div className="space-y-4 order-2 lg:order-1">
 
           {/* Dados pessoais */}
           <section className="bg-card rounded-xl border border-border p-5 space-y-4">
@@ -381,7 +381,7 @@ export default function Checkout() {
         </div>
 
         {/* ── Right: Order Summary ────────────────────────────────── */}
-        <div className="space-y-4 lg:sticky lg:top-20">
+        <div className="space-y-4 order-1 lg:order-2 lg:sticky lg:top-20">
           <section className="bg-card rounded-xl border border-border p-5 space-y-4">
             <h2 className="font-bold text-sm text-foreground">Resumo do pedido</h2>
 
