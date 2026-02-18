@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { getProductById, formatPrice, Product } from "@/lib/products";
-import gtsm1Logo from "@/assets/gtsm1-logo.png";
+import Navbar from "@/components/store/Navbar";
 
 // ── Máscaras ─────────────────────────────────────────────────────────────────
 const maskCPF = (v: string) =>
@@ -263,16 +263,7 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen bg-secondary/30 flex flex-col">
-      {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <img src={gtsm1Logo} alt="Logo" className="h-8 w-auto" />
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Lock className="h-3.5 w-3.5" style={{ color: successColor }} />
-            <span className="font-medium" style={{ color: successColor }}>Compra 100% segura</span>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
 
