@@ -35,7 +35,7 @@ function getCountdownTarget(): number {
   const key = 'countdown_target';
   const stored = sessionStorage.getItem(key);
   if (stored) return Number(stored);
-  const target = Date.now() + 23 * 60 * 60 * 1000 + 47 * 60 * 1000 + 33 * 1000;
+  const target = Date.now() + 10 * 60 * 60 * 1000;
   sessionStorage.setItem(key, String(target));
   return target;
 }
@@ -46,7 +46,7 @@ export default function Index() {
   const product = allFeatured[0];
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [timeLeft, setTimeLeft] = useState({ h: 23, m: 47, s: 33 });
+  const [timeLeft, setTimeLeft] = useState({ h: 10, m: 0, s: 0 });
 
   const [activeNotif, setActiveNotif] = useState<{ name: string; city: string } | null>(null);
 
