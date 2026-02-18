@@ -461,7 +461,7 @@ function StarRow({ rating }: { rating: number }) {
 
 function PriceBlock({ product, discount, successColor, tierPrice }: { product: any; discount: number; successColor: string; tierPrice: number }) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
       {product.originalPrice && (
         <p className="text-sm text-muted-foreground line-through">{formatPrice(product.originalPrice)}</p>
       )}
@@ -471,10 +471,19 @@ function PriceBlock({ product, discount, successColor, tierPrice }: { product: a
           <span className="text-sm font-bold bg-destructive text-destructive-foreground px-2 py-0.5 rounded">-{discount}%</span>
         )}
       </div>
-      <p className="text-xs font-medium" style={{ color: successColor }}>
-        🔒 Exclusivo via <span className="font-bold">PIX</span> •{" "}
-        <span className="font-bold">🚚 Frete Grátis</span> para todo o Brasil
-      </p>
+      {/* PIX badge */}
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border" style={{ backgroundColor: 'hsl(152 60% 94%)', borderColor: 'hsl(152 60% 75%)' }}>
+          {/* PIX logo SVG */}
+          <svg width="18" height="18" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l76.693-76.692c5.385-5.385 14.765-5.373 20.137 0l76.993 76.992c14.192 14.192 33.064 22 53.12 22h15.098l-97.138 97.126c-29.548 29.56-77.478 29.56-107.026 0L106.42 391.19h6.15z" fill="hsl(152 80% 30%)"/>
+            <path d="M112.57 120.81h-6.15L203.568 23.685c29.548-29.56 77.478-29.56 107.026 0L407.733 120.81H392.62c-20.056 0-38.928 7.808-53.12 22l-76.992 76.992c-5.551 5.55-14.587 5.55-20.137 0l-76.693-76.693c-14.193-14.191-33.065-21.999-53.109-21.999z" fill="hsl(152 80% 30%)"/>
+            <path d="M23.685 204.567L75.898 152.354h36.672c13.417 0 26.027 5.22 35.52 14.713l76.693 76.693c14.624 14.624 40.065 14.636 54.701 0l76.98-76.992c9.493-9.493 22.104-14.713 35.52-14.713h42.709l52.526 52.512c29.56 29.548 29.56 77.478 0 107.026l-52.526 52.525h-42.709c-13.416 0-26.027-5.22-35.52-14.712l-76.98-76.993c-14.648-14.648-40.065-14.636-54.701 0l-76.693 76.693c-9.493 9.492-22.103 14.712-35.52 14.712H75.898L23.685 311.433c-29.56-29.548-29.56-77.478 0-107.026z" fill="hsl(152 80% 30%)"/>
+          </svg>
+          <span className="text-xs font-bold" style={{ color: 'hsl(152 80% 25%)' }}>Pague via PIX</span>
+        </div>
+        <span className="text-xs font-medium" style={{ color: successColor }}>🚚 Frete Grátis</span>
+      </div>
     </div>
   );
 }
