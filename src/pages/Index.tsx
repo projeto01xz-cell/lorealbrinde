@@ -78,20 +78,19 @@ export default function Index() {
       }
       usedIndexes = [...usedIndexes.slice(-5), idx];
       setActiveNotif(PURCHASE_NOTIFICATIONS[idx]);
-      setTimeout(() => setActiveNotif(null), 4000);
+      setTimeout(() => setActiveNotif(null), 3500);
     };
-    // First notification after 8s
-    const first = setTimeout(showNotif, 8000);
-    // Then repeat every 18-28s
-    const getDelay = () => 18000 + Math.random() * 10000;
+    // First notification after 3s
+    const first = setTimeout(showNotif, 3000);
+    // Then repeat every 5s
     let repeat: ReturnType<typeof setTimeout>;
     const schedule = () => {
       repeat = setTimeout(() => {
         showNotif();
         schedule();
-      }, getDelay());
+      }, 5000);
     };
-    const scheduleStart = setTimeout(schedule, 8000);
+    const scheduleStart = setTimeout(schedule, 3000);
     return () => {
       clearTimeout(first);
       clearTimeout(repeat);
