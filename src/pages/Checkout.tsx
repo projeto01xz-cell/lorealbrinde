@@ -1,128 +1,66 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, useNavigate, Link } from "react-router-dom";
-import { Loader2, MapPin, User, CreditCard, Truck, Package, Zap, Lock, QrCode } from "lucide-react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Loader2, MapPin, User, Lock, QrCode, CheckCircle2, ChevronRight, ShieldCheck, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { getProductById, formatPrice, Product } from "@/lib/products";
 import gtsm1Logo from "@/assets/gtsm1-logo.png";
 
-// Card masks
-const maskCardNumber = (value: string) => {
-  return value.replace(/\D/g, "").replace(/(\d{4})(\d)/, "$1 $2").replace(/(\d{4}) (\d{4})(\d)/, "$1 $2 $3").replace(/(\d{4}) (\d{4}) (\d{4})(\d)/, "$1 $2 $3 $4").replace(/(\d{4} \d{4} \d{4} \d{4})\d+?$/, "$1");
-};
-const maskExpiry = (value: string) => {
-  return value.replace(/\D/g, "").replace(/(\d{2})(\d)/, "$1/$2").replace(/(\/\d{2})\d+?$/, "$1");
-};
+// ── Máscaras ─────────────────────────────────────────────────────────────────
+const maskCPF = (v: string) =>
+  v.replace(/\D/g, "").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2")
+   .replace(/(\d{3})(\d{1,2})/, "$1-$2").replace(/(-\d{2})\d+?$/, "$1");
 
-// Card validations
-const validateCardNumber = (cardNumber: string): boolean => {
-  const cleanNumber = cardNumber.replace(/\D/g, "");
-  return cleanNumber.length >= 13 && cleanNumber.length <= 19;
-};
-const validateExpiry = (expiry: string): boolean => {
-  const parts = expiry.split("/");
-  if (parts.length !== 2) return false;
-  const month = parseInt(parts[0], 10);
-  const year = parseInt(parts[1], 10);
-  if (month < 1 || month > 12) return false;
-  const currentYear = new Date().getFullYear() % 100;
-  const currentMonth = new Date().getMonth() + 1;
-  if (year < currentYear || (year === currentYear && month < currentMonth)) return false;
-  return true;
-};
+const maskCEP = (v: string) =>
+  v.replace(/\D/g, "").replace(/(\d{5})(\d)/, "$1-$2").replace(/(-\d{3})\d+?$/, "$1");
 
-// Máscaras
-const maskCPF = (value: string) => {
-  return value
-    .replace(/\D/g, "")
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d{1,2})/, "$1-$2")
-    .replace(/(-\d{2})\d+?$/, "$1");
-};
+const maskPhone = (v: string) =>
+  v.replace(/\D/g, "").replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2")
+   .replace(/(-\d{4})\d+?$/, "$1");
 
-const maskCEP = (value: string) => {
-  return value
-    .replace(/\D/g, "")
-    .replace(/(\d{5})(\d)/, "$1-$2")
-    .replace(/(-\d{3})\d+?$/, "$1");
-};
-
-const maskPhone = (value: string) => {
-  return value
-    .replace(/\D/g, "")
-    .replace(/(\d{2})(\d)/, "($1) $2")
-    .replace(/(\d{5})(\d)/, "$1-$2")
-    .replace(/(-\d{4})\d+?$/, "$1");
-};
-
-// Validações
+// ── Validações ────────────────────────────────────────────────────────────────
 const validateCPF = (cpf: string): boolean => {
-  const cleanCPF = cpf.replace(/\D/g, "");
-  if (cleanCPF.length !== 11) return false;
-  if (/^(\d)\1+$/.test(cleanCPF)) return false;
-  
-  let sum = 0;
-  for (let i = 0; i < 9; i++) {
-    sum += parseInt(cleanCPF.charAt(i)) * (10 - i);
-  }
-  let remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  if (remainder !== parseInt(cleanCPF.charAt(9))) return false;
-  
-  sum = 0;
-  for (let i = 0; i < 10; i++) {
-    sum += parseInt(cleanCPF.charAt(i)) * (11 - i);
-  }
-  remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  if (remainder !== parseInt(cleanCPF.charAt(10))) return false;
-  
-  return true;
+  const c = cpf.replace(/\D/g, "");
+  if (c.length !== 11 || /^(\d)\1+$/.test(c)) return false;
+  const calc = (len: number) => {
+    let sum = 0;
+    for (let i = 0; i < len; i++) sum += parseInt(c[i]) * (len + 1 - i);
+    const r = (sum * 10) % 11;
+    return r === 10 || r === 11 ? 0 : r;
+  };
+  return calc(9) === parseInt(c[9]) && calc(10) === parseInt(c[10]);
 };
 
-const validateEmail = (email: string): boolean => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-};
+const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-const shippingOptions = [
-  {
-    id: "pac",
-    name: "PAC",
-    price: 0,
-    days: "8-12 dias úteis",
-    icon: Package,
-  },
-  {
-    id: "sedex",
-    name: "SEDEX",
-    price: 29.90,
-    days: "3-5 dias úteis",
-    icon: Truck,
-  },
-  {
-    id: "express",
-    name: "Expresso",
-    price: 49.90,
-    days: "1-2 dias úteis",
-    icon: Zap,
-  },
+// ── Discount tiers (igual à página do produto) ────────────────────────────────
+const DISCOUNT_TIERS = [
+  { min: 1,  max: 5,  unitPrice: 37.82, label: "1 a 5 unid." },
+  { min: 6,  max: 11, unitPrice: 34.15, label: "6 a 11 unid." },
+  { min: 12, max: 39, unitPrice: 28.49, label: "12 a 39 unid." },
+  { min: 40, max: Infinity, unitPrice: 24.68, label: "40+ unid." },
 ];
+
+const getTierPrice = (qty: number) =>
+  (DISCOUNT_TIERS.find(t => qty >= t.min && qty <= t.max) || DISCOUNT_TIERS[0]).unitPrice;
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function Checkout() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const productId = searchParams.get("produto");
   const quantityParam = searchParams.get("quantidade");
-  
+
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("pix");
-  
+  const [loadingCep, setLoadingCep] = useState(false);
+  const [loadingPayment, setLoadingPayment] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -136,24 +74,12 @@ export default function Checkout() {
     city: "",
     state: "",
   });
-  
-  const [selectedShipping, setSelectedShipping] = useState("pac");
-  const [loadingCep, setLoadingCep] = useState(false);
-  const [loadingPayment, setLoadingPayment] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [installments, setInstallments] = useState(1);
-  const [cardData, setCardData] = useState({
-    number: "",
-    holderName: "",
-    expiry: "",
-    cvv: "",
-  });
 
   useEffect(() => {
     if (productId) {
-      const foundProduct = getProductById(productId);
-      if (foundProduct) {
-        setProduct(foundProduct);
+      const found = getProductById(productId);
+      if (found) {
+        setProduct(found);
       } else {
         toast.error("Produto não encontrado");
         navigate("/produtos");
@@ -162,41 +88,31 @@ export default function Checkout() {
       toast.error("Nenhum produto selecionado");
       navigate("/produtos");
     }
-    
     if (quantityParam) {
       const qty = parseInt(quantityParam);
-      if (!isNaN(qty) && qty > 0) {
-        setQuantity(qty);
-      }
+      if (!isNaN(qty) && qty > 0) setQuantity(qty);
     }
   }, [productId, quantityParam, navigate]);
 
   const fetchAddress = async (cep: string) => {
-    const cleanCEP = cep.replace(/\D/g, "");
-    if (cleanCEP.length !== 8) return;
-    
+    const clean = cep.replace(/\D/g, "");
+    if (clean.length !== 8) return;
     setLoadingCep(true);
-    setErrors((prev) => ({ ...prev, cep: "" }));
-    
+    setErrors(prev => ({ ...prev, cep: "" }));
     try {
-      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`);
-      const data = await response.json();
-      
-      if (data.erro) {
-        setErrors((prev) => ({ ...prev, cep: "CEP não encontrado" }));
-        return;
-      }
-      
-      setFormData((prev) => ({
+      const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
+      const data = await res.json();
+      if (data.erro) { setErrors(prev => ({ ...prev, cep: "CEP não encontrado" })); return; }
+      setFormData(prev => ({
         ...prev,
-        cep: maskCEP(cleanCEP),
+        cep: maskCEP(clean),
         street: data.logradouro || "",
         neighborhood: data.bairro || "",
         city: data.localidade || "",
         state: data.uf || "",
       }));
     } catch {
-      setErrors((prev) => ({ ...prev, cep: "Erro ao buscar CEP" }));
+      setErrors(prev => ({ ...prev, cep: "Erro ao buscar CEP" }));
     } finally {
       setLoadingCep(false);
     }
@@ -204,163 +120,54 @@ export default function Checkout() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    let maskedValue = value;
-
+    let v = value;
     if (name === "cpf") {
-      maskedValue = maskCPF(value);
-      if (maskedValue.replace(/\D/g, "").length === 11) {
-        if (!validateCPF(maskedValue)) {
-          setErrors((prev) => ({ ...prev, cpf: "CPF inválido" }));
-        } else {
-          setErrors((prev) => ({ ...prev, cpf: "" }));
-        }
-      } else {
-        setErrors((prev) => ({ ...prev, cpf: "" }));
-      }
+      v = maskCPF(value);
+      if (v.replace(/\D/g, "").length === 11)
+        setErrors(prev => ({ ...prev, cpf: validateCPF(v) ? "" : "CPF inválido" }));
+      else setErrors(prev => ({ ...prev, cpf: "" }));
     } else if (name === "cep") {
-      maskedValue = maskCEP(value);
-      const cleanCEP = maskedValue.replace(/\D/g, "");
-      if (cleanCEP.length === 8) {
-        fetchAddress(cleanCEP);
-      }
+      v = maskCEP(value);
+      if (v.replace(/\D/g, "").length === 8) fetchAddress(v);
     } else if (name === "phone") {
-      maskedValue = maskPhone(value);
+      v = maskPhone(value);
     } else if (name === "email") {
-      if (value && !validateEmail(value)) {
-        setErrors((prev) => ({ ...prev, email: "E-mail inválido" }));
-      } else {
-        setErrors((prev) => ({ ...prev, email: "" }));
-      }
+      setErrors(prev => ({ ...prev, email: value && !validateEmail(value) ? "E-mail inválido" : "" }));
     }
-
-    setFormData((prev) => ({ ...prev, [name]: maskedValue }));
-  };
-
-  const handleCardInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    let maskedValue = value;
-
-    if (name === "number") {
-      maskedValue = maskCardNumber(value);
-      if (maskedValue.replace(/\D/g, "").length >= 13) {
-        if (!validateCardNumber(maskedValue)) {
-          setErrors((prev) => ({ ...prev, cardNumber: "Número do cartão inválido" }));
-        } else {
-          setErrors((prev) => ({ ...prev, cardNumber: "" }));
-        }
-      } else {
-        setErrors((prev) => ({ ...prev, cardNumber: "" }));
-      }
-    } else if (name === "expiry") {
-      maskedValue = maskExpiry(value);
-      if (maskedValue.length === 5) {
-        if (!validateExpiry(maskedValue)) {
-          setErrors((prev) => ({ ...prev, cardExpiry: "Data inválida" }));
-        } else {
-          setErrors((prev) => ({ ...prev, cardExpiry: "" }));
-        }
-      } else {
-        setErrors((prev) => ({ ...prev, cardExpiry: "" }));
-      }
-    } else if (name === "cvv") {
-      maskedValue = value.replace(/\D/g, "").substring(0, 4);
-    }
-
-    setCardData((prev) => ({ ...prev, [name]: maskedValue }));
-  };
-
-  const validateCardForm = (): boolean => {
-    const cardErrors: Record<string, string> = {};
-    
-    if (!validateCardNumber(cardData.number)) {
-      cardErrors.cardNumber = "Número do cartão inválido";
-    }
-    if (!cardData.holderName || cardData.holderName.trim().length < 2) {
-      cardErrors.cardHolder = "Nome do titular é obrigatório";
-    }
-    if (!validateExpiry(cardData.expiry)) {
-      cardErrors.cardExpiry = "Data de validade inválida";
-    }
-    if (cardData.cvv.length < 3) {
-      cardErrors.cardCvv = "CVV inválido";
-    }
-
-    setErrors((prev) => ({ ...prev, ...cardErrors }));
-    return Object.keys(cardErrors).length === 0;
+    setFormData(prev => ({ ...prev, [name]: v }));
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!formData.fullName.trim() || formData.fullName.trim().length < 3) {
-      newErrors.fullName = "Nome completo é obrigatório";
-    }
-    if (!formData.email.trim() || !validateEmail(formData.email)) {
-      newErrors.email = "E-mail válido é obrigatório";
-    }
-    if (!formData.cpf.trim() || !validateCPF(formData.cpf)) {
-      newErrors.cpf = "CPF válido é obrigatório";
-    }
-    if (!formData.phone.trim() || formData.phone.replace(/\D/g, "").length < 10) {
-      newErrors.phone = "Telefone válido é obrigatório";
-    }
-    if (!formData.cep.trim() || formData.cep.replace(/\D/g, "").length !== 8) {
-      newErrors.cep = "CEP válido é obrigatório";
-    }
-    if (!formData.street.trim()) {
-      newErrors.street = "Rua é obrigatória";
-    }
-    if (!formData.number.trim()) {
-      newErrors.number = "Número é obrigatório";
-    }
-    if (!formData.neighborhood.trim()) {
-      newErrors.neighborhood = "Bairro é obrigatório";
-    }
-    if (!formData.city.trim()) {
-      newErrors.city = "Cidade é obrigatória";
-    }
-    if (!formData.state.trim()) {
-      newErrors.state = "Estado é obrigatório";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const e: Record<string, string> = {};
+    if (!formData.fullName.trim() || formData.fullName.trim().length < 3) e.fullName = "Nome completo é obrigatório";
+    if (!formData.email.trim() || !validateEmail(formData.email)) e.email = "E-mail válido é obrigatório";
+    if (!formData.cpf.trim() || !validateCPF(formData.cpf)) e.cpf = "CPF válido é obrigatório";
+    if (!formData.phone.trim() || formData.phone.replace(/\D/g, "").length < 10) e.phone = "Telefone válido é obrigatório";
+    if (!formData.cep.trim() || formData.cep.replace(/\D/g, "").length !== 8) e.cep = "CEP válido é obrigatório";
+    if (!formData.street.trim()) e.street = "Rua é obrigatória";
+    if (!formData.number.trim()) e.number = "Número é obrigatório";
+    if (!formData.neighborhood.trim()) e.neighborhood = "Bairro é obrigatório";
+    if (!formData.city.trim()) e.city = "Cidade é obrigatória";
+    if (!formData.state.trim()) e.state = "Estado é obrigatório";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
   const handleSubmit = async () => {
     if (!product) return;
-    
     if (!validateForm()) {
       toast.error("Por favor, preencha todos os campos corretamente");
       return;
     }
-
-    // Validate card form for credit card payment
-    if (selectedPaymentMethod === "credit" && !validateCardForm()) {
-      toast.error("Por favor, verifique os dados do cartão");
-      return;
-    }
-    
     setLoadingPayment(true);
-    
     try {
-      const shippingOption = shippingOptions.find((s) => s.id === selectedShipping);
-      const shippingCost = shippingOption?.price || 0;
-      const productTotal = product.price * quantity;
-      
-      // No PIX discount
-      let totalWithDiscount = productTotal + shippingCost;
-      // For credit card, apply interest for installments > 1
-      const INTEREST_RATE = 0.0299; // 2.99% per month
-      if (selectedPaymentMethod === "credit" && installments > 1) {
-        totalWithDiscount = (productTotal + shippingCost) * Math.pow(1 + INTEREST_RATE, installments);
-      }
+      const unitPrice = getTierPrice(quantity);
+      const totalAmount = unitPrice * quantity;
+      const amountInCents = Math.round(totalAmount * 100);
 
-      const amountInCents = Math.round(totalWithDiscount * 100);
-      
-      const paymentData: Record<string, unknown> = {
+      const paymentData = {
         amount: amountInCents,
-        paymentMethod: selectedPaymentMethod === "pix" ? "pix" : "credit_card",
+        paymentMethod: "pix",
         customer: {
           name: formData.fullName.trim(),
           email: formData.email.trim(),
@@ -374,109 +181,48 @@ export default function Checkout() {
           state: formData.state,
           zipCode: formData.cep.replace(/\D/g, ""),
         },
-        items: [
-          {
-            title: `teste ${quantity}`, // Masked product name for privacy
-            quantity: quantity,
-            unitPrice: Math.round(product.price * 100),
-            operationType: 1,
-          },
-        ],
+        items: [{
+          title: product.name,
+          quantity,
+          unitPrice: Math.round(unitPrice * 100),
+          operationType: 1,
+        }],
       };
 
-      // Add card data for credit card payment
-      if (selectedPaymentMethod === "credit") {
-        const expiryParts = cardData.expiry.split("/");
-        paymentData.card = {
-          number: cardData.number.replace(/\s/g, ""),
-          holderName: cardData.holderName,
-          expMonth: parseInt(expiryParts[0], 10),
-          expYear: 2000 + parseInt(expiryParts[1], 10),
-          cvv: cardData.cvv,
-        };
-        paymentData.installments = installments;
-      }
-      
-      // Store order data in sessionStorage for PixPaymentPage
-      const orderData = {
-        product: {
-          id: product.id,
-          name: product.name,
-          image: product.image,
-          price: product.price,
-        },
+      sessionStorage.setItem("checkoutOrder", JSON.stringify({
+        product: { id: product.id, name: product.name, image: product.image, price: unitPrice },
         quantity,
-        customer: {
-          name: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-          cpf: formData.cpf,
-        },
-        address: {
-          cep: formData.cep,
-          street: formData.street,
-          number: formData.number,
-          complement: formData.complement,
-          neighborhood: formData.neighborhood,
-          city: formData.city,
-          state: formData.state,
-        },
-        shipping: {
-          option: selectedShipping,
-          price: shippingCost,
-        },
-        paymentMethod: selectedPaymentMethod,
-        total: totalWithDiscount,
-      };
-      
-      sessionStorage.setItem("checkoutOrder", JSON.stringify(orderData));
-      
-      const { data, error } = await supabase.functions.invoke("create-pix-payment", {
-        body: paymentData,
-      });
-      
-      if (error) {
-        console.error("Payment error:", error);
+        customer: { name: formData.fullName, email: formData.email, phone: formData.phone, cpf: formData.cpf },
+        address: { cep: formData.cep, street: formData.street, number: formData.number, complement: formData.complement, neighborhood: formData.neighborhood, city: formData.city, state: formData.state },
+        shipping: { option: "pac", price: 0 },
+        paymentMethod: "pix",
+        total: totalAmount,
+      }));
+
+      const { data, error } = await supabase.functions.invoke("create-pix-payment", { body: paymentData });
+
+      if (error || data?.error) {
+        console.error("Payment error:", error || data);
         toast.error("Erro ao processar pagamento. Tente novamente.");
         return;
       }
 
-      if (data.error) {
-        console.error("Payment API error:", data);
-        toast.error(data.error || "Erro ao processar pagamento");
+      if (!data?.pix?.payload) {
+        toast.error("Resposta inválida do gateway de pagamento.");
         return;
       }
 
-      if (selectedPaymentMethod === "pix") {
-        if (!data || !data.pix?.payload) {
-          console.error("Invalid payment response:", data);
-          toast.error("Resposta inválida do gateway de pagamento.");
-          return;
-        }
-        
-        // Store PIX data in sessionStorage
-        sessionStorage.setItem("pixPayment", JSON.stringify({
-          id: data.id,
-          payload: data.pix.payload,
-          qrCodeUrl: data.pix.qrCodeUrl,
-          expiresAt: data.pix.expiresAt,
-          amount: data.amount,
-        }));
-        
-        // Navigate to PIX payment page
-        navigate("/pagamento-pix");
-      } else {
-        // Credit card payment
-        if (data.status === "paid" || data.status === "approved") {
-          toast.success("Pagamento aprovado! Seu pedido foi confirmado.");
-          // Could redirect to success page here
-        } else {
-          toast.error("Pagamento não aprovado. Por favor, tente novamente.");
-        }
-      }
-      
-    } catch (error) {
-      console.error("Payment error:", error);
+      sessionStorage.setItem("pixPayment", JSON.stringify({
+        id: data.id,
+        payload: data.pix.payload,
+        qrCodeUrl: data.pix.qrCodeUrl,
+        expiresAt: data.pix.expiresAt,
+        amount: data.amount,
+      }));
+
+      navigate("/pagamento-pix");
+    } catch (err) {
+      console.error("Payment error:", err);
       toast.error("Erro ao processar pagamento. Tente novamente.");
     } finally {
       setLoadingPayment(false);
@@ -491,547 +237,222 @@ export default function Checkout() {
     );
   }
 
-  const selectedShippingOption = shippingOptions.find((s) => s.id === selectedShipping);
-  const shippingPrice = selectedShippingOption?.price || 0;
-  const subtotal = product.price * quantity;
-  const total = subtotal + shippingPrice;
+  const unitPrice = getTierPrice(quantity);
+  const originalPrice = product.originalPrice || 189.90;
+  const discountPct = Math.round((1 - unitPrice / originalPrice) * 100);
+  const total = unitPrice * quantity;
 
-  // Generate installment options with interest
-  const INTEREST_RATE = 0.0299; // 2.99% per month
-  const installmentOptions = [];
-  for (let i = 1; i <= 12; i++) {
-    let totalWithInterest = total;
-    let installmentValue = total / i;
-    let interestLabel = "";
+  const successColor = "hsl(142 70% 35%)";
 
-    if (i === 1) {
-      interestLabel = "(sem juros)";
-    } else {
-      totalWithInterest = total * Math.pow(1 + INTEREST_RATE, i);
-      installmentValue = totalWithInterest / i;
-      interestLabel = `(total R$ ${totalWithInterest.toFixed(2).replace(".", ",")})`;
-    }
-
-    if (installmentValue >= 5) {
-      installmentOptions.push({
-        value: i,
-        totalAmount: totalWithInterest,
-        label: `${i}x de R$ ${installmentValue.toFixed(2).replace(".", ",")} ${interestLabel}`,
-      });
-    }
-  }
+  const Field = ({ label, name, placeholder, type = "text", error, half = false }: {
+    label: string; name: string; placeholder: string; type?: string; error?: string; half?: boolean;
+  }) => (
+    <div className={half ? "col-span-1" : "col-span-2"}>
+      <Label className="text-xs font-semibold text-foreground/80 mb-1 block">{label}</Label>
+      <Input
+        name={name}
+        type={type}
+        placeholder={placeholder}
+        value={(formData as Record<string, string>)[name]}
+        onChange={handleInputChange}
+        className={`h-10 text-sm ${error ? "border-destructive focus-visible:ring-destructive" : ""}`}
+      />
+      {error && <p className="text-xs text-destructive mt-0.5">{error}</p>}
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Custom Checkout Header */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border w-full">
-        <div className="w-full px-4 py-3 flex items-center justify-between">
-          <Link to="/">
-            <img src={gtsm1Logo} alt="GTSM1" className="h-6 w-auto" />
-          </Link>
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Lock className="h-4 w-4 text-primary" />
-            <span className="text-xs font-medium">Ambiente Seguro</span>
+    <div className="min-h-screen bg-secondary/30 flex flex-col">
+      {/* Header */}
+      <header className="bg-card border-b border-border sticky top-0 z-30">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <img src={gtsm1Logo} alt="Logo" className="h-8 w-auto" />
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Lock className="h-3.5 w-3.5" style={{ color: successColor }} />
+            <span className="font-medium" style={{ color: successColor }}>Compra 100% segura</span>
           </div>
         </div>
       </header>
-      
-      <main className="flex-1 pb-8">
 
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
 
-        <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
-          {/* Product Summary */}
-          <div className="bg-card rounded-xl p-4 border border-border">
-            <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-              <Package className="h-4 w-4 text-primary" />
-              Resumo do Pedido
-            </h2>
+        {/* ── Left: Form ─────────────────────────────────────────── */}
+        <div className="space-y-4">
+
+          {/* Dados pessoais */}
+          <section className="bg-card rounded-xl border border-border p-5 space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-primary-foreground" style={{ background: 'hsl(270 55% 35%)' }}>1</div>
+              <h2 className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                <User className="h-4 w-4 text-muted-foreground" /> Dados pessoais
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Nome completo *" name="fullName" placeholder="Seu nome completo" error={errors.fullName} />
+              <Field label="E-mail *" name="email" placeholder="seu@email.com" type="email" error={errors.email} />
+              <Field label="CPF *" name="cpf" placeholder="000.000.000-00" error={errors.cpf} half />
+              <Field label="Telefone / WhatsApp *" name="phone" placeholder="(00) 00000-0000" error={errors.phone} half />
+            </div>
+          </section>
+
+          {/* Endereço */}
+          <section className="bg-card rounded-xl border border-border p-5 space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-primary-foreground" style={{ background: 'hsl(270 55% 35%)' }}>2</div>
+              <h2 className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-muted-foreground" /> Endereço de entrega
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {/* CEP */}
+              <div className="col-span-1">
+                <Label className="text-xs font-semibold text-foreground/80 mb-1 block">CEP *</Label>
+                <div className="relative">
+                  <Input
+                    name="cep"
+                    placeholder="00000-000"
+                    value={formData.cep}
+                    onChange={handleInputChange}
+                    className={`h-10 text-sm pr-8 ${errors.cep ? "border-destructive" : ""}`}
+                  />
+                  {loadingCep && <Loader2 className="absolute right-2.5 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
+                </div>
+                {errors.cep && <p className="text-xs text-destructive mt-0.5">{errors.cep}</p>}
+              </div>
+              <Field label="Rua *" name="street" placeholder="Nome da rua" error={errors.street} />
+              <Field label="Número *" name="number" placeholder="Nº" error={errors.number} half />
+              <Field label="Complemento" name="complement" placeholder="Apto, bloco..." half />
+              <Field label="Bairro *" name="neighborhood" placeholder="Bairro" error={errors.neighborhood} />
+              <Field label="Cidade *" name="city" placeholder="Cidade" error={errors.city} half />
+              <Field label="Estado *" name="state" placeholder="UF" error={errors.state} half />
+            </div>
+          </section>
+
+          {/* Frete */}
+          <section className="bg-card rounded-xl border border-border p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-primary-foreground" style={{ background: 'hsl(270 55% 35%)' }}>3</div>
+              <h2 className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                <Truck className="h-4 w-4 text-muted-foreground" /> Envio
+              </h2>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg border-2 border-green-500 bg-green-50 dark:bg-green-950/20">
+              <CheckCircle2 className="h-5 w-5 flex-shrink-0" style={{ color: successColor }} />
+              <div>
+                <p className="text-sm font-bold" style={{ color: successColor }}>🚚 Frete Grátis — PAC (8-12 dias úteis)</p>
+                <p className="text-xs text-muted-foreground">Promoção exclusiva para pagamento via PIX</p>
+              </div>
+              <span className="ml-auto text-sm font-black" style={{ color: successColor }}>R$ 0,00</span>
+            </div>
+          </section>
+
+          {/* Pagamento — só PIX */}
+          <section className="bg-card rounded-xl border border-border p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-primary-foreground" style={{ background: 'hsl(270 55% 35%)' }}>4</div>
+              <h2 className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                <QrCode className="h-4 w-4 text-muted-foreground" /> Pagamento
+              </h2>
+            </div>
+            <div className="flex items-center gap-3 p-4 rounded-lg border-2 border-green-500 bg-green-50 dark:bg-green-950/20">
+              {/* PIX SVG */}
+              <svg width="28" height="28" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+                <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l76.693-76.692c5.385-5.385 14.765-5.373 20.137 0l76.993 76.992c14.192 14.192 33.064 22 53.12 22h15.098l-97.138 97.126c-29.548 29.56-77.478 29.56-107.026 0L106.42 391.19h6.15z" fill="hsl(152 80% 30%)"/>
+                <path d="M112.57 120.81h-6.15L203.568 23.685c29.548-29.56 77.478-29.56 107.026 0L407.733 120.81H392.62c-20.056 0-38.928 7.808-53.12 22l-76.992 76.992c-5.551 5.55-14.587 5.55-20.137 0l-76.693-76.693c-14.193-14.191-33.065-21.999-53.109-21.999z" fill="hsl(152 80% 30%)"/>
+                <path d="M23.685 204.567L75.898 152.354h36.672c13.417 0 26.027 5.22 35.52 14.713l76.693 76.693c14.624 14.624 40.065 14.636 54.701 0l76.98-76.992c9.493-9.493 22.104-14.713 35.52-14.713h42.709l52.526 52.512c29.56 29.548 29.56 77.478 0 107.026l-52.526 52.525h-42.709c-13.416 0-26.027-5.22-35.52-14.712l-76.98-76.993c-14.648-14.648-40.065-14.636-54.701 0l-76.693 76.693c-9.493 9.492-22.103 14.712-35.52 14.712H75.898L23.685 311.433c-29.56-29.548-29.56-77.478 0-107.026z" fill="hsl(152 80% 30%)"/>
+              </svg>
+              <div>
+                <p className="text-sm font-bold" style={{ color: successColor }}>Pix — Aprovação imediata</p>
+                <p className="text-xs text-muted-foreground">QR Code gerado após confirmação do pedido</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* ── Right: Order Summary ────────────────────────────────── */}
+        <div className="space-y-4 lg:sticky lg:top-20">
+          <section className="bg-card rounded-xl border border-border p-5 space-y-4">
+            <h2 className="font-bold text-sm text-foreground">Resumo do pedido</h2>
+
+            {/* Product row */}
             <div className="flex gap-3">
               <img
                 src={product.image}
                 alt={product.name}
-                className="w-20 h-20 object-contain bg-secondary/30 rounded-lg"
+                className="w-16 h-16 object-cover rounded-lg border border-border flex-shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-medium text-foreground line-clamp-2">
-                  {product.name}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Quantidade: {quantity}
-                </p>
-                <p className="text-base font-bold text-primary mt-1">
-                  {formatPrice(subtotal)}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Personal Data */}
-          <div className="bg-card rounded-xl p-4 border border-border">
-            <h2 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-              <User className="h-4 w-4 text-primary" />
-              Dados Pessoais
-            </h2>
-            
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="fullName" className="text-xs font-medium text-muted-foreground">
-                  Nome Completo *
-                </Label>
-                <Input
-                  id="fullName"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  placeholder="Seu nome completo"
-                  className={errors.fullName ? "border-destructive" : ""}
-                />
-                {errors.fullName && (
-                  <p className="text-xs text-destructive mt-1">{errors.fullName}</p>
-                )}
-              </div>
-              
-              <div>
-                <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">
-                  E-mail *
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="seu@email.com"
-                  className={errors.email ? "border-destructive" : ""}
-                />
-                {errors.email && (
-                  <p className="text-xs text-destructive mt-1">{errors.email}</p>
-                )}
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="cpf" className="text-xs font-medium text-muted-foreground">
-                    CPF *
-                  </Label>
-                  <Input
-                    id="cpf"
-                    name="cpf"
-                    value={formData.cpf}
-                    onChange={handleInputChange}
-                    placeholder="000.000.000-00"
-                    maxLength={14}
-                    className={errors.cpf ? "border-destructive" : ""}
-                  />
-                  {errors.cpf && (
-                    <p className="text-xs text-destructive mt-1">{errors.cpf}</p>
-                  )}
-                </div>
-                
-                <div>
-                  <Label htmlFor="phone" className="text-xs font-medium text-muted-foreground">
-                    Telefone *
-                  </Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    placeholder="(00) 00000-0000"
-                    maxLength={15}
-                    className={errors.phone ? "border-destructive" : ""}
-                  />
-                  {errors.phone && (
-                    <p className="text-xs text-destructive mt-1">{errors.phone}</p>
-                  )}
+                <p className="text-xs font-semibold text-foreground line-clamp-2 leading-snug">{product.name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Qtd: {quantity}</p>
+                <div className="flex items-baseline gap-1.5 mt-1">
+                  <span className="text-sm font-black text-foreground">{formatPrice(unitPrice)}</span>
+                  <span className="text-xs text-muted-foreground line-through">{formatPrice(originalPrice)}</span>
+                  <span className="text-[10px] font-bold bg-destructive text-destructive-foreground px-1 rounded">-{discountPct}%</span>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Address */}
-          <div className="bg-card rounded-xl p-4 border border-border">
-            <h2 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-primary" />
-              Endereço de Entrega
-            </h2>
-            
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="cep" className="text-xs font-medium text-muted-foreground">
-                  CEP *
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="cep"
-                    name="cep"
-                    value={formData.cep}
-                    onChange={handleInputChange}
-                    placeholder="00000-000"
-                    maxLength={9}
-                    className={errors.cep ? "border-destructive" : ""}
-                  />
-                  {loadingCep && (
-                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-                  )}
-                </div>
-                {errors.cep && (
-                  <p className="text-xs text-destructive mt-1">{errors.cep}</p>
-                )}
+            <div className="border-t border-border pt-3 space-y-2 text-sm">
+              <div className="flex justify-between text-muted-foreground">
+                <span>{quantity}x {formatPrice(unitPrice)}</span>
+                <span>{formatPrice(total)}</span>
               </div>
-              
-              <div>
-                <Label htmlFor="street" className="text-xs font-medium text-muted-foreground">
-                  Rua *
-                </Label>
-                <Input
-                  id="street"
-                  name="street"
-                  value={formData.street}
-                  onChange={handleInputChange}
-                  placeholder="Nome da rua"
-                  className={errors.street ? "border-destructive" : ""}
-                />
-                {errors.street && (
-                  <p className="text-xs text-destructive mt-1">{errors.street}</p>
-                )}
+              <div className="flex justify-between" style={{ color: successColor }}>
+                <span className="font-medium">🚚 Frete</span>
+                <span className="font-bold">Grátis</span>
               </div>
-              
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <Label htmlFor="number" className="text-xs font-medium text-muted-foreground">
-                    Número *
-                  </Label>
-                  <Input
-                    id="number"
-                    name="number"
-                    value={formData.number}
-                    onChange={handleInputChange}
-                    placeholder="123"
-                    className={errors.number ? "border-destructive" : ""}
-                  />
-                  {errors.number && (
-                    <p className="text-xs text-destructive mt-1">{errors.number}</p>
-                  )}
-                </div>
-                
-                <div className="col-span-2">
-                  <Label htmlFor="complement" className="text-xs font-medium text-muted-foreground">
-                    Complemento
-                  </Label>
-                  <Input
-                    id="complement"
-                    name="complement"
-                    value={formData.complement}
-                    onChange={handleInputChange}
-                    placeholder="Apto, bloco..."
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <Label htmlFor="neighborhood" className="text-xs font-medium text-muted-foreground">
-                  Bairro *
-                </Label>
-                <Input
-                  id="neighborhood"
-                  name="neighborhood"
-                  value={formData.neighborhood}
-                  onChange={handleInputChange}
-                  placeholder="Bairro"
-                  className={errors.neighborhood ? "border-destructive" : ""}
-                />
-                {errors.neighborhood && (
-                  <p className="text-xs text-destructive mt-1">{errors.neighborhood}</p>
-                )}
-              </div>
-              
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-2">
-                  <Label htmlFor="city" className="text-xs font-medium text-muted-foreground">
-                    Cidade *
-                  </Label>
-                  <Input
-                    id="city"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    placeholder="Cidade"
-                    className={errors.city ? "border-destructive" : ""}
-                  />
-                  {errors.city && (
-                    <p className="text-xs text-destructive mt-1">{errors.city}</p>
-                  )}
-                </div>
-                
-                <div>
-                  <Label htmlFor="state" className="text-xs font-medium text-muted-foreground">
-                    UF *
-                  </Label>
-                  <Input
-                    id="state"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleInputChange}
-                    placeholder="UF"
-                    maxLength={2}
-                    className={errors.state ? "border-destructive" : ""}
-                  />
-                  {errors.state && (
-                    <p className="text-xs text-destructive mt-1">{errors.state}</p>
-                  )}
-                </div>
+              <div className="flex justify-between text-muted-foreground text-xs">
+                <span>Desconto aplicado</span>
+                <span className="text-destructive font-semibold">-{formatPrice((originalPrice - unitPrice) * quantity)}</span>
               </div>
             </div>
-          </div>
 
-          {/* Shipping Options */}
-          <div className="bg-card rounded-xl p-4 border border-border">
-            <h2 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-              <Truck className="h-4 w-4 text-primary" />
-              Opções de Entrega
-            </h2>
-            
-            <RadioGroup
-              value={selectedShipping}
-              onValueChange={setSelectedShipping}
-              className="space-y-3"
+            <div className="border-t border-border pt-3 flex justify-between items-center">
+              <span className="text-sm font-bold text-foreground">Total</span>
+              <div className="text-right">
+                <p className="text-xl font-black text-foreground">{formatPrice(total)}</p>
+                <p className="text-[10px] font-medium" style={{ color: successColor }}>🔒 via PIX • Frete Grátis</p>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <Button
+              onClick={handleSubmit}
+              disabled={loadingPayment}
+              className="w-full h-12 text-sm font-bold rounded-xl flex items-center justify-center gap-2"
+              style={{ background: 'hsl(152 80% 30%)', color: '#fff' }}
             >
-              {shippingOptions.map((option) => {
-                const Icon = option.icon;
-                return (
-                  <label
-                    key={option.id}
-                    htmlFor={option.id}
-                    className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                      selectedShipping === option.id
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-muted-foreground"
-                    }`}
-                  >
-                    <RadioGroupItem value={option.id} id={option.id} />
-                    <Icon className="h-5 w-5 text-muted-foreground" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-foreground">{option.name}</p>
-                      <p className="text-xs text-muted-foreground">{option.days}</p>
-                    </div>
-                    <span className={`text-sm font-bold ${option.price === 0 ? "text-primary" : "text-foreground"}`}>
-                      {option.price === 0 ? "GRÁTIS" : formatPrice(option.price)}
-                    </span>
-                  </label>
-                );
-              })}
-            </RadioGroup>
-          </div>
-
-          {/* Payment Method */}
-          <div className="bg-card rounded-xl p-4 border border-border">
-            <h2 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-primary" />
-              Forma de Pagamento
-            </h2>
-            
-            <RadioGroup
-              value={selectedPaymentMethod}
-              onValueChange={setSelectedPaymentMethod}
-              className="space-y-3"
-            >
-              <label
-                htmlFor="pix"
-                className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                  selectedPaymentMethod === "pix"
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-muted-foreground"
-                }`}
-              >
-                <RadioGroupItem value="pix" id="pix" />
-                <QrCode className="h-5 w-5 text-muted-foreground" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">PIX</p>
-                  <p className="text-xs text-muted-foreground">Aprovação imediata</p>
-                </div>
-              </label>
-              
-              <label
-                htmlFor="credit"
-                className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                  selectedPaymentMethod === "credit"
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-muted-foreground"
-                }`}
-              >
-                <RadioGroupItem value="credit" id="credit" />
-                <CreditCard className="h-5 w-5 text-muted-foreground" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">Cartão de Crédito</p>
-                  <p className="text-xs text-muted-foreground">Até 12x com juros</p>
-                </div>
-              </label>
-            </RadioGroup>
-
-
-            {/* Credit Card Form */}
-            {selectedPaymentMethod === "credit" && (
-              <div className="mt-4 pt-4 border-t border-border space-y-4">
-                <div>
-                  <Label htmlFor="cardNumber" className="text-xs font-medium text-muted-foreground">
-                    Número do Cartão *
-                  </Label>
-                  <Input
-                    id="cardNumber"
-                    name="number"
-                    value={cardData.number}
-                    onChange={handleCardInputChange}
-                    placeholder="0000 0000 0000 0000"
-                    maxLength={19}
-                    className={errors.cardNumber ? "border-destructive" : ""}
-                  />
-                  {errors.cardNumber && (
-                    <p className="text-xs text-destructive mt-1">{errors.cardNumber}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="holderName" className="text-xs font-medium text-muted-foreground">
-                    Nome no Cartão *
-                  </Label>
-                  <Input
-                    id="holderName"
-                    name="holderName"
-                    value={cardData.holderName}
-                    onChange={handleCardInputChange}
-                    placeholder="NOME COMO ESTÁ NO CARTÃO"
-                    className={`uppercase ${errors.cardHolder ? "border-destructive" : ""}`}
-                  />
-                  {errors.cardHolder && (
-                    <p className="text-xs text-destructive mt-1">{errors.cardHolder}</p>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="expiry" className="text-xs font-medium text-muted-foreground">
-                      Validade *
-                    </Label>
-                    <Input
-                      id="expiry"
-                      name="expiry"
-                      value={cardData.expiry}
-                      onChange={handleCardInputChange}
-                      placeholder="MM/AA"
-                      maxLength={5}
-                      className={errors.cardExpiry ? "border-destructive" : ""}
-                    />
-                    {errors.cardExpiry && (
-                      <p className="text-xs text-destructive mt-1">{errors.cardExpiry}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="cvv" className="text-xs font-medium text-muted-foreground">
-                      CVV *
-                    </Label>
-                    <Input
-                      id="cvv"
-                      name="cvv"
-                      value={cardData.cvv}
-                      onChange={handleCardInputChange}
-                      placeholder="123"
-                      maxLength={4}
-                      className={errors.cardCvv ? "border-destructive" : ""}
-                    />
-                    {errors.cardCvv && (
-                      <p className="text-xs text-destructive mt-1">{errors.cardCvv}</p>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="installments" className="text-xs font-medium text-muted-foreground">
-                    Parcelas
-                  </Label>
-                  <select
-                    id="installments"
-                    value={installments}
-                    onChange={(e) => setInstallments(parseInt(e.target.value, 10))}
-                    className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    {installmentOptions.map(opt => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Order Summary */}
-          <div className="bg-card rounded-xl p-4 border border-border">
-            <h2 className="text-sm font-bold text-foreground mb-3">Resumo</h2>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="text-foreground">{formatPrice(subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Frete</span>
-                <span className={shippingPrice === 0 ? "text-primary font-medium" : "text-foreground"}>
-                  {shippingPrice === 0 ? "GRÁTIS" : formatPrice(shippingPrice)}
-                </span>
-              </div>
-              {selectedPaymentMethod === "credit" && installments > 1 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Juros ({installments}x)</span>
-                  <span className="text-muted-foreground">
-                    +{formatPrice((installmentOptions.find(o => o.value === installments)?.totalAmount || total) - total)}
-                  </span>
-                </div>
+              {loadingPayment ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  <QrCode className="h-4 w-4" />
+                  Gerar QR Code PIX
+                  <ChevronRight className="h-4 w-4" />
+                </>
               )}
-              <div className="border-t border-border pt-2 mt-2">
-                <div className="flex justify-between">
-                  <span className="text-base font-bold text-foreground">Total</span>
-                  <span className="text-xl font-bold text-primary">
-                    {selectedPaymentMethod === "pix" 
-                      ? formatPrice(total) 
-                      : formatPrice(installmentOptions.find(o => o.value === installments)?.totalAmount || total)}
-                  </span>
-                </div>
-                {selectedPaymentMethod === "credit" && (
-                  <p className="text-xs text-muted-foreground text-right mt-1">
-                    {installments}x de {formatPrice((installmentOptions.find(o => o.value === installments)?.totalAmount || total) / installments)}
-                    {installments === 1 ? " (sem juros)" : ""}
-                  </p>
-                )}
+            </Button>
+
+            {/* Trust badges */}
+            <div className="flex items-center justify-center gap-4 pt-1">
+              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <ShieldCheck className="h-3.5 w-3.5" style={{ color: successColor }} />
+                Compra segura
+              </div>
+              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <Lock className="h-3.5 w-3.5" style={{ color: successColor }} />
+                Dados protegidos
               </div>
             </div>
-          </div>
-
-          {/* Submit Button */}
-          <Button
-            onClick={handleSubmit}
-            disabled={loadingPayment}
-            className="w-full h-14 text-base font-bold bg-primary hover:opacity-90 text-primary-foreground rounded-xl"
-          >
-            {loadingPayment ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Processando...
-              </>
-            ) : (
-              `FINALIZAR COMPRA`
-            )}
-          </Button>
+          </section>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-muted/50 border-t border-border py-4 px-4">
-        <div className="max-w-lg mx-auto text-center">
-          <p className="text-xs text-muted-foreground">
-            GTSM1 Comércio de Bicicletas Ltda
-          </p>
-          <p className="text-xs text-muted-foreground">
-            CNPJ: 45.678.901/0001-23
-          </p>
-        </div>
+      <footer className="border-t border-border py-4 text-center">
+        <p className="text-[10px] text-muted-foreground">
+          © 2025 GTSM1 Store · Todos os direitos reservados · Ambiente 100% seguro
+        </p>
       </footer>
     </div>
   );
