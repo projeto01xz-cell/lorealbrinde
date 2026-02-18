@@ -31,50 +31,56 @@ export const categories = [
 export const products: Product[] = [
   {
     id: '1',
-    name: 'Ventilador Turbo Potente 110/220V',
-    description: `💨 Ventilador Turbo — Potência e Frescor para sua Casa
+    name: 'Ventilador Turbo Force 50cm — O Mais Forte e Silencioso',
+    description: `💨 Ventilador Turbo Force 50cm — Potência que Não se Ouve, se Sente!
 
-O Ventilador Turbo é a solução ideal para quem busca muito mais vento com economia de energia. Silencioso, potente e perfeito para qualquer ambiente da sua casa.
+Deixe os ambientes da sua casa muito mais agradáveis, refrescantes e silenciosos com o Ventilador Turbo Force de 50 cm. O MAIS FORTE E SILENCIOSO VENTILADOR JÁ FEITO!
+
+Perfeito para qualquer tipo de ambiente, é até 4x mais silencioso e ainda mais forte que os demais disponíveis no mercado. Conta com design moderno, sofisticado e totalmente desmontável, o que possibilita o fácil armazenamento quando não estiver em uso.
+
+🌬️ DIFERENCIAIS
+• Power Zone — área concentrada que garante o máximo de vento direcionado
+• Função Eco Fresh que economiza até 20% de energia
+• Ultra silencioso mesmo na velocidade máxima
+• Fácil de montar e desmontar com apenas um clique
+• Design moderno e discreto para qualquer ambiente
+• Oscilação automática para cobertura total do ambiente
 
 📋 FICHA TÉCNICA
-• Bivolt: 110V / 220V automático
-• Velocidades: 3 níveis (baixo, médio, alto)
-• Hélices: 6 pás em ABS reforçado
-• Altura: Ajustável até 1,30m
-• Diâmetro: 40 cm
-• Cabo: 1,5 metro
-• Garantia: 90 dias
-
-✅ DIFERENCIAIS
-• Ultra silencioso mesmo na velocidade máxima
-• Economiza até 40% de energia vs. ventiladores convencionais
-• Fácil montagem, sem ferramentas
-• Design moderno que combina com qualquer decoração
-• Grade de proteção anti-dedos (seguro para crianças)
-• Oscilação automática 90°
+• Bivolt: 110V / 220V
+• Velocidades: 2 níveis (turbo + eco)
+• Hélices: 6 pás de Polipropileno
+• Potência: 126 W
+• Diâmetro: 50 cm
+• Velocidade máxima: 1.500 rpm
+• Nível de ruído: 55 dB
+• Eficiência energética: Classe A
+• Peso: 4,63 kg
 
 🛡️ SEGURANÇA
+• Certificado pelo INMETRO
+• Grade removível para fácil limpeza
 • Proteção térmica automática
-• Grade de segurança resistente
-• Base antiderrapante
-• Certificado pelo INMETRO`,
+• Base antiderrapante estável`,
     price: 37.80,
     originalPrice: 189.90,
     image: ventilador01,
     images: [ventilador01, ventilador02, ventilador03, ventilador04, ventilador05, ventilador06, ventilador07],
     category: 'ventiladores',
-    rating: 4.9,
-    reviews: 1847,
+    rating: 4.8,
+    reviews: 2800,
     inStock: true,
     featured: true,
     freeShipping: true,
     specs: {
       'Tensão': '110V / 220V Bivolt',
-      'Velocidades': '3 níveis',
-      'Hélices': '6 pás ABS',
-      'Diâmetro': '40 cm',
-      'Oscilação': '90° automática',
-      'Garantia': '90 dias',
+      'Velocidades': '2 níveis (Turbo + Eco)',
+      'Hélices': '6 pás Polipropileno',
+      'Diâmetro': '50 cm',
+      'Potência': '126 W',
+      'Nível de Ruído': '55 dB',
+      'Eficiência': 'Classe A (INMETRO)',
+      'Peso': '4,63 kg',
     },
   },
 ];
