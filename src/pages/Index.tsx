@@ -131,7 +131,7 @@ export default function Index() {
               {/* Badge */}
               {discount > 0 && (
                 <span className="absolute top-4 left-4 z-10 bg-destructive text-destructive-foreground text-xs font-bold px-3 py-1.5 rounded">
-                  Promoção
+                  🔥 QUEIMÃO
                 </span>
               )}
 
