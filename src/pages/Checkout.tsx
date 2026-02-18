@@ -425,37 +425,40 @@ export default function Checkout() {
                 <p className="text-[10px] font-medium" style={{ color: successColor }}>🔒 via PIX • Frete Grátis</p>
               </div>
             </div>
-
-            {/* CTA */}
-            <Button
-              onClick={handleSubmit}
-              disabled={loadingPayment}
-              className="w-full h-12 text-sm font-bold rounded-xl flex items-center justify-center gap-2"
-              style={{ background: 'hsl(152 80% 30%)', color: '#fff' }}
-            >
-              {loadingPayment ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <>
-                  <QrCode className="h-4 w-4" />
-                  Gerar QR Code PIX
-                  <ChevronRight className="h-4 w-4" />
-                </>
-              )}
-            </Button>
-
-            {/* Trust badges */}
-            <div className="flex items-center justify-center gap-4 pt-1">
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                <ShieldCheck className="h-3.5 w-3.5" style={{ color: successColor }} />
-                Compra segura
-              </div>
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                <Lock className="h-3.5 w-3.5" style={{ color: successColor }} />
-                Dados protegidos
-              </div>
-            </div>
           </section>
+        </div>
+
+        {/* ── Left: Form ─────────────────────────────────────────── (continued) */}
+        {/* CTA Button + Trust badges — after form, order-last on mobile */}
+        <div className="order-last lg:order-none lg:col-start-2 lg:row-start-2 space-y-3">
+          <Button
+            onClick={handleSubmit}
+            disabled={loadingPayment}
+            className="w-full h-12 text-sm font-bold rounded-xl flex items-center justify-center gap-2"
+            style={{ background: 'hsl(152 80% 30%)', color: '#fff' }}
+          >
+            {loadingPayment ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                <QrCode className="h-4 w-4" />
+                Gerar QR Code PIX
+                <ChevronRight className="h-4 w-4" />
+              </>
+            )}
+          </Button>
+
+          {/* Trust badges */}
+          <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+              <ShieldCheck className="h-3.5 w-3.5" style={{ color: successColor }} />
+              Compra segura
+            </div>
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+              <Lock className="h-3.5 w-3.5" style={{ color: successColor }} />
+              Dados protegidos
+            </div>
+          </div>
         </div>
       </main>
 
