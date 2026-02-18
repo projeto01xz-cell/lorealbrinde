@@ -361,8 +361,8 @@ export default function Index() {
             <span className="text-xl font-black text-foreground leading-tight">
               {formatPrice(tierPrice)}
             </span>
-            <span className="text-[10px] text-muted-foreground leading-none">
-              3x de {formatPrice(tierPrice / 3)} s/ juros
+            <span className="text-[10px] font-medium leading-none" style={{ color: 'hsl(142 70% 35%)' }}>
+              🔒 PIX • 🚚 Frete Grátis
             </span>
           </div>
 
@@ -472,8 +472,8 @@ function PriceBlock({ product, discount, successColor, tierPrice }: { product: a
         )}
       </div>
       <p className="text-xs font-medium" style={{ color: successColor }}>
-        ou 3x de {formatPrice(tierPrice / 3)} sem juros •{" "}
-        <span className="font-bold">Frete Grátis</span> acima de R$ 99,99
+        🔒 Exclusivo via <span className="font-bold">PIX</span> •{" "}
+        <span className="font-bold">🚚 Frete Grátis</span> para todo o Brasil
       </p>
     </div>
   );
