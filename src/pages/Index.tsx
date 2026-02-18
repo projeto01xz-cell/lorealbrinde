@@ -471,21 +471,49 @@ export default function Index() {
         {activeNotif && (
           <motion.div
             key={activeNotif.name + activeNotif.city}
-            initial={{ opacity: 0, x: -80, y: 0 }}
-            animate={{ opacity: 1, x: 0, y: 0 }}
-            exit={{ opacity: 0, x: -80 }}
-            transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="fixed bottom-20 left-4 z-[60] lg:bottom-6 flex items-center gap-3 bg-card border border-border rounded-xl shadow-2xl px-4 py-3 max-w-[280px]"
+            initial={{ opacity: 0, x: -100, scale: 0.92 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -100, scale: 0.92 }}
+            transition={{ type: "spring", stiffness: 320, damping: 26 }}
+            className="fixed bottom-20 left-3 z-[60] lg:bottom-6 max-w-[300px] w-[calc(100vw-24px)] lg:w-[300px]"
           >
-            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <ShoppingCart className="h-4 w-4 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-foreground leading-tight">
-                {activeNotif.name} de {activeNotif.city}
-              </p>
-              <p className="text-xs text-muted-foreground leading-tight">acabou de comprar! 🔥</p>
-              <p className="text-[10px] text-muted-foreground/60 mt-0.5">há poucos instantes</p>
+            <div className="bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
+              {/* Top accent bar */}
+              <div className="h-1 w-full bg-primary" />
+              <div className="flex items-center gap-3 px-4 py-3">
+                {/* Avatar */}
+                <div className="relative flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center">
+                    <span className="text-base font-extrabold text-primary">{activeNotif.name[0]}</span>
+                  </div>
+                  <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                    <Check className="h-2.5 w-2.5 text-primary-foreground" />
+                  </span>
+                </div>
+
+                {/* Text */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-foreground leading-tight">
+                    {activeNotif.name} <span className="font-normal text-muted-foreground text-xs">de {activeNotif.city}</span>
+                  </p>
+                  <p className="text-xs text-foreground leading-tight mt-0.5">
+                    acabou de comprar este produto <span className="text-primary">🔥</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex items-center justify-between px-4 pb-3 -mt-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-[11px] text-muted-foreground">há poucos instantes</span>
+                </div>
+                <div className="flex gap-0.5">
+                  {[1,2,3,4,5].map(s => (
+                    <Star key={s} className="h-3 w-3 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
