@@ -1,15 +1,15 @@
-import { Search, ShoppingCart, Menu, X, ChevronRight, Zap, Headphones, Speaker, BatteryCharging, Wind, MonitorSmartphone, Mouse, Lightbulb, Heart } from "lucide-react";
+import { Search, ShoppingCart, Menu, X, ChevronRight, Zap, Headphones, Speaker, BatteryCharging, Wind, MonitorSmartphone, Mouse, Lightbulb } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
 const CATEGORIES = [
-  { label: "Eletrônicos em Geral", icon: MonitorSmartphone, to: "/produtos" },
-  { label: "Fones de Ouvido", icon: Headphones, to: "/produtos" },
+  { label: "Eletrônicos", icon: MonitorSmartphone, to: "/produtos" },
+  { label: "Fones", icon: Headphones, to: "/produtos" },
   { label: "Caixas de Som", icon: Speaker, to: "/produtos" },
   { label: "Carregadores", icon: BatteryCharging, to: "/produtos" },
   { label: "Ventiladores", icon: Wind, to: "/produtos" },
-  { label: "Suportes de Celular", icon: MonitorSmartphone, to: "/produtos" },
-  { label: "Mouse e Teclados", icon: Mouse, to: "/produtos" },
+  { label: "Suportes", icon: MonitorSmartphone, to: "/produtos" },
+  { label: "Mouse/Teclado", icon: Mouse, to: "/produtos" },
   { label: "Iluminação", icon: Lightbulb, to: "/produtos" },
 ];
 
@@ -27,68 +27,72 @@ export default function Navbar() {
 
       {/* Purple main header */}
       <div className="w-full" style={{ backgroundColor: 'hsl(270 55% 38%)' }}>
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center gap-3 h-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4">
+          <div className="flex items-center gap-2 h-14">
 
-            {/* Mobile Menu */}
+            {/* Hamburger */}
             <button
-              className="lg:hidden p-2 -ml-1 touch-target text-white"
+              className="p-2 -ml-1 text-white flex-shrink-0 touch-target"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Menu"
             >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              <Menu className="h-6 w-6" />
             </button>
 
             {/* Logo */}
-            <Link to="/" className="flex-shrink-0 flex items-center gap-2">
-              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
-                <Zap className="h-5 w-5 text-white" />
+            <Link to="/" className="flex-shrink-0 flex items-center gap-1.5">
+              <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+                <Zap className="h-4 w-4 text-white" />
               </div>
-              <span className="text-lg font-extrabold text-white tracking-tight hidden sm:block">JSvariedades</span>
+              <span className="text-sm font-extrabold text-white tracking-tight">JSvariedades</span>
             </Link>
 
             {/* Search Bar */}
-            <div className="flex-1 max-w-2xl mx-2 sm:mx-4">
-              <div className="relative w-full flex items-center">
+            <div className="flex-1 min-w-0 mx-1 sm:mx-3">
+              <div className="relative flex items-center">
                 <input
                   type="text"
                   placeholder="Busque o que deseja"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white rounded py-2.5 pl-4 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none border-0 shadow-sm"
+                  className="w-full bg-white rounded py-2 pl-3 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none border-0"
                 />
                 <button
-                  className="absolute right-0 top-0 h-full px-4 rounded-r flex items-center justify-center transition-colors"
+                  className="absolute right-0 top-0 h-full px-3 rounded-r flex items-center justify-center"
                   style={{ backgroundColor: 'hsl(45 100% 51%)' }}
                   aria-label="Buscar"
                 >
-                  <Search className="h-4 w-4" style={{ color: 'hsl(0 0% 10%)' }} />
+                  <Search className="h-3.5 w-3.5" style={{ color: 'hsl(0 0% 10%)' }} />
                 </button>
               </div>
             </div>
 
-            {/* Right icons */}
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <Link to="/sobre" className="hidden lg:flex flex-col items-center gap-0.5 text-white px-2 py-1 hover:bg-white/10 rounded transition-colors">
-                <span className="text-xs font-medium">Quem somos</span>
-              </Link>
-              <button className="flex flex-col items-center gap-0.5 text-white px-2 py-1 hover:bg-white/10 rounded transition-colors" aria-label="Favoritos">
-                <Heart className="h-5 w-5" />
-                <span className="text-[10px] hidden lg:block">Favoritos</span>
-              </button>
-              <button className="relative flex flex-col items-center gap-0.5 text-white px-2 py-1 hover:bg-white/10 rounded transition-colors" aria-label="Carrinho">
-                <div className="relative">
-                  <ShoppingCart className="h-5 w-5" />
-                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center" style={{ backgroundColor: 'hsl(45 100% 51%)', color: 'hsl(0 0% 10%)' }}>0</span>
-                </div>
-                <span className="text-[10px] hidden lg:block">Carrinho</span>
-              </button>
-            </div>
+            {/* Cart icon */}
+            <button className="relative p-2 text-white hover:bg-white/10 rounded transition-colors flex-shrink-0" aria-label="Carrinho">
+              <ShoppingCart className="h-5 w-5" />
+              <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center" style={{ backgroundColor: 'hsl(45 100% 51%)', color: 'hsl(0 0% 10%)' }}>0</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Categories bar */}
+      {/* Mobile category chips strip */}
+      <div className="w-full bg-card border-b border-border lg:hidden overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-2 px-3 py-2">
+          {CATEGORIES.map((cat) => (
+            <Link
+              key={cat.label}
+              to={cat.to}
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-secondary text-xs font-medium text-foreground hover:border-primary hover:text-primary transition-colors whitespace-nowrap"
+            >
+              <cat.icon className="h-3.5 w-3.5" />
+              {cat.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop categories bar */}
       <div className="w-full hidden lg:block" style={{ backgroundColor: 'hsl(270 55% 30%)' }}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide">
@@ -101,7 +105,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Category icons strip */}
+      {/* Desktop category icons strip */}
       <div className="w-full bg-card border-b border-border hidden lg:block">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-2">
@@ -119,38 +123,52 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Drawer Menu */}
       {isMenuOpen && (
-        <div className="fixed inset-0 top-[calc(1.75rem+4rem)] z-40 bg-card lg:hidden">
-          <nav className="flex flex-col p-4">
-            {[
-              { to: "/", label: "Início" },
-              { to: "/produtos", label: "Produtos" },
-              { to: "/sobre", label: "Quem somos" },
-            ].map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="flex items-center justify-between py-4 border-b border-border text-base font-medium text-foreground"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.label}
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </Link>
-            ))}
-            <div className="mt-4">
-              <p className="text-xs font-bold text-muted-foreground mb-3 uppercase">Categorias</p>
-              {CATEGORIES.map((cat) => (
+        <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setIsMenuOpen(false)}>
+          <div className="absolute inset-0 bg-black/50" />
+          <nav
+            className="absolute left-0 top-0 bottom-0 w-72 bg-card shadow-2xl flex flex-col overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drawer header */}
+            <div className="flex items-center justify-between px-4 py-4 flex-shrink-0" style={{ backgroundColor: 'hsl(270 55% 38%)' }}>
+              <span className="text-base font-bold text-white">Menu</span>
+              <button onClick={() => setIsMenuOpen(false)} className="text-white p-1">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-4 flex-1 overflow-y-auto">
+              {[
+                { to: "/", label: "Início" },
+                { to: "/produtos", label: "Produtos" },
+                { to: "/sobre", label: "Quem somos" },
+              ].map((item) => (
                 <Link
-                  key={cat.label}
-                  to={cat.to}
-                  className="flex items-center gap-3 py-3 border-b border-border text-sm text-foreground"
+                  key={item.to}
+                  to={item.to}
+                  className="flex items-center justify-between py-3.5 border-b border-border text-base font-medium text-foreground"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <cat.icon className="h-5 w-5 text-primary" />
-                  {cat.label}
+                  {item.label}
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
                 </Link>
               ))}
+              <div className="mt-5">
+                <p className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider">Categorias</p>
+                {CATEGORIES.map((cat) => (
+                  <Link
+                    key={cat.label}
+                    to={cat.to}
+                    className="flex items-center gap-3 py-3 border-b border-border text-sm text-foreground"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <cat.icon className="h-5 w-5 text-primary" />
+                    {cat.label}
+                  </Link>
+                ))}
+              </div>
             </div>
           </nav>
         </div>
