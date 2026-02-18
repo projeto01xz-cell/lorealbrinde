@@ -1,4 +1,4 @@
-import { ShoppingCart, Menu, X, ChevronRight, Moon, Headphones, Speaker, BatteryCharging, Wind, MonitorSmartphone, Mouse, Lightbulb } from "lucide-react";
+import { ShoppingCart, Menu, X, ChevronRight, Moon, Headphones, Speaker, BatteryCharging, Wind, MonitorSmartphone, Mouse, Lightbulb, Search } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -64,19 +64,17 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile category chips strip */}
-      <div className="w-full bg-card border-b border-border lg:hidden overflow-x-auto scrollbar-hide">
-        <div className="flex items-center gap-2 px-3 py-2">
-          {CATEGORIES.map((cat) => (
-            <Link
-              key={cat.label}
-              to={cat.to}
-              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-secondary text-xs font-medium text-foreground hover:border-primary hover:text-primary transition-colors whitespace-nowrap"
-            >
-              <cat.icon className="h-3.5 w-3.5" />
-              {cat.label}
-            </Link>
-          ))}
+      {/* Search bar strip — mobile & desktop */}
+      <div className="w-full bg-card border-b border-border px-3 py-2">
+        <div className="max-w-7xl mx-auto">
+          <div className="relative flex items-center">
+            <Search className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Buscar produtos..."
+              className="w-full pl-9 pr-4 py-2 text-sm bg-secondary border border-border rounded-full outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-foreground placeholder:text-muted-foreground"
+            />
+          </div>
         </div>
       </div>
 
