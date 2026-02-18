@@ -1,26 +1,17 @@
-import { Search, ShoppingCart, Menu, X, ChevronRight, User } from "lucide-react";
+import { Search, ShoppingCart, Menu, X, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const cartCount = 0;
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 w-full">
-      {/* Announcement Bar */}
-      <div className="bg-primary text-primary-foreground text-center py-2 text-xs sm:text-sm font-medium flex items-center justify-center gap-2">
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-        </svg>
-        Frete Grátis para todo o Brasil
-      </div>
-
-      {/* Main Header */}
-      <div className="w-full bg-card border-b border-border">
+    <header className="sticky top-0 left-0 right-0 z-50 w-full shadow-sm">
+      {/* ML Yellow Top Bar */}
+      <div className="w-full" style={{ backgroundColor: 'hsl(45 100% 51%)' }}>
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16 gap-4">
+          <div className="flex items-center justify-between h-14 gap-4">
             {/* Mobile Menu Button */}
             <button
               className="lg:hidden p-2 -ml-2 touch-target"
@@ -34,65 +25,59 @@ export default function Navbar() {
               )}
             </button>
 
-            {/* Logo as Text */}
+            {/* Logo */}
             <Link to="/" className="flex-shrink-0">
-              <span className="text-xl font-bold text-foreground tracking-tight">JSvaridedaes</span>
+              <span className="text-xl font-extrabold text-foreground tracking-tight">JSvariedades</span>
             </Link>
 
-            {/* Search Bar - Desktop */}
-            <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            {/* Search Bar */}
+            <div className="flex-1 max-w-2xl mx-4 hidden sm:flex">
               <div className="relative w-full flex items-center">
                 <input
                   type="text"
                   placeholder="Buscar produtos..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-secondary rounded-lg py-2.5 pl-4 pr-10 text-foreground placeholder:text-muted-foreground 
-                           focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm border border-border"
+                  className="w-full bg-white rounded-sm py-2.5 pl-4 pr-12 text-foreground placeholder:text-muted-foreground 
+                           focus:outline-none text-sm border-0 shadow-sm"
                 />
-                <button className="absolute right-3 text-muted-foreground hover:text-primary transition-colors" aria-label="Buscar">
-                  <Search className="h-4 w-4" />
+                <button
+                  className="absolute right-0 top-0 h-full px-4 rounded-r-sm flex items-center justify-center transition-colors"
+                  style={{ backgroundColor: 'hsl(45 100% 43%)' }}
+                  aria-label="Buscar"
+                >
+                  <Search className="h-4 w-4 text-foreground" />
                 </button>
               </div>
             </div>
 
-            {/* Desktop Nav Links */}
-            <nav className="hidden lg:flex items-center gap-6">
-              <Link to="/" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-                Início
-              </Link>
-              <Link to="/produtos" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-                Produtos
-              </Link>
-              <Link to="/sobre" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+            {/* Right Icons */}
+            <div className="flex items-center gap-1">
+              <Link to="/sobre" className="hidden lg:block text-sm font-medium text-foreground px-3 py-1.5 hover:bg-black/10 rounded transition-colors">
                 Sobre nós
               </Link>
-            </nav>
-
-            {/* Right Icons */}
-            <div className="flex items-center gap-2">
-              <button className="p-2 text-foreground hover:text-primary transition-colors touch-target hidden sm:flex" aria-label="Minha conta">
-                <User className="h-5 w-5" />
-              </button>
-              <button className="relative p-2 -mr-2 touch-target text-foreground hover:text-primary transition-colors" aria-label="Carrinho">
+              <button className="relative p-2 touch-target text-foreground hover:bg-black/10 rounded transition-colors" aria-label="Carrinho">
                 <ShoppingCart className="h-5 w-5" />
-                {cartCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 h-4 w-4 bg-primary text-primary-foreground 
-                                 text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
               </button>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Search Bar - Mobile: hidden to save space */}
+      {/* Secondary nav bar */}
+      <div className="w-full bg-card border-b border-border hidden lg:block">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center gap-6 h-10">
+            <Link to="/produtos" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Todos os Produtos</Link>
+            <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Ofertas do Dia</Link>
+            <span className="text-xs font-semibold" style={{ color: 'hsl(145 63% 36%)' }}>🚚 Frete Grátis para todo o Brasil</span>
+          </div>
         </div>
       </div>
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="fixed inset-0 top-[120px] bg-card z-40 lg:hidden">
+        <div className="fixed inset-0 top-[56px] bg-card z-40 lg:hidden">
           <nav className="flex flex-col p-4">
             {[
               { to: "/", label: "Início" },
@@ -102,7 +87,7 @@ export default function Navbar() {
               <Link
                 key={item.to}
                 to={item.to}
-                className="flex items-center justify-between py-4 border-b border-border text-base font-medium text-foreground hover:text-primary transition-colors"
+                className="flex items-center justify-between py-4 border-b border-border text-base font-medium text-foreground hover:text-foreground/70 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.label}
