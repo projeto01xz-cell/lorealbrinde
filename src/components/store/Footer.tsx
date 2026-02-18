@@ -1,6 +1,5 @@
 import { Phone, Facebook, Instagram, Youtube, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
-import gtsm1Logo from "@/assets/gtsm1-logo.png";
 
 export default function Footer() {
   return (
@@ -9,9 +8,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo & Description */}
           <div className="md:col-span-1">
-            <img src={gtsm1Logo} alt="GTSM1" className="h-8 w-auto mb-4" />
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Sua loja de veículos elétricos desde 1994. Qualidade, tecnologia e confiança.
+            <span className="text-xl font-bold text-foreground tracking-tight">JSvaridedaes</span>
+            <p className="text-sm text-muted-foreground leading-relaxed mt-3">
+              Sua loja de variedades com os melhores produtos e preços. Qualidade e confiança.
             </p>
           </div>
 
