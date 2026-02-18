@@ -36,7 +36,7 @@ export default function Navbar() {
 
             {/* Logo as Text */}
             <Link to="/" className="flex-shrink-0">
-              <span className="text-xl font-bold text-foreground tracking-tight">GTSM1</span>
+              <span className="text-xl font-bold text-foreground tracking-tight">JSvaridedaes</span>
             </Link>
 
             {/* Search Bar - Desktop */}
