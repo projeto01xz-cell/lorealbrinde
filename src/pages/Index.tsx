@@ -93,7 +93,7 @@ export default function Index() {
             <div className="px-4 lg:px-0 py-6 space-y-5">
               {/* Category */}
               <span className="text-xs font-bold text-primary uppercase tracking-widest">
-                {product.category === 'scooters' ? 'Scooters Elétricas' : product.category === 'ebikes' ? 'Bicicletas Elétricas' : product.category}
+                {product.category === 'ventiladores' ? 'Ventiladores' : product.category}
               </span>
 
               {/* Title */}
@@ -256,9 +256,9 @@ export default function Index() {
             {/* Sample Reviews */}
             <div className="space-y-4">
               {[
-                { name: 'João S.', rating: 5, date: '10/01/2025', comment: 'Produto excelente! Superou minhas expectativas. Entrega rápida e embalagem segura.', verified: true },
-                { name: 'Maria L.', rating: 5, date: '08/01/2025', comment: 'Muito satisfeita com a compra. Qualidade premium e ótimo custo-benefício.', verified: true },
-                { name: 'Carlos M.', rating: 4, date: '05/01/2025', comment: 'Bom produto, mas a bateria poderia durar um pouco mais. No geral, recomendo!', verified: true },
+              { name: 'João S.', rating: 5, date: '10/01/2025', comment: 'Ventilador incrível! Muito silencioso e faz um vento enorme. Vale muito a pena!', verified: true },
+                { name: 'Maria L.', rating: 5, date: '08/01/2025', comment: 'Chegou rápido, montagem super fácil. Está fresquinho aqui em casa o dia todo!', verified: true },
+                { name: 'Carlos M.', rating: 4, date: '05/01/2025', comment: 'Ótimo custo-benefício, bem potente. Recomendo muito para quem quer economizar!', verified: true },
               ].map((review, index) => (
                 <div key={index} className="p-4 border border-border rounded-xl">
                   <div className="flex items-center justify-between mb-2">
